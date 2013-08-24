@@ -1,13 +1,14 @@
 {
-  "name": "node-js-sample",
+  "name": "CosmeXOXO",
   "version": "0.0.2",
-  "description": "a sample node.js app for heroku",
+  "description": "Shopping website",
   "main": "web.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "dependencies": {
     "express": "~3.3.4"
+    "ejs": "0.7.x"
   },
   "engines": {
     "node": "0.10.13",
@@ -15,13 +16,13 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/heroku/node-js-sample"
+    "url": "https://github.com/sebcagnon/cosmexoxo"
   },
   "keywords": [
     "node",
     "heroku"
   ],
-  "author": "Mark Pundsack",
+  "author": "Sebastien Cagnon <cagnonsebastien@gmail.com> (http://www.about-robots.com)",
   "license": "BSD",
   "gitHead": "90fd58e343c29e54fc1d4e19036595500b2bdc21"
 }
