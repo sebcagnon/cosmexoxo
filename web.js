@@ -1,5 +1,6 @@
 var express = require('express')
   , fs = require("fs")
+  , engine = require("ejs-locals")
   , http = require('http');
 
 var app = express();
@@ -9,12 +10,14 @@ app.set('port', process.env.PORT || 8080);
 app.configure( function () {
   console.log('setting view engine');
   app.set('views', __dirname + '/views');
+  app.engine('ejs', engine);
   app.set('view engine', 'ejs');
-  app.use("/public", express.static(__dirname + '/public'));
+  app.use("/images", express.static(__dirname + '/public/images'));
+  app.use("/styles", express.static(__dirname + '/public/styles'));
 });
 
 app.get('/', function(request, response) {
-  response.render('index', {});
+  response.render('index');
 });
 
 http.createServer(app).listen(app.get('port'), function () {
