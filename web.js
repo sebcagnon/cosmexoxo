@@ -14,6 +14,7 @@ app.configure( function () {
   app.set('view engine', 'ejs');
   app.use("/images", express.static(__dirname + '/public/images'));
   app.use("/styles", express.static(__dirname + '/public/styles'));
+  app.use("/bootstrap", express.static(__dirname + '/public/bootstrap'));
 });
 
 app.get('/', function(request, response) {
