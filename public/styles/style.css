@@ -12,9 +12,11 @@ body {
   margin: 60px 0;
 }
 
+/* debugging
 .span3, .span6, .span1, .span8 {
   border: solid 1px red;
 }
+*/
 
 /* Customize the navbar links to be fill the entire space of the .navbar */
 .navbar .navbar-inner {
