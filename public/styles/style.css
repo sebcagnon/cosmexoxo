@@ -82,6 +82,11 @@ body {
   background-color: #696969;
 }
 
+.navbar .nav li:last-child a {
+  border-right: 0;
+  border-radius: 0 3px 3px 0;
+}
+
 ul.nav li.dropdown:hover > ul.dropdown-menu {
   display: block;
   margin-top: 0px;
@@ -97,13 +102,15 @@ ul.nav li.dropdown:hover > ul.dropdown-menu {
   border-bottom-color: #FFFFFF;
 }
 
-/*
-.navbar .nav li:first-child a {
-  border-left: 0;
-  border-radius: 3px 0 0 3px;
+.navbar .nav ul.dropdown-menu {
+  background-color:#FFF0FF
 }
-*/
-.navbar .nav li:last-child a {
-  border-right: 0;
-  border-radius: 0 3px 3px 0;
+
+.navbar .nav ul.dropdown-menu li a, .navbar .nav ul.dropdown-menu li.nav-header {
+  color:#000000;
+}
+
+.navbar .nav ul.dropdown-menu li a:hover, .navbar .nav ul.dropdown-menu li a:focus {
+  background-color:#FFCCFF;
+  background-image:none;
 }
