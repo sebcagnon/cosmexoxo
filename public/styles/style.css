@@ -97,7 +97,7 @@ ul.nav li.dropdown:hover > ul.dropdown-menu {
   border-bottom-color: #EEEEEE:
 }
 
-.navbar .nav li.dropdown > a:hover .caret {
+.navbar .nav li.dropdown > a:hover .caret, .navbar .nav li.dropdown > a:focus .caret {
   border-top-color: #FFFFFF;
   border-bottom-color: #FFFFFF;
 }
