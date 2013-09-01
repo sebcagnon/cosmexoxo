@@ -15,6 +15,7 @@ app.configure( function () {
   app.use("/images", express.static(__dirname + '/public/images'));
   app.use("/styles", express.static(__dirname + '/public/styles'));
   app.use("/bootstrap", express.static(__dirname + '/public/bootstrap'));
+  app.use("/js", express.static(__dirname + '/public/js'));
 });
 
 app.get('/', function(request, response) {

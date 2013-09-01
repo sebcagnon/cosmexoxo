@@ -20,8 +20,9 @@ body {
 */
 
 /* Customize the navbar links to be fill the entire space of the .navbar */
-.navbar .navbar-inner {
-  padding: 0;
+.navbar .brand {  
+  padding-left: 5px;    
+  padding-top: 5px;
 }
 
 .navbar-inner, .navbar .btn-navbar {
@@ -35,29 +36,7 @@ body {
   filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#696d75', endColorstr='#363636',GradientType=0 ); /* IE6-9 */
 }
 
-/* Not Use yet 
-.navbar .divider-vertical {
-  background-color: #c79810;
-  border-right: 2px solid #FFFFFF;
-}
-*/
-
-.navbar .nav .active > a, .navbar .nav .active > a:hover {
-  color: #EEEEEE;
-  background-color: #696969;
-}
-
-.navbar .nav {
-  margin: 0;
-  display: table;
-  width: 100%;
-}
-.navbar .nav li {
-  display: table-cell;
-  width: 1%;
-  float: none;
-}
-.navbar .nav li a {
+.navbar .brand, .navbar .nav li a{
   color: #EEEEEE;
   font-weight: bold;
   text-align: center;
@@ -65,15 +44,65 @@ body {
   border-right: 1px solid rgba(255,255,255,.9);
 }
 
+.navbar .nav .active > a {
+  color: #EEEEEE;
+  background-color: #696969;
+  font-weight: bold;
+  text-align: center;
+}
+
 .navbar .nav li a:hover {
   color: #FFFFFF;
+  height: 18px;
   border-bottom: 2px solid #E61990;
 }
 
+.navbar .nav li.img a:hover{
+  height: 50px;
+  border:1px 1px 1px 1px solid #E61990;
+}
+
+.navbar .brand:hover {
+  color: #FFFFFF;
+  height: 22px;
+  border-bottom: 2px solid #E61990;
+}
+
+.navbar .nav li a:focus  {
+  color: #FFFFFF;
+}
+
+.navbar .nav > .active > a:focus{
+  color: #FFFFFF;
+  background-color: #797979;
+}
+
+.navbar .nav .active > a:hover {
+  color: #FFFFFF;
+  background-color: #696969;
+}
+
+ul.nav li.dropdown:hover > ul.dropdown-menu {
+  display: block;
+  margin-top: 0px;
+}
+
+.navbar .nav .dropdown .caret {
+  border-top-color: #EEEEEE;
+  border-bottom-color: #EEEEEE:
+}
+
+.navbar .nav li.dropdown > a:hover .caret {
+  border-top-color: #FFFFFF;
+  border-bottom-color: #FFFFFF;
+}
+
+/*
 .navbar .nav li:first-child a {
   border-left: 0;
   border-radius: 3px 0 0 3px;
 }
+*/
 .navbar .nav li:last-child a {
   border-right: 0;
   border-radius: 0 3px 3px 0;
