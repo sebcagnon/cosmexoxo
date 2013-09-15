@@ -5,7 +5,7 @@
     "brand":"shiseido",
     "colors":["white", "black"],
     "description":"this is a sample product for testing purposes, a very pretty one",
-    "price":19.95
+    "price":1995
     },
   "00002":{
     "id":"00002",
@@ -13,7 +13,7 @@
     "brand":"shiseido",
     "colors":["red", "pink"],
     "description":"this pretty sample product will make you happy!",
-    "price":15.90
+    "price":12341590
     },
   "00003":{
     "id":"00003",
@@ -21,7 +21,7 @@
     "brand":"Kanebo",
     "colors":["blue", "silver"],
     "description":"Round price, for round skin",
-    "price":20
+    "price":2000
     },
   "00004":{
     "id":"00004",
@@ -29,6 +29,6 @@
     "brand":"shiseido",
     "colors":["white", "black", "yellow", "red"],
     "description":"because it's good",
-    "price":15
+    "price":1500
     }
 }
