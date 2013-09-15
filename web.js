@@ -34,6 +34,10 @@ app.get('/brand/:brandName', function(request, response) {
   }
 });
 
+app.get('/brand/', function(request, response) {
+  response.render('brand', { isBrand:false, brandName:'', brands:products.getBrandList()});
+});
+
 app.get('/product/:productID', function(request, response) {
   productData = {};
   response.render('product', productData);
