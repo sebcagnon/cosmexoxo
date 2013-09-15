@@ -23,4 +23,8 @@ productsDB.getProductsByBrand = function (brandName) {
   return prods;
 }
 
+productsDB.isBrand = function (brandName) {
+  return productsDB.getBrandList().indexOf(brandName.toLowerCase()) !== -1;
+}
+
 module.exports = productsDB;
