@@ -115,6 +115,6 @@ ul.nav li.dropdown:hover > ul.dropdown-menu {
 }
 
 .navbar .nav ul.dropdown-menu li a:hover, .navbar .nav ul.dropdown-menu li a:focus {
-  background-color:#FFCCFF;
+  background-color:#FFE6FF;
   background-image:none;
 }
