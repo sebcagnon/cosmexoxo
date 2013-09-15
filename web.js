@@ -22,6 +22,11 @@ app.get('/', function(request, response) {
   response.render('index');
 });
 
+app.get('/brand/:brandName', function(request, response) {
+  formattedName = request.params.brandName[0].toUpperCase() + request.params.brandName.substring(1).toLowerCase();
+  response.render('brand', { brandName : formattedName });
+});
+
 http.createServer(app).listen(app.get('port'), function () {
   console.log("Listening on " + app.get('port'));
 });
