@@ -1,7 +1,8 @@
 var express = require('express')
   , fs = require("fs")
   , engine = require("ejs-locals")
-  , http = require('http');
+  , http = require('http')
+  , products = require('./models/products');
 
 var app = express();
 app.use(express.logger());
@@ -24,8 +25,14 @@ app.get('/', function(request, response) {
 
 app.get('/brand/:brandName', function(request, response) {
   formattedName = request.params.brandName[0].toUpperCase() + request.params.brandName.substring(1).toLowerCase();
-  response.render('brand', { brandName : formattedName });
+  if ( products.isBrand(formattedName) ) {
+    response.render('brand', { brandName : formattedName , products : products.getProductsByBrand()});
 });
+
+app.get('/product/:productID', function(request, response) {
+  productData = {};
+  response.render('product', productData);
+}
 
 http.createServer(app).listen(app.get('port'), function () {
   console.log("Listening on " + app.get('port'));
