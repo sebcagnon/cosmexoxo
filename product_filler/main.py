@@ -3,6 +3,7 @@
 import sys
 import Tkinter as tk
 from tkFileDialog import askopenfilename
+import dbConnect
 
 class Application(tk.Frame):
   def __init__(self, master=None):
@@ -52,9 +53,16 @@ class Application(tk.Frame):
       
   def connectToDatabase(self):
     if self.connectionStatus.get() == 'Not Connected':
-      self.connectionStatus.set('Connected')
-      self.connectButtonText.set('Disconnect')
+      self.connectionStatus.set('Connecting...')
+      self.conn, self.cur, err = dbConnect.connect(self.dbConfigFileName.get())
+      if err:
+        self.connectionStatus.set('ConnectionFailed')
+      else:
+        self.connectionStatus.set('Connected')
+        self.connectButtonText.set('Disconnect')
     elif self.connectionStatus.get() == 'Connected':
+      self.connectionStatus.set('Disconnecting')
+      dbConnect.closeConnection(self.conn, self.cur)
       self.connectionStatus.set('Not Connected')
       self.connectButtonText.set('Connect')
     
