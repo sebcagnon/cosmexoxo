@@ -1,24 +1,24 @@
 import psycopg2
 import json
 
-def connect(file):
-  """ Connects to a database using a json file for the parameters """
-  try:
+class DBConnection(Object):
+  """handles connection and common requests to the database"""
+
+  def __init__(self, dataBaseConfig):
+    """dataBaseConfig: path to JSON file with db address and authentication data"""
+    [self.conn, self.cur] = self.connect(file)
+
+
+  def connect(self.file):
+    """ Connects to a database using a json file for the parameters """
     jsonFile = open(file)
     params = json.load(jsonFile)
     jsonFile.close()
-  except IOError, e:
-    print 'File Error:', e
-    return [False, False, e]
-  try:
     conn = psycopg2.connect(**params)
     cur = conn.cursor()
-  except OperationalError, e:
-    print 'Connection Error:', e
-    return [False, False, e]
-  return [conn, cur, False]
+    return [conn, cur]
     
-def closeConnection(conn, cur):
-  cur.close()
-  conn.close()
-  
+  def closeConnection(self):
+    """Disconnects from database"""
+    self.cur.close()
+    self.conn.close()
