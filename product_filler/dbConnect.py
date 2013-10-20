@@ -6,7 +6,7 @@ class DBConnection(object):
 
   def __init__(self, dataBaseConfig):
     """dataBaseConfig: path to JSON file with db address and authentication data"""
-    [self.conn, self.cur] = self.connect(dataBaseConfig)
+    self.connect(dataBaseConfig)
     self.cur.execute("""SET search_path TO product_info, "$user", public;""")
 
   def connect(self, file):
@@ -14,9 +14,8 @@ class DBConnection(object):
     jsonFile = open(file, 'r')
     params = json.load(jsonFile)
     jsonFile.close()
-    conn = psycopg2.connect(**params)
-    cur = conn.cursor()
-    return [conn, cur]
+    self.conn = psycopg2.connect(**params)
+    self.cur = conn.cursor()
     
   def closeConnection(self):
     """Disconnects from database"""
