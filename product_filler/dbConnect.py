@@ -7,7 +7,7 @@ class DBConnection(object):
   def __init__(self, dataBaseConfig):
     """dataBaseConfig: path to JSON file with db address and authentication data"""
     [self.conn, self.cur] = self.connect(dataBaseConfig)
-
+    self.cur.execute("""SET search_path TO product_info, "$user", public;""")
 
   def connect(self, file):
     """ Connects to a database using a json file for the parameters """
@@ -59,6 +59,77 @@ class DBConnection(object):
     if printing:
       root.printTree()
     return root
+    
+  def getProductInfoByID(self, id):
+    """Get the info of a product by id"""
+    return self.getProductInfo(id=id)
+    
+  def getProductInfoByName(self, name):
+    """Get the info of a product by name"""
+    return self.getProductInfo(name=name)
+    
+  def getProductInfo(self, id=None, name=None):
+    """Get the info of a product by name or by id"""
+    self._checkGetProductInfoParams(id, name)
+    product_info = {}
+    product_info.update(self.getProductBasics(id=id, name=name))
+    product_info.update(self.getProductVariants(id=id, name=name))
+    product_info.update(self.getProductCategories(id=id, name=name))
+    return product_info
+  
+  def getProductBasics(self, id=None, name=None):
+    """Get the name, id, brand and company associated to name or id"""
+    where = self._checkGetProductInfoParams(id, name)
+    self.cur.execute(
+      """
+      SELECT p.product_id, b.brand_id, c.company_id
+      FROM product p
+      INNER JOIN brand b ON p.brand_id = b.brand_id
+      INNER JOIN company c ON b.company_id = c.company_id
+      WHERE {clause};
+      """.format(clause=where))
+    header = ("product_id", "brand_id", "company_id")
+    info = self.cur.fetchone()
+    return dict(zip(header, info))
+    
+  def getProductVariants(self, id=None, name=None):
+    """Get the variants associated to the product name or id"""
+    where = self._checkGetProductInfoParams(id, name)
+    self.cur.execute(
+      """
+      SELECT p.product_id, v.variant_id
+      FROM product p INNER JOIN variant v ON p.product_id = v.product_id
+      WHERE {clause};
+      """.format(clause=where))
+    header = ("product_id", "variant_id")
+    info = self.cur.fetchall()
+    variants = [vid for pid, vid in info]
+    return dict(zip(header, (info[0][0], variants)))
+    
+  def getProductCategories(self, id=None, name=None):
+    """Get the categories of a product by name or by id"""
+    where = self._checkGetProductInfoParams(id, name)
+    self.cur.execute(
+      """
+      SELECT DISTINCT p.product_id, cat.category_id
+      FROM product p
+      INNER JOIN product_category pc ON p.product_id = pc.product_id
+      INNER JOIN category cat ON cat.category_id = pc.category_id
+      WHERE {clause};
+      """.format(clause=where))
+    header = ("product_id", "category_id")
+    info = self.cur.fetchall()
+    categories = [cid for pid, cid in info]
+    return dict(zip(header, (info[0][0], categories)))
+    
+  def _checkGetProductInfoParams(self, id, name):
+    """Checks the parameters and return the right condition for the query"""
+    if not (id or name) or (id and name):
+      raise ValueError("Need to specify either id OR name, but not both")
+    if id:
+      return "p.product_id = {i}".format(i=id)
+    elif name:
+      return "p.product_name = {n}".format(n=name)
 
 class Tree(object):
   """A simple Tree class"""
@@ -95,10 +166,15 @@ if __name__=='__main__':
   root.printTree()
   print
   
-  print "Testing getCategoryTree"
+  print "Testing DBConnection"
   import os
   path = os.path.join('..', '..', 'staging-db.json')
   db = DBConnection(path)
   print "Connected"
+  print "Testing getCategoryTree"
   db.getCategoryTree(1)
-  print "Done"
+  print "Category Tree: Done"
+  print "Testing getProductInfo"
+  print db.getProductInfo(id=3)
+  print db.getProductInfo(id=1)
+  print "Product Info: Done"
