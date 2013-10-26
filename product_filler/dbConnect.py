@@ -16,7 +16,7 @@ class DBConnection(object):
     params = json.load(jsonFile)
     jsonFile.close()
     self.conn = psycopg2.connect(**params)
-    self.cur = conn.cursor()
+    self.cur = self.conn.cursor()
 
   def closeConnection(self):
     """Disconnects from database"""
@@ -90,7 +90,10 @@ class DBConnection(object):
       """.format(clause=where))
     header = ("product_id", "brand_id", "company_id")
     info = self.cur.fetchone()
-    return dict(zip(header, info))
+    if info:
+      return dict(zip(header, info))
+    else:
+      return {}
 
   def getProductVariants(self, id=None, name=None):
     """Get the variants associated to the product name or id"""
@@ -103,8 +106,11 @@ class DBConnection(object):
       """.format(clause=where))
     header = ("product_id", "variant_id")
     info = self.cur.fetchall()
-    variants = [vid for pid, vid in info]
-    return dict(zip(header, (info[0][0], variants)))
+    if info:
+      variants = [vid for pid, vid in info]
+      return dict(zip(header, (info[0][0], variants)))
+    else:
+      return {}
 
   def getProductCategories(self, id=None, name=None):
     """Get the categories of a product by name or by id"""
@@ -119,8 +125,11 @@ class DBConnection(object):
       """.format(clause=where))
     header = ("product_id", "category_id")
     info = self.cur.fetchall()
-    categories = [cid for pid, cid in info]
-    return dict(zip(header, (info[0][0], categories)))
+    if info:
+      categories = [cid for pid, cid in info]
+      return dict(zip(header, (info[0][0], categories)))
+    else:
+      return {}
 
   def _checkGetProductInfoParams(self, id, name):
     """Checks the parameters and return the right condition for the query"""
