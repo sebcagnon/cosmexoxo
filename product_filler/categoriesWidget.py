@@ -1,5 +1,5 @@
 import Tkinter as tk
-from tkFileDialog import askopenfilename
+import tkMessageBox
 
 class CategoriesWidget(tk.Frame):
   """Handles display and creation of Categories from the database"""
@@ -25,7 +25,6 @@ class CategoriesWidget(tk.Frame):
     if db:
       self.db = db
       self.showButton.config(state=tk.NORMAL)
-    self.catTree = db.getCategoryTree()
     self.createButtons()
   
   def deactivate(self):
@@ -45,7 +44,11 @@ class CategoriesWidget(tk.Frame):
     
   def createButtons(self):
     """Creates the labels and buttons to edit categories"""
-    self.treeFrame = tk.Frame(self)
+    self.catTree = self.db.getCategoryTree()
+    label = CategoryLabel(self.treeFrame,
+                          name='Add main\ncategory',
+                          id=-1)
+    label.grid()
     for child in self.catTree.leaves:
       self.recursiveLabelDisplay(child)
     
@@ -57,6 +60,28 @@ class CategoriesWidget(tk.Frame):
     label.grid(column=column)
     for child in tree.leaves:
       self.recursiveLabelDisplay(child, column+1)
+      
+  def hasChildren(self, id):
+    """True if category has child categories, False if not, 
+    ValueError if not exist"""
+    queue = self.catTree.leaves[:]
+    while queue:
+      print queue
+      node = queue.pop(0)
+      if node.cargo['id']==id:
+        if node.leaves:
+          return True
+        else:
+          return False
+      else:
+        queue += node.leaves[:]
+    raise ValueError('Could not find category with this id: ' + str(id))
+  
+  def updateTree(self):
+    """Updates the category tree and the labels"""
+    for child in self.treeFrame.winfo_children():
+      child.destroy()
+    self.createButtons()
 
 
 class CategoryLabel(tk.Label):
@@ -64,7 +89,7 @@ class CategoryLabel(tk.Label):
   
   def __init__(self, master=None, name='', id=-1):
     self.textVar = tk.StringVar()
-    self.textVar.set(name)
+    self.textVar.set(str(id) + ': ' + name)
     self.id = id
     tk.Label.__init__(self, master, textvariable=self.textVar,
                       bg='white', bd=1, relief=tk.RAISED)
@@ -75,6 +100,8 @@ class CategoryLabel(tk.Label):
                           command=self.add_subcategory)
     self.menu.add_command(label='Delete', command=self.delete)
     self.bind('<Button-3>', self.openMenu)
+    # shortcut
+    self.mainFrame = self.master.master
   
   def openMenu(self, event):
     """Opens the right click menu for the label"""
@@ -90,7 +117,23 @@ class CategoryLabel(tk.Label):
   
   def delete(self):
     """Delete the category if user confirms"""
-    print 'delete ' + self.master.master.visibility
+    if self.mainFrame.hasChildren(self.id):
+      tkMessageBox.showerror('DeleteCategory Error',
+          'Can not delete ' + self.textVar.get()
+          + '\nDelete subcategories first')
+    elif tkMessageBox.askyesno('Delete Category Warning',
+            'Warning: if you delete a category\n' +
+            'it can create broken links\n' +
+            'Confirm delete?',
+            icon=tkMessageBox.WARNING):
+      res = self.mainFrame.db.deleteCategory(self.id)
+      if res==True:
+        tkMessageBox.showinfo('Delete Category Success',
+            'Category was successfully deleted')
+        self.mainFrame.updateTree()
+      else:
+        tkMessageBox.showerror('Delete Category Error',
+            'Category could not be deleted\n' + str(res))
     
 
 if __name__=='__main__':

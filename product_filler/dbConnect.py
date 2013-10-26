@@ -152,6 +152,18 @@ class DBConnection(object):
       return "p.product_id = {i}".format(i=id)
     elif name:
       return "p.product_name = {n}".format(n=name)
+  
+  def deleteCategory(self, id):
+    """Delete the category using its id"""
+    try:
+      self.cur.execute(
+        """DELETE FROM category 
+        WHERE category.category_id = {id}
+        """.format(id=id))
+      self.conn.commit()
+      return True
+    except ProgrammingError, e:
+      return e
 
 
 if __name__=='__main__':
