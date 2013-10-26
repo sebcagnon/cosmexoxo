@@ -32,4 +32,4 @@ if __name__=='__main__':
   leaf1 = Tree(1)
   root = Tree(0, [leaf2, leaf1])
   root.printTree()
-  print
+  print 'Done'
