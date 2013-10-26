@@ -27,17 +27,18 @@ class DBConnection(object):
     """Returns a nested list representing the categories tree,
        if printing=1, prints the tree"""
     self.cur.execute(
-    """SELECT cat_parent.category_id, cat.category_id
+    """SELECT cat_parent.category_id, cat_parent.name, cat.category_id
         FROM product_info.category cat
         RIGHT JOIN product_info.category cat_parent
           ON cat.parent_id = cat_parent.category_id
         ORDER BY 1;""")
     ans = self.cur.fetchall()
-    parents = set([row[0] for row in ans if row[1]])
-    children = set([row[1] for row in ans if row[1]])
+    flatTree = {id:{'id':id, 'name':name} for id, name, _ in ans}
+    parents = set([row[0] for row in ans if row[-1]])
+    children = set([row[1] for row in ans if row[-1]])
     root = tree.Tree('Categories')
     nextLevel = [p for p in parents if not p in children]
-    ans = [row for row in ans if row[1]]
+    ans = [row for row in ans if row[-1]]
 
     def recTreeBuild(root, children, ans):
       """Recursively find children of each node to build the Category tree"""
@@ -47,11 +48,11 @@ class DBConnection(object):
         children = []
         newAns = ans[:]
         for i, row in enumerate(ans):
-          if row[0] == parentID and row[1]:
-            children.append(row[1])
+          if row[0] == parentID and row[-1]:
+            children.append(row[-1])
             newAns.remove(row)
         ans = newAns
-        parent = tree.Tree(parentID)
+        parent = tree.Tree(flatTree[parentID])
         root.addChild(recTreeBuild(parent, children, ans))
       return root
 
