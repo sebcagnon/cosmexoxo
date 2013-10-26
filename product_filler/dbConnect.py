@@ -82,13 +82,16 @@ class DBConnection(object):
     where = self._checkGetProductInfoParams(id, name)
     self.cur.execute(
       """
-      SELECT p.product_id, b.brand_id, c.company_id
+      SELECT p.product_id, p.name, p.description, p.active,
+      b.brand_id, b.name, c.company_id, c.name
       FROM product p
       INNER JOIN brand b ON p.brand_id = b.brand_id
       INNER JOIN company c ON b.company_id = c.company_id
       WHERE {clause};
       """.format(clause=where))
-    header = ("product_id", "brand_id", "company_id")
+    header = ("product_id", "product_name", "product_description", 
+              "product_active", "brand_id", "brand_name",
+              "company_id", "company_name")
     info = self.cur.fetchone()
     if info:
       return dict(zip(header, info))
@@ -100,15 +103,20 @@ class DBConnection(object):
     where = self._checkGetProductInfoParams(id, name)
     self.cur.execute(
       """
-      SELECT p.product_id, v.variant_id
+      SELECT p.product_id, v.variant_id, v.name, v.price, v.weight
       FROM product p INNER JOIN variant v ON p.product_id = v.product_id
       WHERE {clause};
       """.format(clause=where))
-    header = ("product_id", "variant_id")
+    header = ("variant_name", "variant_price", "variant_weight")
     info = self.cur.fetchall()
     if info:
-      variants = [vid for pid, vid in info]
-      return dict(zip(header, (info[0][0], variants)))
+      vids = [row[1] for row in info]
+      res = {"product_id":info[0][0], "variant_ids":vids}
+      variants = {}
+      for row in info:
+        variants[row[1]] = dict(zip(header, row[2:]))
+      res["variants"] = variants
+      return res
     else:
       return {}
 
@@ -117,17 +125,21 @@ class DBConnection(object):
     where = self._checkGetProductInfoParams(id, name)
     self.cur.execute(
       """
-      SELECT DISTINCT p.product_id, cat.category_id
+      SELECT DISTINCT p.product_id, cat.category_id, cat.name
       FROM product p
       INNER JOIN product_category pc ON p.product_id = pc.product_id
       INNER JOIN category cat ON cat.category_id = pc.category_id
       WHERE {clause};
       """.format(clause=where))
-    header = ("product_id", "category_id")
     info = self.cur.fetchall()
     if info:
-      categories = [cid for pid, cid in info]
-      return dict(zip(header, (info[0][0], categories)))
+      cids = [row[1] for row in info]
+      res = {"product_id":info[0][0], "category_ids":cids}
+      categories = {}
+      for row in info:
+        categories[row[1]] = {"category_name":row[2]}
+      res["categories"] = categories
+      return res
     else:
       return {}
 
@@ -151,6 +163,6 @@ if __name__=='__main__':
   db.getCategoryTree(1)
   print "Category Tree: Done"
   print "Testing getProductInfo"
-  print db.getProductInfo(id=3)
-  print db.getProductInfo(id=1)
+  print db.getProductInfo(id=7)
+  print db.getProductInfo(id=8)
   print "Product Info: Done"
