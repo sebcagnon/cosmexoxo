@@ -6,6 +6,7 @@ class ConnectionWidget(tk.Frame):
   """Handles connection to database server"""
   def __init__(self, master=None):
     tk.Frame.__init__(self, master)
+    self.master = master
     self.grid()
     self.createWidgets()
 
@@ -36,17 +37,23 @@ class ConnectionWidget(tk.Frame):
     self.connectStatusLabel.grid(row=1, column=1)
 
   def connectToDatabase(self):
-    if self.connectionStatus.get() == 'Not Connected':
+    if self.connectionStatus.get() != 'Connected':
       self.connectionStatus.set('Connecting...')
-      self.conn, self.cur, err = dbConnect.connect(self.dbConfigFileName.get())
-      if err:
+      try:
+        self.db = dbConnect.DBConnection(self.dbConfigFileName.get())
+      except:
         self.connectionStatus.set('ConnectionFailed')
+        raise
       else:
+        if self.master:
+          self.master.event_generate('<<Connection>>')
         self.connectionStatus.set('Connected')
         self.connectButtonText.set('Disconnect')
     elif self.connectionStatus.get() == 'Connected':
+      if self.master:
+        self.master.event_generate('<<Disconnection>>')
       self.connectionStatus.set('Disconnecting')
-      dbConnect.closeConnection(self.conn, self.cur)
+      self.db.closeConnection()
       self.connectionStatus.set('Not Connected')
       self.connectButtonText.set('Connect')
 
