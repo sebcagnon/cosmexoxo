@@ -1,9 +1,12 @@
 #!/usr/bin/env python
 
 import sys
+import os
 import Tkinter as tk
 from tkFileDialog import askopenfilename
 import dbConnect
+
+APP_PATH = r'c:\Users\luluseb\Documents\cosmexoxo\product_filler'
 
 class Application(tk.Frame):
   def __init__(self, master=None):
@@ -21,10 +24,11 @@ class Application(tk.Frame):
     self.columnconfigure(0, weight=1)
     # database connection
     self.setConnectionWidgets()
-      
+    top.iconbitmap(os.path.join(APP_PATH, 'favicon.ico'))
+
   def dataConfigBrowser(self):
     self.dbConfigFileName.set(askopenfilename())
-    
+
   def setConnectionWidgets(self):
     """ select db connection file and connect button """
     # text variables
