@@ -95,10 +95,12 @@ class CategoryLabel(tk.Label):
                       bg='white', bd=1, relief=tk.RAISED)
     # create right-click menu
     self.menu = tk.Menu(self, tearoff=0)
-    self.menu.add_command(label='Edit', command=self.edit)
+    if self.id!=-1: # id=-1 for buttons only
+      self.menu.add_command(label='Edit', command=self.edit)
     self.menu.add_command(label='Add subcategory', 
                           command=self.add_subcategory)
-    self.menu.add_command(label='Delete', command=self.delete)
+    if self.id!=-1:
+      self.menu.add_command(label='Delete', command=self.delete)
     self.bind('<Button-3>', self.openMenu)
     # shortcut
     self.mainFrame = self.master.master
@@ -113,7 +115,15 @@ class CategoryLabel(tk.Label):
   
   def add_subcategory(self):
     """Add a new child category to the current one"""
-    print 'add_subcategory to ' + self.textVar.get()
+    if self.id == -1:
+      message = 'Create new category'
+    else:
+      message = 'Create new category under: ' + self.textVar.get()
+    self.catName = tk.StringVar()
+    self.editWindow = EditCategoryWindow(master=self, 
+                        textVar=self.catName,
+                        labelText=message,
+                        buttonText='Add')
   
   def delete(self):
     """Delete the category if user confirms"""
@@ -134,7 +144,34 @@ class CategoryLabel(tk.Label):
       else:
         tkMessageBox.showerror('Delete Category Error',
             'Category could not be deleted\n' + str(res))
-    
+
+
+class EditCategoryWindow(tk.Toplevel):
+  """A pop-up window that enables category editing"""
+  
+  def __init__(self, master=None, textVar=None, labelText='', buttonText=''):
+    if not textVar:
+      self.textVar = tk.StringVar()
+    else:
+      self.textVar = textVar
+    tk.Toplevel.__init__(self, master)
+    self.geometry('300x300')
+    self.label = tk.Label(self, text=labelText)
+    self.label.grid(columnspan=2)
+    self.entry = tk.Entry(self, textvariable=self.textVar)
+    self.entry.grid(columnspan=2)
+    self.addButton = tk.Button(self, text=buttonText, command=self.add)
+    self.addButton.grid(row=2, column=0)
+    self.cancelButton = tk.Button(self, text='Cancel', command=self.cancel)
+    self.cancelButton.grid(row=2, column=1)
+  
+  def cancel(self):
+    """Closes the window without modification"""
+    self.destroy()
+  
+  def add(self):
+    """Closes window with signal to act the changes"""
+    self.destroy()
 
 if __name__=='__main__':
   app = CategoriesWidget()
