@@ -36,7 +36,7 @@ class DBConnection(object):
     flatTree = {id:{'id':id, 'name':name} for id, name, _ in ans}
     parents = set([row[0] for row in ans if row[-1]])
     children = set([row[1] for row in ans if row[-1]])
-    root = tree.Tree('Categories')
+    root = tree.Tree({'name':'Categories','id':-1})
     nextLevel = [p for p in parents if not p in children]
     ans = [row for row in ans if row[-1]]
 
