@@ -8,7 +8,7 @@ class CategoriesWidget(tk.Frame):
     tk.Frame.__init__(self, master, border=2, relief=tk.GROOVE)
     self.grid()
     self.createWidgets()
-    self.status = 'Hide'
+    self.visibility = 'Hide'
     
   def createWidgets(self):
     """Initialize the frame's widgets"""
@@ -36,12 +36,12 @@ class CategoriesWidget(tk.Frame):
   
   def showHide(self):
     """Show/Hide the whole widget"""
-    if self.status == 'Show':
+    if self.visibility == 'Show':
       self.treeFrame.grid_forget()
-      self.status = 'Hide'
+      self.visibility = 'Hide'
     else:
       self.treeFrame.grid()
-      self.status = 'Show'
+      self.visibility = 'Show'
     
   def createButtons(self):
     """Creates the labels and buttons to edit categories"""
@@ -51,12 +51,47 @@ class CategoriesWidget(tk.Frame):
     
   def recursiveLabelDisplay(self, tree, column=0):
     """Recursive method that creates tabulated labels"""
-    label = tk.Label(self.treeFrame, text = tree.cargo['name'])
+    label = CategoryLabel(self.treeFrame,
+                          name=tree.cargo['name'],
+                          id=tree.cargo['id'])
     label.grid(column=column)
     for child in tree.leaves:
       self.recursiveLabelDisplay(child, column+1)
 
 
+class CategoryLabel(tk.Label):
+  """Labels with right-click menu for editing"""
+  
+  def __init__(self, master=None, name='', id=-1):
+    self.textVar = tk.StringVar()
+    self.textVar.set(name)
+    self.id = id
+    tk.Label.__init__(self, master, textvariable=self.textVar,
+                      bg='white', bd=1, relief=tk.RAISED)
+    # create right-click menu
+    self.menu = tk.Menu(self, tearoff=0)
+    self.menu.add_command(label='Edit', command=self.edit)
+    self.menu.add_command(label='Add subcategory', 
+                          command=self.add_subcategory)
+    self.menu.add_command(label='Delete', command=self.delete)
+    self.bind('<Button-3>', self.openMenu)
+  
+  def openMenu(self, event):
+    """Opens the right click menu for the label"""
+    self.menu.post(event.x_root, event.y_root)
+  
+  def edit(self):
+    """Edit the name of the category"""
+    print 'edit ' + self.textVar.get()
+  
+  def add_subcategory(self):
+    """Add a new child category to the current one"""
+    print 'add_subcategory to ' + self.textVar.get()
+  
+  def delete(self):
+    """Delete the category if user confirms"""
+    print 'delete ' + self.master.master.visibility
+    
 
 if __name__=='__main__':
   app = CategoriesWidget()
