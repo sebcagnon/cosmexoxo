@@ -165,21 +165,34 @@ class DBConnection(object):
     except psycopg2.Error, e:
       return e
   
-  def addCategory(self, name, id):
-    """Add a new category child of company with the ID. 
-       Use id=-1 for root category"""
+  def addCategory(self, name, parentID):
+    """Add a new category child of company with the parentID. 
+       Use parentID=-1 for root category"""
     if not name:
       return ValueError('addCategory: name cannot be empty')
-    if id==-1:
+    if parentID==-1:
       parent_id = 'NULL'
     else:
-      parent_id = id
-    print name, parent_id
+      parent_id = parentID
     try:
       self.cur.execute(
         """INSERT INTO category (name, parent_id)
         VALUES ('{cat_name}', {pid})
         """.format(cat_name=name, pid=parent_id))
+      self.conn.commit()
+      return True
+    except psycopg2.Error, e:
+      return e
+  
+  def editCategory(self, name, id):
+    """Edit the name of the category identified by id"""
+    if not name:
+      return ValueError('editCategory: name cannot be empty')
+    try:
+      self.cur.execute(
+        """UPDATE category
+        SET name='{cat_name}' WHERE category_id={cid}
+        """.format(cat_name=name, cid=id))
       self.conn.commit()
       return True
     except psycopg2.Error, e:
