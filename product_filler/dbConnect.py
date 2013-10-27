@@ -90,7 +90,7 @@ class DBConnection(object):
       INNER JOIN company c ON b.company_id = c.company_id
       WHERE {clause};
       """.format(clause=where))
-    header = ("product_id", "product_name", "product_description", 
+    header = ("product_id", "product_name", "product_description",
               "product_active", "brand_id", "brand_name",
               "company_id", "company_name")
     info = self.cur.fetchone()
@@ -152,21 +152,21 @@ class DBConnection(object):
       return "p.product_id = {i}".format(i=id)
     elif name:
       return "p.product_name = {n}".format(n=name)
-  
+
   def deleteCategory(self, id):
     """Delete the category using its id"""
     try:
       self.cur.execute(
-        """DELETE FROM category 
+        """DELETE FROM category
         WHERE category.category_id = {id}
         """.format(id=id))
       self.conn.commit()
       return True
     except psycopg2.Error, e:
       return e
-  
+
   def addCategory(self, name, parentID):
-    """Add a new category child of company with the parentID. 
+    """Add a new category child of company with the parentID.
        Use parentID=-1 for root category"""
     if not name:
       return ValueError('addCategory: name cannot be empty')
@@ -183,7 +183,7 @@ class DBConnection(object):
       return True
     except psycopg2.Error, e:
       return e
-  
+
   def editCategory(self, name, id):
     """Edit the name of the category identified by id"""
     if not name:

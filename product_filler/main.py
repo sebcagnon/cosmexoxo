@@ -37,7 +37,7 @@ class Application(tk.Frame):
     """Activates the widgets once you are connected"""
     self.db = self.connectionWidget.db
     self.categoriesWidget.activate(self.db)
-    
+
   def onDisconnected(self, event):
     """Deactivates the widgets once you are disconnected"""
     self.db = None
