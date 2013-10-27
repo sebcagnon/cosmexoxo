@@ -34,10 +34,10 @@ class DBConnection(object):
         ORDER BY 1;""")
     ans = self.cur.fetchall()
     flatTree = {id:{'id':id, 'name':name} for id, name, _ in ans}
-    parents = set([row[0] for row in ans if row[-1]])
-    children = set([row[1] for row in ans if row[-1]])
+    children = set([row[-1] for row in ans if row[-1]])
+    roots = set([row[0] for row in ans if row[0] not in children])
     root = tree.Tree({'name':'Categories','id':-1})
-    nextLevel = [p for p in parents if not p in children]
+    nextLevel = list(roots)
     ans = [row for row in ans if row[-1]]
 
     def recTreeBuild(root, children, ans):
@@ -162,7 +162,27 @@ class DBConnection(object):
         """.format(id=id))
       self.conn.commit()
       return True
-    except ProgrammingError, e:
+    except psycopg2.Error, e:
+      return e
+  
+  def addCategory(self, name, id):
+    """Add a new category child of company with the ID. 
+       Use id=-1 for root category"""
+    if not name:
+      return ValueError('addCategory: name cannot be empty')
+    if id==-1:
+      parent_id = 'NULL'
+    else:
+      parent_id = id
+    print name, parent_id
+    try:
+      self.cur.execute(
+        """INSERT INTO category (name, parent_id)
+        VALUES ('{cat_name}', {pid})
+        """.format(cat_name=name, pid=parent_id))
+      self.conn.commit()
+      return True
+    except psycopg2.Error, e:
       return e
 
 

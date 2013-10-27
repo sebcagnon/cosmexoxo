@@ -43,9 +43,10 @@ class Application(tk.Frame):
     self.db = None
     self.categoriesWidget.deactivate()
 
-
-app = Application()
-app.master.title('Product Filler')
-app.mainloop()
-
-sys.exit()
+if __name__=='__main__':
+  app = Application()
+  app.master.title('Product Filler')
+  app.mainloop()
+  if app.db:
+    app.db.closeConnection()
+  sys.exit()
