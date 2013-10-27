@@ -76,7 +76,6 @@ class CategoriesWidget(tk.Frame):
     ValueError if not exist"""
     queue = self.catTree.leaves[:]
     while queue:
-      print queue
       node = queue.pop(0)
       if node.cargo['id']==id:
         if node.leaves:
@@ -123,16 +122,35 @@ class CategoryLabel(tk.Frame):
   
   def openMenu(self, event):
     """Opens the right click menu for the label"""
-    print 'in open menu'
     if self.mainFrame.editState == self.mainFrame.WAITING:
       self.menu.post(event.x_root, event.y_root)
 
   def edit(self):
-    """Edit the name of the category"""
-    print 'edit ' + self.textVar.get()
+    """Create edition frame to edit current category name"""
+    self.mainFrame.editState = self.mainFrame.EDITING
+    self.label.grid_forget()
+    message = 'Edit Category Name:'
+    self.newName = tk.StringVar()
+    self.editFrame = NewCategoryFrame(master=self,
+                        textVar=self.newName,
+                        labelText=message,
+                        buttonText='Edit',
+                        buttonAction=self.editCategory)
+    self.editFrame.grid(columnspan=2)
+    self.config(bd=2, relief=tk.SUNKEN)
+  
+  def editCategory(self):
+    """when the NewCategoryFrame.addButton is clicked"""
+    res = self.mainFrame.db.editCategory(self.newName.get(), self.id)
+    if res==True:
+      self.mainFrame.updateTree()
+      self.mainFrame.editState = self.mainFrame.WAITING
+    else:
+      tkMessageBox.showerror('Edit Category Error',
+            'Category could not be edited\n' + str(res))
   
   def add_subcategory(self):
-    """Add a new child category to the current one"""
+    """Create edition frame to add subcategory to current one"""
     self.mainFrame.editState = self.mainFrame.ADDING
     if self.id == -1:
       message = 'New category:'
@@ -142,9 +160,26 @@ class CategoryLabel(tk.Frame):
     self.editFrame = NewCategoryFrame(master=self, 
                         textVar=self.catName,
                         labelText=message,
-                        buttonText='Add')
+                        buttonText='Add',
+                        buttonAction=self.addCategory)
     self.editFrame.grid(row=0, column=1, columnspan=2, rowspan=3)
     self.config(bd=2, relief=tk.SUNKEN)
+
+  def addCategory(self):
+    """when the NewCategoryFrame.addButton is clicked"""
+    res = self.mainFrame.db.addCategory(self.catName.get(), self.id)
+    if res==True:
+      self.mainFrame.updateTree()
+      self.mainFrame.editState = self.mainFrame.WAITING
+    else:
+      tkMessageBox.showerror('Add Category Error',
+            'Category could not be created\n' + str(res))
+  
+  def cancelAddCategory(self):
+    """when the NewCategoryFrame.cancelButton is clicked"""
+    self.editFrame.destroy()
+    self.mainFrame.editState = self.mainFrame.WAITING
+    self.config(bd=0, relief=tk.FLAT)
   
   def delete(self):
     """Delete the category if user confirms"""
@@ -167,43 +202,38 @@ class CategoryLabel(tk.Frame):
         tkMessageBox.showerror('Delete Category Error',
             'Category could not be deleted\n' + str(res))
     self.mainFrame.editState = self.mainFrame.WAITING
-  
-  def addCategory(self):
-    """when the NewCategoryFrame.addButton is clicked"""
-    res = self.mainFrame.db.addCategory(self.catName.get(), self.id)
-    if res==True:
-      self.mainFrame.updateTree()
-      self.mainFrame.editState = self.mainFrame.WAITING
-    else:
-      tkMessageBox.showerror('Add Category Error',
-            'Category could not be created\n' + str(res))
-  
-  def cancelAddCategory(self):
-    """when the NewCategoryFrame.cancelButton is clicked"""
-    self.editFrame.destroy()
-    self.mainFrame.editState = self.mainFrame.WAITING
-    self.config(bd=0, relief=tk.FLAT)
 
 
 class NewCategoryFrame(tk.Frame):
   """A frame for creating a new category"""
   
-  def __init__(self, master=None, textVar=None, labelText='', buttonText=''):
+  def __init__(self, master=None, textVar=None, labelText='', 
+                buttonText='', buttonAction=None):
     if not textVar:
       self.textVar = tk.StringVar()
     else:
       self.textVar = textVar
     tk.Frame.__init__(self, master)
+    # Label explanation
     self.label = tk.Label(self, text=labelText)
     self.label.grid(columnspan=2)
     self.entry = tk.Entry(self, textvariable=self.textVar)
     self.entry.grid(columnspan=2)
+    # Entry focus and Return key reaction
+    self.entry.focus_set()
+    def entryAction(event):
+      """Ditch the event, call buttonAction"""
+      buttonAction()
+    self.entry.bind("<Return>", entryAction)
+    # Buttons
     self.addButton = tk.Button(self, text=buttonText, 
-        command=self.master.addCategory)
+        command=buttonAction)
     self.addButton.grid(row=2, column=0)
     self.cancelButton = tk.Button(self, text='Cancel', 
         command=self.master.cancelAddCategory)
     self.cancelButton.grid(row=2, column=1)
+    
+
 
 if __name__=='__main__':
   app = CategoriesWidget()
