@@ -39,24 +39,7 @@ class DBConnection(object):
     root = tree.Tree({'name':'Categories','id':-1})
     nextLevel = list(roots)
     ans = [row for row in ans if row[-1]]
-
-    def recTreeBuild(root, children, ans):
-      """Recursively find children of each node to build the Category tree"""
-      if not children:
-        return root
-      for parentID in children:
-        children = []
-        newAns = ans[:]
-        for i, row in enumerate(ans):
-          if row[0] == parentID and row[-1]:
-            children.append(row[-1])
-            newAns.remove(row)
-        ans = newAns
-        parent = tree.Tree(flatTree[parentID])
-        root.addChild(recTreeBuild(parent, children, ans))
-      return root
-
-    recTreeBuild(root, nextLevel, ans)
+    self.recTreeBuild(root, nextLevel, ans, flatTree)
     if printing:
       root.printTree()
     return root
@@ -197,6 +180,22 @@ class DBConnection(object):
       return True
     except psycopg2.Error, e:
       return e
+  
+  def recTreeBuild(self, root, children, ans, treeElements):
+    """Recursively find children of each node to build the Category tree"""
+    if not children:
+      return root
+    for parentID in children:
+      children = []
+      newAns = ans[:]
+      for i, row in enumerate(ans):
+        if row[0] == parentID and row[-1]:
+          children.append(row[-1])
+          newAns.remove(row)
+      ans = newAns
+      parent = tree.Tree(treeElements[parentID])
+      root.addChild(self.recTreeBuild(parent, children, ans, treeElements))
+    return root
 
 
 if __name__=='__main__':
