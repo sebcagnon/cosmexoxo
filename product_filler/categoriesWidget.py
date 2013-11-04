@@ -1,7 +1,8 @@
 import Tkinter as tk
+from treeWidget import TreeWidget
 import tkMessageBox
 
-class CategoriesWidget(tk.Frame):
+class CategoriesWidget(TreeWidget):
   """Handles display and creation of Categories from the database"""
   # CategoryWidget state constants
   HIDDEN = -1
@@ -9,46 +10,6 @@ class CategoriesWidget(tk.Frame):
   EDITING = 1
   ADDING = 2
   DELETING = 3
-
-  def __init__(self, master=None):
-    tk.Frame.__init__(self, master, border=2, relief=tk.GROOVE)
-    self.grid()
-    self.createWidgets()
-    self.editState = self.HIDDEN
-
-  def createWidgets(self):
-    """Initialize the frame's widgets"""
-    # Show or not
-    self.title = tk.Label(self, text='CATEGORY EDITOR')
-    self.title.grid(row=0, column=0, sticky=tk.W)
-    self.showButton = tk.Button(self, text='Show/Hide', command=self.showHide,
-                                state=tk.DISABLED)
-    self.showButton.grid(row=0, column=1, sticky=tk.E)
-    self.treeFrame = tk.Frame(self)
-
-  def activate(self, db):
-    """Enables Show/Hide Button"""
-    if db:
-      self.db = db
-      self.showButton.config(state=tk.NORMAL)
-    self.createButtons()
-
-  def deactivate(self):
-    """Hides the widget and disables button"""
-    self.db = None
-    self.showButton.config(state=tk.DISABLED)
-    self.treeFrame.grid_forget()
-    self.editState = self.HIDDEN
-    self.deleteTree()
-
-  def showHide(self):
-    """Show/Hide the whole widget"""
-    if self.editState != self.HIDDEN:
-      self.treeFrame.grid_forget()
-      self.editState = self.HIDDEN
-    else:
-      self.treeFrame.grid(columnspan=2)
-      self.editState = self.WAITING
 
   def createButtons(self):
     """Creates the labels and buttons to edit categories"""
@@ -85,16 +46,6 @@ class CategoriesWidget(tk.Frame):
       else:
         queue += node.leaves[:]
     raise ValueError('Could not find category with this id: ' + str(id))
-
-  def updateTree(self):
-    """Updates the category tree and the labels"""
-    self.deleteTree()
-    self.createButtons()
-
-  def deleteTree(self):
-    """Deletes the category tree"""
-    for child in self.treeFrame.winfo_children():
-      child.destroy()
 
 
 class CategoryLabel(tk.Frame):

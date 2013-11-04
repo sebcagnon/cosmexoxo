@@ -27,7 +27,8 @@ class Application(tk.Frame):
     self.columnconfigure(0, weight=1)
     # database connection
     self.connectionWidget = connectionWidget.ConnectionWidget(self)
-    self.categoriesWidget = categoriesWidget.CategoriesWidget(self)
+    self.categoriesWidget = \
+          categoriesWidget.CategoriesWidget('CATEGORY EDITOR', self)
 
     self.bind('<<Connection>>', self.onConnected)
     self.bind('<<Disconnection>>', self.onDisconnected)
