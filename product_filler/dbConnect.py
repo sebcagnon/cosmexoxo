@@ -225,6 +225,32 @@ class DBConnection(object):
       root.printTree()
     return root
 
+  def editLineFromId(self, table, column, newValue, id):
+    """UPDATE table SET column=newValue WHERE 'table'_id=id"""
+    val = self.formatValue(newValue)
+    try:
+      self.cur.execute(
+        """UPDATE {table}
+           SET {column}={value} WHERE {table}_id={id}
+        """.format(table=table, column=column, value=val, id=id))
+      self.conn.commit()
+      return True
+    except psycopg2.Error, e:
+      return e
+  
+  def formatValue(self, value):
+    """Format values for compatibility with database queries"""
+    if value is True:
+      return 'TRUE'
+    elif value is False:
+      return 'FALSE'
+    elif isinstance(value, (int, float, long)):
+      return value
+    elif isinstance(value, str):
+      return repr(value)
+    else:
+      return value
+
 if __name__=='__main__':
   print "Testing DBConnection"
   import os

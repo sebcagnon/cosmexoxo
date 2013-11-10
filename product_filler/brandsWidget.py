@@ -5,19 +5,15 @@ import tkMessageBox
 
 class BrandsWidget(TreeWidget):
   """Handles display and creation of Categories from the database"""
-  # CategoryWidget state constants
-  HIDDEN = -1
-  WAITING = 0
-  EDITING = 1
-  ADDING = 2
-  DELETING = 3
 
   def createButtons(self):
     """Creates the labels and buttons to edit categories"""
     self.brandTree = self.db.getBrandTree()
-    label = BrandLabel(self.treeFrame,
+    label = BrandLabel(master=self.treeFrame,
                           name='Add New\nBrand',
-                          id=-1)
+                          id=-1,
+                          type=None,
+                          navbar=None)
     label.grid(sticky=tk.W)
     for child in self.brandTree.leaves:
       self.recursiveLabelDisplay(child)
@@ -26,10 +22,15 @@ class BrandsWidget(TreeWidget):
 
   def recursiveLabelDisplay(self, tree, column=0):
     """Recursive method that creates tabulated labels"""
-    label = BrandLabel(self.treeFrame,
+    if column == 0:
+      type = 'company'
+    else:
+      type = 'brand'
+    label = BrandLabel(master=self.treeFrame,
                           name=tree.cargo['name'],
                           id=tree.cargo['id'],
-                          navbar=tree.cargo['in_navbar'])
+                          navbar=tree.cargo['in_navbar'],
+                          type=type)
     label.grid(column=column, sticky=tk.W)
     for child in tree.leaves:
       self.recursiveLabelDisplay(child, column+1)
@@ -38,13 +39,21 @@ class BrandsWidget(TreeWidget):
 class BrandLabel(tk.Frame):
   """Labels with right-click menu for editing"""
 
-  def __init__(self, master=None, name='', id=-1, navbar=False):
+  def __init__(self, name, id, navbar, type, master=None):
+    """
+    master: the parent widget
+    name: the name of the brand/company (str)
+    id: the id of the brand/company, -1 for the "add company" label (int)
+    navbar: in_navbar status (bool)
+    type: 'company' or 'brand'
+    """
     tk.Frame.__init__(self, master)
     # create name label
     self.textVar = tk.StringVar()
-    self.textVar.set(str(id) + ': ' + name)
+    self.textVar.set(str(id) + ': ' + str(name))
     self.id = id
     self.navbar = navbar
+    self.type = type
     self.label = tk.Label(self, textvariable=self.textVar,
                       bg='white', bd=1, relief=tk.RAISED)
     self.label.grid(row=0)
@@ -56,18 +65,33 @@ class BrandLabel(tk.Frame):
       self.navState.set(self.navbar*1)
       self.navbarCheck = tk.Checkbutton(self, variable=self.navState)
       self.navbarCheck.grid(row=0, column=2)
+      self.navbarCheck.bind('<Button-1>', self.navbarCheckHandler)
     # create right-click menu
-    return
-    self.menu = tk.Menu(self, tearoff=0)
-    if self.id!=-1: # id=-1 for buttons only
-      self.menu.add_command(label='Edit', command=self.edit)
-    self.menu.add_command(label='Add brand',
-                          command=self.add_brand)
-    if self.id!=-1:
-      self.menu.add_command(label='Delete', command=self.delete)
-    self.label.bind('<Button-3>', self.openMenu)
+    if 0:
+      self.menu = tk.Menu(self, tearoff=0)
+      if self.id!=-1: # id=-1 for buttons only
+        self.menu.add_command(label='Edit', command=self.edit)
+      self.menu.add_command(label='Add brand',
+                            command=self.add_brand)
+      if self.id!=-1:
+        self.menu.add_command(label='Delete', command=self.delete)
+      self.label.bind('<Button-3>', self.openMenu)
     # shortcut
     self.mainFrame = self.master.master
+
+  def navbarCheckHandler(self, event):
+    """Edits the in_navbar info when checkbutton is clicked"""
+    self.mainFrame.editState == self.mainFrame.EDITING
+    res = self.mainFrame.db.editLineFromId(table=self.type, 
+                                         column='in_navbar',
+                                         newValue=(not self.navbar),
+                                         id=self.id)
+    if res==True:
+      self.mainFrame.updateTree()
+    else:
+      tkMessageBox.showerror('Edit Company/Brand Error',
+            'Navbar setting could not be edited\n' + str(res))
+    self.mainFrame.editState = self.mainFrame.WAITING
 
   def openMenu(self, event):
     """Opens the right click menu for the label"""
