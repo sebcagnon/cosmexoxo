@@ -10,7 +10,7 @@ class BrandsWidget(TreeWidget):
     """Creates the labels and buttons to edit categories"""
     self.brandTree = self.db.getBrandTree()
     label = BrandLabel(master=self.treeFrame,
-                          name='Add New\nBrand',
+                          name='Add New\nCompany',
                           id=-1,
                           type=None,
                           navbar=None)
@@ -26,6 +26,8 @@ class BrandsWidget(TreeWidget):
       type = 'company'
     else:
       type = 'brand'
+      if tree.cargo['id'] == None:
+        return
     label = BrandLabel(master=self.treeFrame,
                           name=tree.cargo['name'],
                           id=tree.cargo['id'],
@@ -67,22 +69,24 @@ class BrandLabel(tk.Frame):
       self.navbarCheck.grid(row=0, column=2)
       self.navbarCheck.bind('<Button-1>', self.navbarCheckHandler)
     # create right-click menu
-    if 0:
-      self.menu = tk.Menu(self, tearoff=0)
-      if self.id!=-1: # id=-1 for buttons only
-        self.menu.add_command(label='Edit', command=self.edit)
-      self.menu.add_command(label='Add brand',
-                            command=self.add_brand)
-      if self.id!=-1:
-        self.menu.add_command(label='Delete', command=self.delete)
-      self.label.bind('<Button-3>', self.openMenu)
+    self.menu = tk.Menu(self, tearoff=0)
+    if self.id == -1:
+      self.menu.add_command(label='Add Company', 
+                            command=self.add_brandOrCompany)
+    else:
+      self.menu.add_command(label='Edit', command=self.edit)
+      if self.type == 'company':
+        self.menu.add_command(label='Add brand',
+                              command=self.add_brandOrCompany)
+      self.menu.add_command(label='Delete', command=self.delete)
+    self.label.bind('<Button-3>', self.openMenu)
     # shortcut
     self.mainFrame = self.master.master
 
   def navbarCheckHandler(self, event):
     """Edits the in_navbar info when checkbutton is clicked"""
     self.mainFrame.editState == self.mainFrame.EDITING
-    res = self.mainFrame.db.editLineFromId(table=self.type, 
+    res = self.mainFrame.db.updateLineFromId(table=self.type, 
                                          column='in_navbar',
                                          newValue=(not self.navbar),
                                          id=self.id)
@@ -102,81 +106,86 @@ class BrandLabel(tk.Frame):
     """Create edition frame to edit current category name"""
     self.mainFrame.editState = self.mainFrame.EDITING
     self.label.grid_forget()
-    message = 'Edit Category Name:'
+    self.navLabel.grid_forget()
+    self.navbarCheck.grid_forget()
+    message = 'Edit {type} Name:'.format(type=self.type)
     self.newName = tk.StringVar()
-    self.editFrame = NewCategoryFrame(master=self,
+    self.editFrame = TextEditFrame(master=self,
                         textVar=self.newName,
                         labelText=message,
                         buttonText='Edit',
-                        buttonAction=self.editCategory)
+                        buttonAction=self.editName,
+                        cancelButtonAction=self.cancelEditName)
     self.editFrame.grid(columnspan=2)
     self.config(bd=2, relief=tk.SUNKEN)
 
-  def editCategory(self):
-    """when the NewCategoryFrame.addButton is clicked"""
-    res = self.mainFrame.db.editCategory(self.newName.get(), self.id)
+  def editName(self):
+    """when the TextEditFrame.edit button is clicked"""
+    value = self.newName.get().encode('utf-8')
+    res = self.mainFrame.db.updateLineFromId(table=self.type,
+                                         column='name',
+                                         newValue=value,
+                                         id=self.id)
     if res==True:
       self.mainFrame.updateTree()
       self.mainFrame.editState = self.mainFrame.WAITING
     else:
-      tkMessageBox.showerror('Edit Category Error',
-            'Category could not be edited\n' + str(res))
+      tkMessageBox.showerror('Edit Company/Brand Error',
+            'Name could not be edited\n' + str(res))
 
-  def add_subcategory(self):
-    """Create edition frame to add subcategory to current one"""
+  def cancelEditName(self):
+    """when the TextEditFrame.cancelButton is clicked"""
+    self.editFrame.destroy()
+    self.label.grid(row=0, column=0)
+    self.navLabel.grid(row=0, column=1)
+    self.navbarCheck.grid(row=0, column=2)
+    self.mainFrame.editState = self.mainFrame.WAITING
+    self.config(bd=0, relief=tk.FLAT)
+
+  def add_brandOrCompany(self):
+    """Create edition frame to add a new brand or company"""
     self.mainFrame.editState = self.mainFrame.ADDING
     if self.id == -1:
-      message = 'New category:'
+      message = "New Company:"
     else:
-      message = 'New Subcategory:'
-    self.catName = tk.StringVar()
-    self.editFrame = NewCategoryFrame(master=self,
-                        textVar=self.catName,
+      message = "New Brand:"
+    self.newName = tk.StringVar()
+    self.editFrame = TextEditFrame(master=self,
+                        textVar=self.newName,
                         labelText=message,
                         buttonText='Add',
-                        buttonAction=self.addCategory)
+                        buttonAction=self.addNewBrandOrCompany,
+                        cancelButtonAction=self.cancelAdding)
     self.editFrame.grid(row=0, column=1, columnspan=2, rowspan=3)
     self.config(bd=2, relief=tk.SUNKEN)
 
-  def addCategory(self):
-    """when the NewCategoryFrame.addButton is clicked"""
-    res = self.mainFrame.db.addCategory(self.catName.get(), self.id)
-    if res==True:
+  def addNewBrandOrCompany(self):
+    """when TextEditFrame.addButton is clicked"""
+    if self.id == -1:
+      tab = 'company'
+      headers = ('name',)
+      values = (self.newName.get().encode('utf-8'),)
+    else:
+      tab = 'brand'
+      headers = ('name', 'company_id')
+      values = (self.newName.get().encode('utf-8'), self.id)
+    res = self.mainFrame.db.simpleInsert(table=tab, headers=headers,
+                                         values=values)
+    if res == True:
       self.mainFrame.updateTree()
       self.mainFrame.editState = self.mainFrame.WAITING
     else:
-      tkMessageBox.showerror('Add Category Error',
-            'Category could not be created\n' + str(res))
+      tkMessageBox.showerror('Add Brand/Company Error',
+            'Brand or Company could not be created\n' + str(res))
 
-  def cancelAddCategory(self):
-    """when the NewCategoryFrame.cancelButton is clicked"""
+  def cancelAdding(self):
+    """when the TextEditFrame.cancelButton is clicked"""
     self.editFrame.destroy()
     self.mainFrame.editState = self.mainFrame.WAITING
     self.config(bd=0, relief=tk.FLAT)
 
   def delete(self):
-    """Delete the category if user confirms"""
-    self.mainFrame.editState = self.mainFrame.DELETING
-    if self.mainFrame.hasChildren(self.id):
-      tkMessageBox.showerror('DeleteCategory Error',
-          'Can not delete ' + self.textVar.get()
-          + '\nDelete subcategories first')
-    elif tkMessageBox.askyesno('Delete Category Warning',
-            'Warning: if you delete a category\n' +
-            'it can create broken links\n' +
-            'Confirm delete?',
-            icon=tkMessageBox.WARNING):
-      res = self.mainFrame.db.deleteCategory(self.id)
-      if res==True:
-        tkMessageBox.showinfo('Delete Category Success',
-            'Category was successfully deleted')
-        self.mainFrame.updateTree()
-      else:
-        tkMessageBox.showerror('Delete Category Error',
-            'Category could not be deleted\n' + str(res))
-    self.mainFrame.editState = self.mainFrame.WAITING
-
-
+    print 'delete'
 
 
 if __name__=='__main__':

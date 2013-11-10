@@ -1,4 +1,5 @@
 import psycopg2
+from psycopg2.extensions import adapt
 import json
 import tree
 
@@ -225,7 +226,7 @@ class DBConnection(object):
       root.printTree()
     return root
 
-  def editLineFromId(self, table, column, newValue, id):
+  def updateLineFromId(self, table, column, newValue, id):
     """UPDATE table SET column=newValue WHERE 'table'_id=id"""
     val = self.formatValue(newValue)
     try:
@@ -233,6 +234,27 @@ class DBConnection(object):
         """UPDATE {table}
            SET {column}={value} WHERE {table}_id={id}
         """.format(table=table, column=column, value=val, id=id))
+      self.conn.commit()
+      return True
+    except psycopg2.Error, e:
+      return e
+
+  def simpleInsert(self, table, headers, values):
+    """INSERT INTO table (headers) VALUES (values)"""
+    inputNames = '('
+    for header in headers:
+      inputNames += header + ', '
+    inputNames = inputNames[:-2] + ')'
+    inputValues = '('
+    for val in values:
+      v = self.formatValue(val)
+      inputValues += str(v) + ', '
+    inputValues = inputValues[:-2] + ')'
+    try:
+      self.cur.execute(
+        """INSERT INTO {table} {names} 
+        VALUES {vals};
+        """.format(table=table, names=inputNames, vals=inputValues))
       self.conn.commit()
       return True
     except psycopg2.Error, e:
@@ -247,7 +269,7 @@ class DBConnection(object):
     elif isinstance(value, (int, float, long)):
       return value
     elif isinstance(value, str):
-      return repr(value)
+      return adapt(value)
     else:
       return value
 
