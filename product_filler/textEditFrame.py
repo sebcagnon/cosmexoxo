@@ -4,7 +4,7 @@ class TextEditFrame(tk.Frame):
   """A frame for creating a new category"""
 
   def __init__(self, master=None, textVar=None, labelText='',
-                buttonText='', buttonAction=None):
+                buttonText='', buttonAction=None, cancelButtonAction=None):
     if not textVar:
       self.textVar = tk.StringVar()
     else:
@@ -28,5 +28,5 @@ class TextEditFrame(tk.Frame):
         command=buttonAction)
     self.addButton.grid(row=2, column=0)
     self.cancelButton = tk.Button(self, text='Cancel',
-        command=self.master.cancelAddCategory)
+        command=cancelButtonAction)
     self.cancelButton.grid(row=2, column=1)

@@ -5,12 +5,6 @@ import tkMessageBox
 
 class CategoriesWidget(TreeWidget):
   """Handles display and creation of Categories from the database"""
-  # CategoryWidget state constants
-  HIDDEN = -1
-  WAITING = 0
-  EDITING = 1
-  ADDING = 2
-  DELETING = 3
 
   def createButtons(self):
     """Creates the labels and buttons to edit categories"""
@@ -87,7 +81,8 @@ class CategoryLabel(tk.Frame):
                         textVar=self.newName,
                         labelText=message,
                         buttonText='Edit',
-                        buttonAction=self.editCategory)
+                        buttonAction=self.editCategory,
+                        cancelButtonAction=self.cancelEditCategory)
     self.editFrame.grid(columnspan=2)
     self.config(bd=2, relief=tk.SUNKEN)
 
@@ -101,6 +96,13 @@ class CategoryLabel(tk.Frame):
       tkMessageBox.showerror('Edit Category Error',
             'Category could not be edited\n' + str(res))
 
+  def cancelEditCategory(self):
+    """when the TextEditFrame.cancelButton is clicked"""
+    self.editFrame.destroy()
+    self.label.grid()
+    self.mainFrame.editState = self.mainFrame.WAITING
+    self.config(bd=0, relief=tk.FLAT)
+
   def add_subcategory(self):
     """Create edition frame to add subcategory to current one"""
     self.mainFrame.editState = self.mainFrame.ADDING
@@ -113,7 +115,8 @@ class CategoryLabel(tk.Frame):
                         textVar=self.catName,
                         labelText=message,
                         buttonText='Add',
-                        buttonAction=self.addCategory)
+                        buttonAction=self.addCategory,
+                        cancelButtonAction=self.cancelAddCategory)
     self.editFrame.grid(row=0, column=1, columnspan=2, rowspan=3)
     self.config(bd=2, relief=tk.SUNKEN)
 
