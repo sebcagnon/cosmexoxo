@@ -18,7 +18,7 @@ class BrandsWidget(TreeWidget):
     label = BrandLabel(self.treeFrame,
                           name='Add New\nBrand',
                           id=-1)
-    label.grid()
+    label.grid(sticky=tk.W)
     for child in self.brandTree.leaves:
       self.recursiveLabelDisplay(child)
     if self.editState != self.HIDDEN:
@@ -28,7 +28,8 @@ class BrandsWidget(TreeWidget):
     """Recursive method that creates tabulated labels"""
     label = BrandLabel(self.treeFrame,
                           name=tree.cargo['name'],
-                          id=tree.cargo['id'])
+                          id=tree.cargo['id'],
+                          navbar=tree.cargo['in_navbar'])
     label.grid(column=column, sticky=tk.W)
     for child in tree.leaves:
       self.recursiveLabelDisplay(child, column+1)
@@ -37,14 +38,24 @@ class BrandsWidget(TreeWidget):
 class BrandLabel(tk.Frame):
   """Labels with right-click menu for editing"""
 
-  def __init__(self, master=None, name='', id=-1):
+  def __init__(self, master=None, name='', id=-1, navbar=False):
+    tk.Frame.__init__(self, master)
+    # create name label
     self.textVar = tk.StringVar()
     self.textVar.set(str(id) + ': ' + name)
     self.id = id
-    tk.Frame.__init__(self, master)
+    self.navbar = navbar
     self.label = tk.Label(self, textvariable=self.textVar,
                       bg='white', bd=1, relief=tk.RAISED)
-    self.label.grid()
+    self.label.grid(row=0)
+    # create navbar checkbox
+    if self.id != -1:
+      self.navLabel = tk.Label(self, text="In Navbar?")
+      self.navLabel.grid(row=0, column=1)
+      self.navState = tk.IntVar()
+      self.navState.set(self.navbar*1)
+      self.navbarCheck = tk.Checkbutton(self, variable=self.navState)
+      self.navbarCheck.grid(row=0, column=2)
     # create right-click menu
     return
     self.menu = tk.Menu(self, tearoff=0)
@@ -145,8 +156,8 @@ class BrandLabel(tk.Frame):
 
 
 if __name__=='__main__':
-  app = CategoriesWidget()
-  app.master.title('CategoriesWidget')
+  app = BrandsWidget()
+  app.master.title('BrandsWidget')
   app.mainloop()
   import sys
   sys.exit()
