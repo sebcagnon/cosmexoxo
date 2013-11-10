@@ -7,6 +7,7 @@ from tkFileDialog import askopenfilename
 import dbConnect
 import connectionWidget
 import categoriesWidget
+import brandsWidget
 
 APP_PATH = r'c:\Users\luluseb\Documents\cosmexoxo\product_filler'
 
@@ -29,6 +30,8 @@ class Application(tk.Frame):
     self.connectionWidget = connectionWidget.ConnectionWidget(self)
     self.categoriesWidget = \
           categoriesWidget.CategoriesWidget('CATEGORY EDITOR', self)
+    self.brandsWidget = \
+          brandsWidget.BrandsWidget('COMPANIES/BRANDS EDITOR', self)
 
     self.bind('<<Connection>>', self.onConnected)
     self.bind('<<Disconnection>>', self.onDisconnected)
@@ -38,11 +41,13 @@ class Application(tk.Frame):
     """Activates the widgets once you are connected"""
     self.db = self.connectionWidget.db
     self.categoriesWidget.activate(self.db)
+    self.brandsWidget.activate(self.db)
 
   def onDisconnected(self, event):
     """Deactivates the widgets once you are disconnected"""
     self.db = None
     self.categoriesWidget.deactivate()
+    self.brandsWidget.deactivate()
 
 if __name__=='__main__':
   app = Application()

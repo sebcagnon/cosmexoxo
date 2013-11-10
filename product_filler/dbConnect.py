@@ -23,27 +23,7 @@ class DBConnection(object):
     self.cur.close()
     self.conn.close()
 
-  def getCategoryTree(self, printing=0):
-    """Returns a nested list representing the categories tree,
-       if printing=1, prints the tree"""
-    self.cur.execute(
-    """SELECT cat_parent.category_id, cat_parent.name, cat.category_id
-        FROM product_info.category cat
-        RIGHT JOIN product_info.category cat_parent
-          ON cat.parent_id = cat_parent.category_id
-        ORDER BY 1;""")
-    ans = self.cur.fetchall()
-    flatTree = {id:{'id':id, 'name':name} for id, name, _ in ans}
-    children = set([row[-1] for row in ans if row[-1]])
-    roots = set([row[0] for row in ans if row[0] not in children])
-    root = tree.Tree({'name':'Categories','id':-1})
-    nextLevel = list(roots)
-    ans = [row for row in ans if row[-1]]
-    self.recTreeBuild(root, nextLevel, ans, flatTree)
-    if printing:
-      root.printTree()
-    return root
-
+  # PRODUCT INFO FOR PRODUCT PAGE
   def getProductInfoByID(self, id):
     """Get the info of a product by id"""
     return self.getProductInfo(id=id)
@@ -136,6 +116,28 @@ class DBConnection(object):
     elif name:
       return "p.product_name = {n}".format(n=name)
 
+  # CATEGORIES
+  def getCategoryTree(self, printing=0):
+    """Returns a nested dict representing the categories tree,
+       if printing=1, prints the tree"""
+    self.cur.execute(
+    """SELECT cat_parent.category_id, cat_parent.name, cat.category_id
+        FROM product_info.category cat
+        RIGHT JOIN product_info.category cat_parent
+          ON cat.parent_id = cat_parent.category_id
+        ORDER BY 1;""")
+    ans = self.cur.fetchall()
+    flatTree = {id:{'id':id, 'name':name} for id, name, _ in ans}
+    children = set([row[-1] for row in ans if row[-1]])
+    roots = set([row[0] for row in ans if row[0] not in children])
+    root = tree.Tree({'name':'Categories','id':-1})
+    nextLevel = list(roots)
+    ans = [row for row in ans if row[-1]]
+    self.recTreeBuild(root, nextLevel, ans, flatTree)
+    if printing:
+      root.printTree()
+    return root
+
   def deleteCategory(self, id):
     """Delete the category using its id"""
     try:
@@ -197,6 +199,31 @@ class DBConnection(object):
       root.addChild(self.recTreeBuild(parent, children, ans, treeElements))
     return root
 
+  # COMPANIES/BRANDS
+  def getBrandTree(self, printing=0):
+    """Returns a nested dict representing the companies and their brands,
+       if printing=1, prints the tree"""
+    self.cur.execute(
+    """SELECT c.company_id, c.name, c.in_navbar,
+        b.brand_id, b.name, b.in_navbar
+        FROM company c
+        LEFT JOIN brand b ON b.company_id = c.company_id
+        ORDER BY c.company_id;""")
+    ans = self.cur.fetchall()
+    root = tree.Tree({'name':'Companies', 'id':-1, 'in_navbar':False})
+    currentCompany = None
+    for line in ans:
+      if currentCompany == None or line[0] != currentCompany.cargo['id']:
+        currentCompany = tree.Tree({'id':line[0],
+                                    'name':line[1],
+                                    'in_navbar':line[2]})
+        root.addChild(currentCompany)
+      currentCompany.addChild(tree.Tree({'id':line[3],
+                                         'name':line[4],
+                                         'in_navbar':line[5]}))
+    if printing:
+      root.printTree()
+    return root
 
 if __name__=='__main__':
   print "Testing DBConnection"
@@ -207,6 +234,9 @@ if __name__=='__main__':
   print "Testing getCategoryTree"
   db.getCategoryTree(1)
   print "Category Tree: Done"
+  print "Testing getBrandTree"
+  db.getBrandTree(1)
+  print "Brand Tree: Done"
   print "Testing getProductInfo"
   print db.getProductInfo(id=7)
   print db.getProductInfo(id=8)
