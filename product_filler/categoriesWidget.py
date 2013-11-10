@@ -1,5 +1,6 @@
 import Tkinter as tk
 from treeWidget import TreeWidget
+from textEditFrame import TextEditFrame
 import tkMessageBox
 
 class CategoriesWidget(TreeWidget):
@@ -82,7 +83,7 @@ class CategoryLabel(tk.Frame):
     self.label.grid_forget()
     message = 'Edit Category Name:'
     self.newName = tk.StringVar()
-    self.editFrame = NewCategoryFrame(master=self,
+    self.editFrame = TextEditFrame(master=self,
                         textVar=self.newName,
                         labelText=message,
                         buttonText='Edit',
@@ -91,7 +92,7 @@ class CategoryLabel(tk.Frame):
     self.config(bd=2, relief=tk.SUNKEN)
 
   def editCategory(self):
-    """when the NewCategoryFrame.addButton is clicked"""
+    """when the TextEditFrame.addButton is clicked"""
     res = self.mainFrame.db.editCategory(self.newName.get(), self.id)
     if res==True:
       self.mainFrame.updateTree()
@@ -108,7 +109,7 @@ class CategoryLabel(tk.Frame):
     else:
       message = 'New Subcategory:'
     self.catName = tk.StringVar()
-    self.editFrame = NewCategoryFrame(master=self,
+    self.editFrame = TextEditFrame(master=self,
                         textVar=self.catName,
                         labelText=message,
                         buttonText='Add',
@@ -117,7 +118,7 @@ class CategoryLabel(tk.Frame):
     self.config(bd=2, relief=tk.SUNKEN)
 
   def addCategory(self):
-    """when the NewCategoryFrame.addButton is clicked"""
+    """when the TextEditFrame.addButton is clicked"""
     res = self.mainFrame.db.addCategory(self.catName.get(), self.id)
     if res==True:
       self.mainFrame.updateTree()
@@ -127,7 +128,7 @@ class CategoryLabel(tk.Frame):
             'Category could not be created\n' + str(res))
 
   def cancelAddCategory(self):
-    """when the NewCategoryFrame.cancelButton is clicked"""
+    """when the TextEditFrame.cancelButton is clicked"""
     self.editFrame.destroy()
     self.mainFrame.editState = self.mainFrame.WAITING
     self.config(bd=0, relief=tk.FLAT)
@@ -153,36 +154,6 @@ class CategoryLabel(tk.Frame):
         tkMessageBox.showerror('Delete Category Error',
             'Category could not be deleted\n' + str(res))
     self.mainFrame.editState = self.mainFrame.WAITING
-
-
-class NewCategoryFrame(tk.Frame):
-  """A frame for creating a new category"""
-
-  def __init__(self, master=None, textVar=None, labelText='',
-                buttonText='', buttonAction=None):
-    if not textVar:
-      self.textVar = tk.StringVar()
-    else:
-      self.textVar = textVar
-    tk.Frame.__init__(self, master)
-    # Label explanation
-    self.label = tk.Label(self, text=labelText)
-    self.label.grid(columnspan=2)
-    self.entry = tk.Entry(self, textvariable=self.textVar)
-    self.entry.grid(columnspan=2)
-    # Entry focus and Return key reaction
-    self.entry.focus_set()
-    def entryAction(event):
-      """Ditch the event, call buttonAction"""
-      buttonAction()
-    self.entry.bind("<Return>", entryAction)
-    # Buttons
-    self.addButton = tk.Button(self, text=buttonText,
-        command=buttonAction)
-    self.addButton.grid(row=2, column=0)
-    self.cancelButton = tk.Button(self, text='Cancel',
-        command=self.master.cancelAddCategory)
-    self.cancelButton.grid(row=2, column=1)
 
 
 if __name__=='__main__':
