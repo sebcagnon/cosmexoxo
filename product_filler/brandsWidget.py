@@ -37,6 +37,17 @@ class BrandsWidget(TreeWidget):
     for child in tree.leaves:
       self.recursiveLabelDisplay(child, column+1)
 
+  def hasBrand(self, id):
+    """Checks if the company with this id has any brands under its name"""
+    for company in self.brandTree.leaves:
+      if company.cargo['id'] == id:
+        if company.leaves:
+          return True
+        else:
+          return False
+    else:
+      raise ValueError("The id could not be found in the brandTree")
+
 
 class BrandLabel(tk.Frame):
   """Labels with right-click menu for editing"""
@@ -185,7 +196,26 @@ class BrandLabel(tk.Frame):
     self.config(bd=0, relief=tk.FLAT)
 
   def delete(self):
-    print 'delete'
+    """Delete the brand/company if user confirms"""
+    self.mainFrame.editState = self.mainFrame.DELETING
+    if self.type == 'company' and self.mainFrame.hasBrand(self.id):
+      tkMessageBox.showerror('Delete Company Error',
+          'Can not delete ' + self.textVar.get()
+          + '\nDelete associated brands first')
+    elif tkMessageBox.askyesno('Delete  Warning',
+            'Warning: if you delete a ' + self.type + '\n' +
+            'it can create broken links\n' +
+            'Confirm delete?',
+            icon=tkMessageBox.WARNING):
+      res = self.mainFrame.db.simpleDelete(table=self.type, id=self.id)
+      if res==True:
+        tkMessageBox.showinfo('Delete ' + self.type + ' Success',
+            '' + self.type + ' was successfully deleted')
+        self.mainFrame.updateTree()
+      else:
+        tkMessageBox.showerror('Delete ' + self.type + ' Error',
+            '' + self.type + ' could not be deleted\n' + str(res))
+    self.mainFrame.editState = self.mainFrame.WAITING
 
 
 if __name__=='__main__':

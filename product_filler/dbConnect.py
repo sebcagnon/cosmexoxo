@@ -219,9 +219,10 @@ class DBConnection(object):
                                     'name':line[1],
                                     'in_navbar':line[2]})
         root.addChild(currentCompany)
-      currentCompany.addChild(tree.Tree({'id':line[3],
-                                         'name':line[4],
-                                         'in_navbar':line[5]}))
+      if line[3] != None:
+        currentCompany.addChild(tree.Tree({'id':line[3],
+                                           'name':line[4],
+                                           'in_navbar':line[5]}))
     if printing:
       root.printTree()
     return root
@@ -255,6 +256,17 @@ class DBConnection(object):
         """INSERT INTO {table} {names} 
         VALUES {vals};
         """.format(table=table, names=inputNames, vals=inputValues))
+      self.conn.commit()
+      return True
+    except psycopg2.Error, e:
+      return e
+
+  def simpleDelete(self, table, id):
+    """DELETE FROM table WHERE 'table'_id = id;"""
+    try:
+      self.cur.execute(
+        """DELETE FROM {table} 
+        WHERE {table}_id = {id};""".format(table=table, id=id))
       self.conn.commit()
       return True
     except psycopg2.Error, e:
