@@ -14,13 +14,12 @@ APP_PATH = r'c:\Users\luluseb\Documents\cosmexoxo\product_filler'
 class Application(tk.Frame):
   def __init__(self, master=None):
     tk.Frame.__init__(self, master)
-    self.grid()
+    self.grid(sticky=tk.N+tk.S+tk.E+tk.W)
     self.createWidgets()
     self.db = None
 
   def createWidgets(self):
     top = self.winfo_toplevel()
-    top.geometry('600x800')
     top.configure(bg='grey')
     top.rowconfigure(0, weight=1)
     top.columnconfigure(0, weight=1)

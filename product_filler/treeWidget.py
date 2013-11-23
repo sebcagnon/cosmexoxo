@@ -11,7 +11,7 @@ class TreeWidget(tk.Frame):
 
   def __init__(self, title, master=None):
     tk.Frame.__init__(self, master, border=2, relief=tk.GROOVE)
-    self.grid()
+    self.grid(sticky=tk.N+tk.S+tk.E+tk.W)
     self.createWidgets(title)
     self.editState = self.HIDDEN
 

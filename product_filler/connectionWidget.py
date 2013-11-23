@@ -6,7 +6,7 @@ class ConnectionWidget(tk.Frame):
   """Handles connection to database server"""
   def __init__(self, master=None):
     tk.Frame.__init__(self, master, border=2, relief=tk.GROOVE)
-    self.grid()
+    self.grid(sticky=tk.N+tk.E+tk.W)
     self.createWidgets()
 
   def createWidgets(self):
