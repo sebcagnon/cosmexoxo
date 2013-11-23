@@ -1,15 +1,15 @@
 import Tkinter as tk
-from treeWidget import TreeWidget
+from baseWidget import BaseWidget
 from textEditFrame import TextEditFrame
 import tkMessageBox
 
-class CategoriesWidget(TreeWidget):
+class CategoriesWidget(BaseWidget):
   """Handles display and creation of Categories from the database"""
 
   def createButtons(self):
     """Creates the labels and buttons to edit categories"""
     self.catTree = self.db.getCategoryTree()
-    label = CategoryLabel(self.treeFrame,
+    label = CategoryLabel(self.mainFrame,
                           name='Add main\ncategory',
                           id=-1)
     label.grid()
@@ -20,7 +20,7 @@ class CategoriesWidget(TreeWidget):
 
   def recursiveLabelDisplay(self, tree, column=0):
     """Recursive method that creates tabulated labels"""
-    label = CategoryLabel(self.treeFrame,
+    label = CategoryLabel(self.mainFrame,
                           name=tree.cargo['name'],
                           id=tree.cargo['id'])
     label.grid(column=column, columnspan=2, sticky=tk.W)

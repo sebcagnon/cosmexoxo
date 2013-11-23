@@ -1,15 +1,15 @@
 import Tkinter as tk
-from treeWidget import TreeWidget
+from baseWidget import BaseWidget
 from textEditFrame import TextEditFrame
 import tkMessageBox
 
-class BrandsWidget(TreeWidget):
+class BrandsWidget(BaseWidget):
   """Handles display and creation of Categories from the database"""
 
   def createButtons(self):
     """Creates the labels and buttons to edit categories"""
     self.brandTree = self.db.getBrandTree()
-    label = BrandLabel(master=self.treeFrame,
+    label = BrandLabel(master=self.mainFrame,
                           name='Add New\nCompany',
                           id=-1,
                           type=None,
@@ -28,7 +28,7 @@ class BrandsWidget(TreeWidget):
       type = 'brand'
       if tree.cargo['id'] == None:
         return
-    label = BrandLabel(master=self.treeFrame,
+    label = BrandLabel(master=self.mainFrame,
                           name=tree.cargo['name'],
                           id=tree.cargo['id'],
                           navbar=tree.cargo['in_navbar'],
