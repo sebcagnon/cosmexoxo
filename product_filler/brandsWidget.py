@@ -82,7 +82,7 @@ class BrandLabel(tk.Frame):
     # create right-click menu
     self.menu = tk.Menu(self, tearoff=0)
     if self.id == -1:
-      self.menu.add_command(label='Add Company', 
+      self.menu.add_command(label='Add Company',
                             command=self.add_brandOrCompany)
     else:
       self.menu.add_command(label='Edit', command=self.edit)
@@ -97,7 +97,7 @@ class BrandLabel(tk.Frame):
   def navbarCheckHandler(self, event):
     """Edits the in_navbar info when checkbutton is clicked"""
     self.mainFrame.editState == self.mainFrame.EDITING
-    res = self.mainFrame.db.updateLineFromId(table=self.type, 
+    res = self.mainFrame.db.updateLineFromId(table=self.type,
                                          column='in_navbar',
                                          newValue=(not self.navbar),
                                          id=self.id)

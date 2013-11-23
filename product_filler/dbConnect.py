@@ -183,7 +183,7 @@ class DBConnection(object):
       return True
     except psycopg2.Error, e:
       return e
-  
+
   def recTreeBuild(self, root, children, ans, treeElements):
     """Recursively find children of each node to build the Category tree"""
     if not children:
@@ -253,7 +253,7 @@ class DBConnection(object):
     inputValues = inputValues[:-2] + ')'
     try:
       self.cur.execute(
-        """INSERT INTO {table} {names} 
+        """INSERT INTO {table} {names}
         VALUES {vals};
         """.format(table=table, names=inputNames, vals=inputValues))
       self.conn.commit()
@@ -265,13 +265,13 @@ class DBConnection(object):
     """DELETE FROM table WHERE 'table'_id = id;"""
     try:
       self.cur.execute(
-        """DELETE FROM {table} 
+        """DELETE FROM {table}
         WHERE {table}_id = {id};""".format(table=table, id=id))
       self.conn.commit()
       return True
     except psycopg2.Error, e:
       return e
-  
+
   def formatValue(self, value):
     """Format values for compatibility with database queries"""
     if value is True:

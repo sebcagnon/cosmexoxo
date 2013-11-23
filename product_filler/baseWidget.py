@@ -11,6 +11,8 @@ class BaseWidget(tk.Frame):
 
   def __init__(self, title, master=None):
     tk.Frame.__init__(self, master, border=2, relief=tk.GROOVE)
+    self.rowconfigure(0, weight=1)
+    self.columnconfigure(0, weight=1)
     self.grid(sticky=tk.N+tk.S+tk.E+tk.W)
     self.createWidgets(title)
     self.editState = self.HIDDEN
@@ -38,7 +40,7 @@ class BaseWidget(tk.Frame):
     self.showButton.config(state=tk.DISABLED)
     self.mainFrame.grid_forget()
     self.editState = self.HIDDEN
-    self.deleteTree()
+    self.deleteMainFrame()
 
   def showHide(self):
     """Show/Hide the whole widget"""
@@ -46,7 +48,9 @@ class BaseWidget(tk.Frame):
       self.mainFrame.grid_forget()
       self.editState = self.HIDDEN
     else:
-      self.mainFrame.grid(columnspan=2)
+      self.mainFrame.rowconfigure(0, weight=1)
+      self.mainFrame.columnconfigure(0, weight=1)
+      self.mainFrame.grid(columnspan=2, sticky=tk.W)
       self.editState = self.WAITING
 
   def createButtons(self):
