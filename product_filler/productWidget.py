@@ -113,21 +113,27 @@ class ProductWidget(BaseWidget):
       for brand in company.leaves:
         brandChoices.append((company.cargo['name']+'->'+brand.cargo['name'],
                        brand.cargo['id']))
-    print brandChoices
     return brandChoices
 
   def getCategoryChoices(self):
     """Gets all the categories with their ids"""
-    #TODO: retrieve from database and format correctly
-    categoryChoices = [("Face", 0),
-                       ("Face->Masks", 1),
-                       ("Face->Foundation", 2),
-                       ("Eye", 3),
-                       ("Eye->Mascara", 4),
-                       ("Skin", 5),
-                       ("Skin->Foundation", 6),
-                       ("Skin->Skin Care", 7)]
+    categoryTree = self.db.getCategoryTree()
+    categoryChoices = []
+    for cat in categoryTree.leaves:
+      categoryChoices += self.recursiveCategoryNames(cat)
     return categoryChoices
+
+  def recursiveCategoryNames(self, tree, prefix=''):
+    """Recursively builds the names of all the categories"""
+    if prefix:
+      name = prefix + '->' + tree.cargo['name']
+    else:
+      name = tree.cargo['name']
+    newLine = (name, tree.cargo['id'])
+    children = []
+    for leaf in tree.leaves:
+      children += self.recursiveCategoryNames(leaf, name)
+    return [newLine] + children
 
   def addVariant(self):
     """Adds a new variant frame to be edited"""
