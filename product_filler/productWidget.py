@@ -91,7 +91,13 @@ class ProductWidget(BaseWidget):
     print "Name: ", self.nameTextVar.get()
     print "IsActive: ", self.activeState.get()
     print "Brand: ", self.brandTextVar.get()
+    catNames = [name for name, id in self.chosenCategories]
+    print "Categories: ", ', '.join(catNames)
     print "Description: ", self.descText.get(1.0, tk.END).strip()
+    print "Variants:"
+    for variant in self.variants:
+      (name, price, weight) = variant.getInfo()
+      print "Name: ", name, "Price: ", price, "Weight: ", weight
 
   def getBrandChoices(self):
     """Gets all the brands/companies with their id"""
@@ -187,6 +193,10 @@ class VariantFrame(tk.Frame):
     self.deleteButton = tk.Button(self, image=image, text="Delete",
                        compound=tk.LEFT, command=deleteCommand)
     self.deleteButton.grid(row=0, column=6)
+
+  def getInfo(self):
+    """Returns (name, price, weight)"""
+    return (self.nameVar.get(), self.priceVar.get(), self.weightVar.get())
 
 
 class CategorySelection(tk.Toplevel):
