@@ -115,7 +115,7 @@ class DBConnection(object):
     if id:
       return "p.product_id = {i}".format(i=id)
     elif name:
-      return "p.product_name = {n}".format(n=name)
+      return "p.name = {n}".format(n=self.formatValue(name))
 
   # CATEGORIES
   def getCategoryTree(self, printing=0):
@@ -183,7 +183,7 @@ class DBConnection(object):
     return root
 
   # GENERAL TABLE MANIPULATIONS
-  def updateLineFromId(self, table, column, newValue, id):
+  def updateLineFromId(self, table, column, newValue, id, commit=True):
     """UPDATE table SET column=newValue WHERE 'table'_id=id"""
     val = self.formatValue(newValue)
     try:
@@ -191,12 +191,13 @@ class DBConnection(object):
         """UPDATE {table}
            SET {column}={value} WHERE {table}_id={id}
         """.format(table=table, column=column, value=val, id=id))
-      self.conn.commit()
+      if commit:
+        self.conn.commit()
       return True
     except psycopg2.Error, e:
       return e
 
-  def simpleInsert(self, table, headers, values):
+  def simpleInsert(self, table, headers, values, commit=True):
     """INSERT INTO table (headers) VALUES (values)"""
     inputNames = '('
     for header in headers:
@@ -212,23 +213,25 @@ class DBConnection(object):
         """INSERT INTO {table} {names}
         VALUES {vals};
         """.format(table=table, names=inputNames, vals=inputValues))
-      self.conn.commit()
+      if commit:
+        self.conn.commit()
       return True
     except psycopg2.Error, e:
       return e
 
-  def deleteLineFromId(self, table, id):
+  def deleteLineFromId(self, table, id, commit=True):
     """DELETE FROM table WHERE 'table'_id = id;"""
     try:
       self.cur.execute(
         """DELETE FROM {table}
         WHERE {table}_id = {id};""".format(table=table, id=id))
-      self.conn.commit()
+      if commit:
+        self.conn.commit()
       return True
     except psycopg2.Error, e:
       return e
 
-  def formatValue(self, value):
+  def formatValue(self, value, commit=True):
     """Format values for compatibility with database queries"""
     if value is True:
       return 'TRUE'

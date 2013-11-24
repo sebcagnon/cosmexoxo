@@ -1,6 +1,7 @@
 import os
 import dbConnect
 import Tkinter as tk
+import tkMessageBox
 from baseWidget import BaseWidget
 
 class ProductWidget(BaseWidget):
@@ -88,22 +89,84 @@ class ProductWidget(BaseWidget):
   
   def save(self):
     """Uploads the current product to the database"""
-    #TODO: save into database instead of printing
-    print "Name: ", self.nameTextVar.get()
-    print "IsActive: ", self.activeState.get()
+    name = self.nameTextVar.get().encode('utf-8')
+    active = self.activeState.get() == 1
+    desc = self.descText.get(1.0, tk.END).encode('utf-8').strip()
     chosenBrandID = -1
-    for name, id in self.brandChoices:
-      if name == self.brandTextVar.get():
+    brandText = self.brandTextVar.get().encode('utf-8')
+    for brandName, id in self.brandChoices:
+      if brandName == brandText:
         chosenBrandID = id
         break
-    print "Brand: ", self.brandTextVar.get(), chosenBrandID
-    catNames = [name + ' ' + str(id) for name, id in self.chosenCategories]
-    print "Categories: ", ', '.join(catNames)
-    print "Description: ", self.descText.get(1.0, tk.END).strip()
-    print "Variants:"
+    catIds = [id for _, id in self.chosenCategories]
+    # Check the product info
+    if not name:
+      errorText = "Name cannot be blank"
+      tkMessageBox.showerror('ProductWidgetError', errorText)
+      raise ProductWidgetError(errorText)
+    elif chosenBrandID == -1:
+      errorText = "Product must have a brand"
+      tkMessageBox.showerror('ProductWidgetError', errorText)
+      raise ProductWidgetError(errorText)
+    elif not catIds:
+      errorText = "Product must have at least one category"
+      tkMessageBox.showerror('ProductWidgetError', errorText)
+      raise ProductWidgetError(errorText)
+    elif not (self.variants and self.variants[0]):
+      if not tkMessageBox.askokcancel("Confirm Product update/save",
+          "Product has no variant\nConfirm for save/update"):
+        raise ProductWidgetError("Creation cancelled by user")
     for variant in self.variants:
-      (name, price, weight) = variant.getInfo()
-      print "Name: ", name, "Price: ", price, "Weight: ", weight
+      (vName, price, weight) = variant.getInfo()
+      if not (vName and price):
+        errorText = "All variants need a name and price"
+        tkMessageBox.showerror('ProductWidgetError', errorText)
+        raise ProductWidgetError(errorText)
+      try:
+        int(price)
+        int(weight)
+      except ValueError:
+        errorText = "Variant price and weight must be int"
+        tkMessageBox.showerror('ProductWidgetError', errorText)
+        raise ProductWidgetError(errorText)
+    # Save to Database, only commit after last one
+    # product
+    heads = ('name', 'description', 'active', 'brand_id')
+    vals = (name, desc, active, chosenBrandID)
+    res = self.db.simpleInsert('product', heads, vals, commit=False)
+    if not (res is True):
+      self.db.conn.rollback()
+      tkMessageBox.showerror('ProductWidgetError', res)
+      raise res
+    product = self.db.getProductBasics(name=name)
+    if not product:
+      self.db.conn.rollback()
+      errorText = "Could not fetch product info"
+      tkMessageBox.showerror('ProductWidgetError', errorText)
+      raise ProductWidgetError(errorText)
+    productId = product['product_id']
+    # product_category
+    heads = ('product_id', 'category_id')
+    for id in catIds:
+      vals = (productId, id)
+      res = self.db.simpleInsert('product_category', heads, vals, commit=False)
+      if not (res is True):
+        self.db.conn.rollback()
+        tkMessageBox.showerror('ProductWidgetError', res)
+        raise res
+    # variant
+    heads = ('name', 'price', 'weight', 'product_id')
+    for variant in self.variants:
+      (vName, price, weight) = variant.getInfo()
+      vals = (vName, int(price), int(weight), productId)
+      res = self.db.simpleInsert('variant', heads, vals, commit=False)
+      if not (res is True):
+        self.db.conn.rollback()
+        tkMessageBox.showerror('ProductWidgetError', res)
+        raise res
+    # Finally commit
+    self.db.conn.commit()
+    #TODO: add confirmation (and erase all or go to update product mode)
 
   def getBrandChoices(self):
     """Gets all the brands/companies with their id"""
@@ -201,7 +264,7 @@ class VariantFrame(tk.Frame):
     # Weight
     self.weightLabel = tk.Label(self, text="Weight (g): ")
     self.weightVar = tk.StringVar()
-    self.weightEntry = tk.Entry(self, textvariable=self.priceEntry)
+    self.weightEntry = tk.Entry(self, textvariable=self.weightVar)
     self.weightLabel.grid(row=0, column=4)
     self.weightEntry.grid(row=0, column=5)
     # Delete
@@ -211,7 +274,8 @@ class VariantFrame(tk.Frame):
 
   def getInfo(self):
     """Returns (name, price, weight)"""
-    return (self.nameVar.get(), self.priceVar.get(), self.weightVar.get())
+    return (self.nameVar.get().encode('utf-8'), self.priceVar.get(),
+                       self.weightVar.get())
 
 
 class CategorySelection(tk.Toplevel):
@@ -260,3 +324,13 @@ class CategoryChoice(tk.Frame):
     self.checked.set(state)
     self.check = tk.Checkbutton(self, text=name, variable=self.checked)
     self.check.grid(sticky=tk.W)
+
+
+class ProductWidgetError(BaseException):
+  """Error raised when trying to save/update a product"""
+  
+  def __init__(self, value):
+    self.value = value
+  
+  def __str__(self):
+    return repr(self.value)
