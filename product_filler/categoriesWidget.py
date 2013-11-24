@@ -88,9 +88,10 @@ class CategoryLabel(tk.Frame):
 
   def editCategory(self):
     """when the TextEditFrame.addButton is clicked"""
-    res = self.mainFrame.db.editCategory(self.newName.get(), self.id)
+    res = self.mainFrame.db.updateLineFromId('category', 'name', 
+                       self.newName.get(), self.id)
     if res==True:
-      self.mainFrame.updateTree()
+      self.mainFrame.updateMainFrame()
       self.mainFrame.editState = self.mainFrame.WAITING
     else:
       tkMessageBox.showerror('Edit Category Error',
@@ -122,9 +123,14 @@ class CategoryLabel(tk.Frame):
 
   def addCategory(self):
     """when the TextEditFrame.addButton is clicked"""
-    res = self.mainFrame.db.addCategory(self.catName.get(), self.id)
+    headers = ('name', 'parent_id')
+    if self.id == -1:
+      values = (self.catName.get(), None)
+    else:
+      values = (self.catName.get(), self.id)
+    res = self.mainFrame.db.simpleInsert('category', headers, values)
     if res==True:
-      self.mainFrame.updateTree()
+      self.mainFrame.updateMainFrame()
       self.mainFrame.editState = self.mainFrame.WAITING
     else:
       tkMessageBox.showerror('Add Category Error',
@@ -148,11 +154,11 @@ class CategoryLabel(tk.Frame):
             'it can create broken links\n' +
             'Confirm delete?',
             icon=tkMessageBox.WARNING):
-      res = self.mainFrame.db.deleteCategory(self.id)
+      res = self.mainFrame.db.deleteLineFromId('category', self.id)
       if res==True:
         tkMessageBox.showinfo('Delete Category Success',
             'Category was successfully deleted')
-        self.mainFrame.updateTree()
+        self.mainFrame.updateMainFrame()
       else:
         tkMessageBox.showerror('Delete Category Error',
             'Category could not be deleted\n' + str(res))

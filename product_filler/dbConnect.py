@@ -139,51 +139,6 @@ class DBConnection(object):
       root.printTree()
     return root
 
-  def deleteCategory(self, id):
-    """Delete the category using its id"""
-    try:
-      self.cur.execute(
-        """DELETE FROM category
-        WHERE category.category_id = {id}
-        """.format(id=id))
-      self.conn.commit()
-      return True
-    except psycopg2.Error, e:
-      return e
-
-  def addCategory(self, name, parentID):
-    """Add a new category child of company with the parentID.
-       Use parentID=-1 for root category"""
-    if not name:
-      return ValueError('addCategory: name cannot be empty')
-    if parentID==-1:
-      parent_id = 'NULL'
-    else:
-      parent_id = parentID
-    try:
-      self.cur.execute(
-        """INSERT INTO category (name, parent_id)
-        VALUES ('{cat_name}', {pid})
-        """.format(cat_name=name, pid=parent_id))
-      self.conn.commit()
-      return True
-    except psycopg2.Error, e:
-      return e
-
-  def editCategory(self, name, id):
-    """Edit the name of the category identified by id"""
-    if not name:
-      return ValueError('editCategory: name cannot be empty')
-    try:
-      self.cur.execute(
-        """UPDATE category
-        SET name='{cat_name}' WHERE category_id={cid}
-        """.format(cat_name=name, cid=id))
-      self.conn.commit()
-      return True
-    except psycopg2.Error, e:
-      return e
-
   def recTreeBuild(self, root, children, ans, treeElements):
     """Recursively find children of each node to build the Category tree"""
     if not children:
@@ -227,6 +182,7 @@ class DBConnection(object):
       root.printTree()
     return root
 
+  # GENERAL TABLE MANIPULATIONS
   def updateLineFromId(self, table, column, newValue, id):
     """UPDATE table SET column=newValue WHERE 'table'_id=id"""
     val = self.formatValue(newValue)
@@ -261,7 +217,7 @@ class DBConnection(object):
     except psycopg2.Error, e:
       return e
 
-  def simpleDelete(self, table, id):
+  def deleteLineFromId(self, table, id):
     """DELETE FROM table WHERE 'table'_id = id;"""
     try:
       self.cur.execute(
@@ -278,6 +234,8 @@ class DBConnection(object):
       return 'TRUE'
     elif value is False:
       return 'FALSE'
+    elif value is None:
+      return 'NULL'
     elif isinstance(value, (int, float, long)):
       return value
     elif isinstance(value, str):

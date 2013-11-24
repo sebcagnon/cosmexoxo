@@ -102,7 +102,7 @@ class BrandLabel(tk.Frame):
                                          newValue=(not self.navbar),
                                          id=self.id)
     if res==True:
-      self.mainFrame.updateTree()
+      self.mainFrame.updateMainFrame()
     else:
       tkMessageBox.showerror('Edit Company/Brand Error',
             'Navbar setting could not be edited\n' + str(res))
@@ -138,7 +138,7 @@ class BrandLabel(tk.Frame):
                                          newValue=value,
                                          id=self.id)
     if res==True:
-      self.mainFrame.updateTree()
+      self.mainFrame.updateMainFrame()
       self.mainFrame.editState = self.mainFrame.WAITING
     else:
       tkMessageBox.showerror('Edit Company/Brand Error',
@@ -183,7 +183,7 @@ class BrandLabel(tk.Frame):
     res = self.mainFrame.db.simpleInsert(table=tab, headers=headers,
                                          values=values)
     if res == True:
-      self.mainFrame.updateTree()
+      self.mainFrame.updateMainFrame()
       self.mainFrame.editState = self.mainFrame.WAITING
     else:
       tkMessageBox.showerror('Add Brand/Company Error',
@@ -207,11 +207,11 @@ class BrandLabel(tk.Frame):
             'it can create broken links\n' +
             'Confirm delete?',
             icon=tkMessageBox.WARNING):
-      res = self.mainFrame.db.simpleDelete(table=self.type, id=self.id)
+      res = self.mainFrame.db.deleteLineFromId(table=self.type, id=self.id)
       if res==True:
         tkMessageBox.showinfo('Delete ' + self.type + ' Success',
             '' + self.type + ' was successfully deleted')
-        self.mainFrame.updateTree()
+        self.mainFrame.updateMainFrame()
       else:
         tkMessageBox.showerror('Delete ' + self.type + ' Error',
             '' + self.type + ' could not be deleted\n' + str(res))
