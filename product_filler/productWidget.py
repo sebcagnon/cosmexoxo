@@ -97,7 +97,7 @@ class ProductWidget(BaseWidget):
         chosenBrandID = id
         break
     print "Brand: ", self.brandTextVar.get(), chosenBrandID
-    catNames = [name for name, id in self.chosenCategories]
+    catNames = [name + ' ' + str(id) for name, id in self.chosenCategories]
     print "Categories: ", ', '.join(catNames)
     print "Description: ", self.descText.get(1.0, tk.END).strip()
     print "Variants:"
@@ -107,10 +107,13 @@ class ProductWidget(BaseWidget):
 
   def getBrandChoices(self):
     """Gets all the brands/companies with their id"""
-    #TODO: retrieves from database and format correctly
-    brandChoices = [("Shiseido->Elixir", 1),
-                    ("L'Oreal->Maybelline", 2),
-                    ("L'Oreal->Nivea", 3)]
+    brandTree = self.db.getBrandTree()
+    brandChoices = []
+    for company in brandTree.leaves:
+      for brand in company.leaves:
+        brandChoices.append((company.cargo['name']+'->'+brand.cargo['name'],
+                       brand.cargo['id']))
+    print brandChoices
     return brandChoices
 
   def getCategoryChoices(self):
