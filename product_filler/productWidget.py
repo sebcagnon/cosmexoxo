@@ -41,10 +41,11 @@ class ProductWidget(BaseWidget):
     # Brand
     self.brandLabel = tk.Label(self.productFrame, text="Brand: ")
     self.brandChoices = self.getBrandChoices()
+    brandNames = [name for name,id in self.brandChoices]
     self.brandTextVar = tk.StringVar()
-    self.brandTextVar.set('')
+    self.brandTextVar.set('Choose brand...')
     self.brandMenu = tk.OptionMenu(self.productFrame, self.brandTextVar, 
-                       *self.brandChoices)
+                       *brandNames)
     self.brandLabel.grid(row=2, column=0, sticky=tk.N+tk.W)
     self.brandMenu.grid(row=2, column=1, sticky=tk.W+tk.N)
     # Categories
@@ -87,10 +88,15 @@ class ProductWidget(BaseWidget):
   
   def save(self):
     """Uploads the current product to the database"""
-    #TODO: implementation
+    #TODO: save into database instead of printing
     print "Name: ", self.nameTextVar.get()
     print "IsActive: ", self.activeState.get()
-    print "Brand: ", self.brandTextVar.get()
+    chosenBrandID = -1
+    for name, id in self.brandChoices:
+      if name == self.brandTextVar.get():
+        chosenBrandID = id
+        break
+    print "Brand: ", self.brandTextVar.get(), chosenBrandID
     catNames = [name for name, id in self.chosenCategories]
     print "Categories: ", ', '.join(catNames)
     print "Description: ", self.descText.get(1.0, tk.END).strip()
@@ -101,15 +107,15 @@ class ProductWidget(BaseWidget):
 
   def getBrandChoices(self):
     """Gets all the brands/companies with their id"""
-    #TODO: implementation
-    brandChoices = ["Shiseido->Elixir",
-                    "L'Oreal->Maybelline".encode('utf-8'),
-                    "L'Oreal->Nivea".encode('utf-8')]
+    #TODO: retrieves from database and format correctly
+    brandChoices = [("Shiseido->Elixir", 1),
+                    ("L'Oreal->Maybelline", 2),
+                    ("L'Oreal->Nivea", 3)]
     return brandChoices
 
   def getCategoryChoices(self):
     """Gets all the categories with their ids"""
-    #TODO: implementation
+    #TODO: retrieve from database and format correctly
     categoryChoices = [("Face", 0),
                        ("Face->Masks", 1),
                        ("Face->Foundation", 2),
