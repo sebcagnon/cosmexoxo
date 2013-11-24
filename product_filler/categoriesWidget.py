@@ -89,7 +89,7 @@ class CategoryLabel(tk.Frame):
   def editCategory(self):
     """when the TextEditFrame.addButton is clicked"""
     res = self.mainFrame.db.updateLineFromId('category', 'name', 
-                       self.newName.get(), self.id)
+                       self.newName.get().encode('utf-8'), self.id)
     if res==True:
       self.mainFrame.updateMainFrame()
       self.mainFrame.editState = self.mainFrame.WAITING
@@ -125,9 +125,9 @@ class CategoryLabel(tk.Frame):
     """when the TextEditFrame.addButton is clicked"""
     headers = ('name', 'parent_id')
     if self.id == -1:
-      values = (self.catName.get(), None)
+      values = (self.catName.get().encode('utf-8'), None)
     else:
-      values = (self.catName.get(), self.id)
+      values = (self.catName.get().encode('utf-8'), self.id)
     res = self.mainFrame.db.simpleInsert('category', headers, values)
     if res==True:
       self.mainFrame.updateMainFrame()

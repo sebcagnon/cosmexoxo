@@ -68,7 +68,7 @@ class BaseWidget(tk.Frame):
       child.destroy()
 
 
-class MainWidgetException:
+class MainWidgetException(BaseException):
   """Raised when the subclass of TreeWidget is not implemented correctly"""
 
   def __init__(self, value):
