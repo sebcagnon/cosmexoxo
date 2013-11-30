@@ -7,6 +7,11 @@ from baseWidget import BaseWidget
 class ProductWidget(BaseWidget):
   """Widget for editing products"""
 
+  def activate(self, db, bucket):
+    """Enables show/hide, but adds bucket connection to widget"""
+    self.bucket = bucket
+    BaseWidget.activate(self, db)
+
   def createButtons(self):
     """Creates the edition fields for the product"""
     # Images
