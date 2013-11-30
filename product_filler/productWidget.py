@@ -3,6 +3,7 @@ import dbConnect
 import Tkinter as tk
 import tkMessageBox
 from baseWidget import BaseWidget
+import ImageTk
 
 class ProductWidget(BaseWidget):
   """Widget for editing products"""
@@ -263,13 +264,13 @@ class VariantFrame(tk.Frame):
     # Price
     self.priceLabel = tk.Label(self, text="Price (US$): ")
     self.priceVar = tk.StringVar()
-    self.priceEntry = tk.Entry(self, textvariable=self.priceVar)
+    self.priceEntry = tk.Entry(self, textvariable=self.priceVar, width=8)
     self.priceLabel.grid(row=0, column=2)
     self.priceEntry.grid(row=0, column=3)
     # Weight
     self.weightLabel = tk.Label(self, text="Weight (g): ")
     self.weightVar = tk.StringVar()
-    self.weightEntry = tk.Entry(self, textvariable=self.weightVar)
+    self.weightEntry = tk.Entry(self, textvariable=self.weightVar, width=8)
     self.weightLabel.grid(row=0, column=4)
     self.weightEntry.grid(row=0, column=5)
     # Delete
