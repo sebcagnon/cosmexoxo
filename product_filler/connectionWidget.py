@@ -1,6 +1,7 @@
 import Tkinter as tk
 from tkFileDialog import askopenfilename
 import dbConnect
+import json
 
 class ConnectionWidget(tk.Frame):
   """Handles connection to database server"""
@@ -8,6 +9,7 @@ class ConnectionWidget(tk.Frame):
     tk.Frame.__init__(self, master, border=2, relief=tk.GROOVE)
     self.grid(sticky=tk.N+tk.E+tk.W)
     self.createWidgets()
+    self.connectionKeys = {}
 
   def createWidgets(self):
     """ select db connection file and connect button """
@@ -40,7 +42,10 @@ class ConnectionWidget(tk.Frame):
     if self.connectionStatus.get() != 'Connected':
       self.connectionStatus.set('Connecting...')
       try:
-        self.db = dbConnect.DBConnection(self.dbConfigFileName.get())
+        jsonFile = open(self.dbConfigFileName.get().encode('utf-8'), 'r')
+        self.connectionKeys = json.load(jsonFile)
+        jsonFile.close()
+        self.db = dbConnect.DBConnection(self.connectionKeys['database'])
       except:
         self.connectionStatus.set('ConnectionFailed')
         raise

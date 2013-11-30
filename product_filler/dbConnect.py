@@ -1,6 +1,5 @@
 import psycopg2
 from psycopg2.extensions import adapt
-import json
 import tree
 
 class DBConnection(object):
@@ -11,11 +10,8 @@ class DBConnection(object):
     self.connect(dataBaseConfig)
     self.cur.execute("""SET search_path TO product_info, "$user", public;""")
 
-  def connect(self, file):
-    """ Connects to a database using a json file for the parameters """
-    jsonFile = open(file, 'r')
-    params = json.load(jsonFile)
-    jsonFile.close()
+  def connect(self, params):
+    """ Connects to a database using a dictionary for the parameters """
     self.conn = psycopg2.connect(**params)
     self.cur = self.conn.cursor()
 
