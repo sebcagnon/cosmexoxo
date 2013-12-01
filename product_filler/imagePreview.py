@@ -24,4 +24,7 @@ class ImagePreview(tk.Label):
     self.previewPhoto = ImageTk.PhotoImage(self.previewImage)
     self.configure(image=self.previewPhoto)
     self.toolTip.configure(image=self.photo)
-    
+
+  def getImageFileName(self):
+    """Returns the fileName of the current image"""
+    return self.fileName

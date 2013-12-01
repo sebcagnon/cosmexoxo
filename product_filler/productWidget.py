@@ -195,6 +195,19 @@ class ProductWidget(BaseWidget):
         raise res
     # Finally commit
     self.db.conn.commit()
+    # Upload Images to S3
+    prodImgFileName = self.prodPicPreview.getImageFileName()
+    if prodImgFileName != self.placeholderPath:
+      prodImgKey = self.bucket.new_key(str(productId)+'_'+name)
+      prodImgKey.set_contents_from_filename(prodImgFileName)
+      prodImgKey.set_metadata('alt', 'image of ' + name)
+      prodImgKey.set_metadata('title', name)
+    varImgFileName = self.varPicPreview.getImageFileName()
+    if varImgFileName != self.placeholderPath:
+      varImgKey = self.bucket.new_key(str(productId)+'_'+name+'_'+'variants')
+      varImgKey.set_contents_from_filename(varImgFileName)
+      varImgKey.set_metadata('alt', 'different variants of ' + name)
+      varImgKey.set_metadata('title', 'variants of ' + name)
     #TODO: add confirmation (and erase all or go to update product mode)
 
   def getBrandChoices(self):
