@@ -23,20 +23,19 @@ class ConnectionWidget(tk.Frame):
 
     # file selection
     self.browseButton = tk.Button(self, text='Browse...',
-      command=self.dataConfigBrowser)
-    self.fileEntry = tk.Entry(self,
+      command=self.dataConfigBrowser, width=12)
+    self.fileEntry = tk.Entry(self, width=30,
       textvariable=self.dbConfigFileName)
     self.browseButton.grid(row=0, column=0, columnspan=1)
-    self.fileEntry.grid(row=0, column=1, columnspan=3)
+    self.fileEntry.grid(row=0, column=1, columnspan=3, padx=5)
 
     # connection
-    self.connectButton = tk.Button(self,
-      textvariable=self.connectButtonText,
-      command=self.connectToDatabase)
+    self.connectButton = tk.Button(self, textvariable=self.connectButtonText,
+      command=self.connectToDatabase, width=12)
     self.connectStatusLabel = tk.Label(self,
       textvariable=self.connectionStatus)
     self.connectButton.grid(row=1, column=0)
-    self.connectStatusLabel.grid(row=1, column=1)
+    self.connectStatusLabel.grid(row=1, column=1, sticky=tk.W, padx=5)
 
   def connectToDatabase(self):
     """Handler of the 'connect' button, connects or disconnects from db"""
