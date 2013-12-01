@@ -2,7 +2,9 @@ import os
 import dbConnect
 import Tkinter as tk
 import tkMessageBox
+from tkFileDialog import askopenfilename
 from baseWidget import BaseWidget
+from imagePreview import ImagePreview
 import ImageTk
 
 class ProductWidget(BaseWidget):
@@ -27,6 +29,8 @@ class ProductWidget(BaseWidget):
     cancelImagePath = os.path.join(self.master.path, "resources",
                        "cross_icon.gif")
     self.crossImage = tk.PhotoImage(file=cancelImagePath)
+    self.placeholderPath = os.path.join(self.master.path, 'resources',
+                       'placeholder.png')
     # Products
     self.productFrame = tk.Frame(self.mainFrame)
     self.productFrame.grid(sticky=tk.N+tk.W)
@@ -77,6 +81,25 @@ class ProductWidget(BaseWidget):
     self.descLabel.config(justify=tk.LEFT)
     self.descText.grid(row=1, column=2, rowspan=10, columnspan=7,
                        sticky=tk.N+tk.S+tk.W)
+    # Pictures
+    self.picturesFrame = tk.Frame(self.mainFrame)
+    self.picturesFrame.grid(columnspan=2, sticky=tk.N+tk.W)
+    self.prodPicLabel = tk.Label(self.picturesFrame, text="Product Picture:")
+    self.prodPicButton = tk.Button(self.picturesFrame, text="Choose Image...",
+                       command=self.loadProdImage)
+    self.prodPicPreview = ImagePreview(size=40, master=self.picturesFrame,
+                       imageFileName=self.placeholderPath)
+    self.prodPicLabel.grid(row=0, column=0, sticky=tk.W)
+    self.prodPicButton.grid(row=0, column=1, sticky=tk.W)
+    self.prodPicPreview.grid(row=0, column=2, sticky=tk.W)
+    self.varPicLabel = tk.Label(self.picturesFrame, text="Variants Picture:")
+    self.varPicButton = tk.Button(self.picturesFrame, text="Choose Image...",
+                       command=self.loadVarImage)
+    self.varPicPreview = ImagePreview(size=40, master=self.picturesFrame,
+                       imageFileName=self.placeholderPath)
+    self.varPicLabel.grid(row=0, column=3, sticky=tk.W)
+    self.varPicButton.grid(row=0, column=4, sticky=tk.W)
+    self.varPicPreview.grid(row=0, column=5, sticky=tk.W)
     # Variants
     self.variantFrame = tk.Frame(self.mainFrame)
     self.variantFrame.grid(columnspan=2, sticky=tk.N+tk.W)
@@ -247,6 +270,14 @@ class ProductWidget(BaseWidget):
     """Destroys the window without updating anything"""
     self.selectionWindow.grab_release()
     self.selectionWindow.destroy()
+
+  def loadProdImage(self):
+    """Loads the product image into the ImagePreview widget"""
+    self.prodPicPreview.setImageFromFileName(askopenfilename())
+
+  def loadVarImage(self):
+    """Loads the variant image into the ImagePreview widget"""
+    self.varPicPreview.setImageFromFileName(askopenfilename())
 
 
 class VariantFrame(tk.Frame):
