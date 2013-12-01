@@ -1,5 +1,6 @@
 import Tkinter as tk
 import ImageTk
+from toolTip import ToolTip
 
 class ImagePreview(tk.Label):
   """A class for displaying small previews of an image and the full size on
@@ -9,6 +10,7 @@ class ImagePreview(tk.Label):
     """size in pixel of the squared preview"""
     tk.Label.__init__(self, master)
     self.size = [size, size]
+    self.toolTip = ToolTip(self, follow_mouse=0, delay=500)
     if imageFileName:
       self.setImageFromFileName(imageFileName)
 
@@ -21,3 +23,5 @@ class ImagePreview(tk.Label):
     self.previewImage.thumbnail(self.size, ImageTk.Image.ANTIALIAS)
     self.previewPhoto = ImageTk.PhotoImage(self.previewImage)
     self.configure(image=self.previewPhoto)
+    self.toolTip.configure(image=self.photo)
+    
