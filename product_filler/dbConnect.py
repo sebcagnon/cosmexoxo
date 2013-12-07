@@ -113,6 +113,17 @@ class DBConnection(object):
     elif name:
       return "p.name = {n}".format(n=self.formatValue(name))
 
+  def getAllProductsWithBrands(self):
+    """Returns a list of all the products with brand/company info
+       row format: [product_id, product.name, brand.name, company.name]"""
+    self.cur.execute(
+      """
+      SELECT p.product_id, p.name, b.name, c.name
+      FROM product p
+      LEFT JOIN brand b ON p.brand_id = b.brand_id
+      LEFT JOIN company c ON b.company_id = c.company_id;""")
+    return self.cur.fetchall()
+
   # CATEGORIES
   def getCategoryTree(self, printing=0):
     """Returns a nested dict representing the categories tree,

@@ -13,6 +13,7 @@ class ProductWidget(BaseWidget):
   def activate(self, db, bucket):
     """Enables show/hide, but adds bucket connection to widget"""
     self.bucket = bucket
+    self.editionMode = 'new'
     BaseWidget.activate(self, db)
 
   def createButtons(self):
@@ -31,9 +32,21 @@ class ProductWidget(BaseWidget):
     self.crossImage = tk.PhotoImage(file=cancelImagePath)
     self.placeholderPath = os.path.join(self.master.path, 'resources',
                        'placeholder.png')
+    downImagePath = os.path.join(self.master.path, "resources", "down_icon.gif")
+    self.downImage = tk.PhotoImage(file=downImagePath)
+    # Load and New buttons
+    self.buttonFrame = tk.Frame(self.mainFrame)
+    self.buttonFrame.grid(sticky=tk.N+tk.W)
+    self.newButton = tk.Button(self.buttonFrame, text="New ", command=self.new,
+                       image=self.plusImage, compound=tk.LEFT)
+    self.loadButton = tk.Button(self.buttonFrame, text="Load... ",
+                       command=self.openProductSelection, image=self.downImage,
+                       compound=tk.LEFT)
+    self.newButton.grid(row=0, column=0, sticky=tk.N+tk.W)
+    self.loadButton.grid(row=0, column=1, sticky=tk.N+tk.W)
     # Products
     self.productFrame = tk.Frame(self.mainFrame)
-    self.productFrame.grid(sticky=tk.N+tk.W)
+    self.productFrame.grid(columnspan=2, sticky=tk.N+tk.W)
     # Product Name
     self.nameLabel = tk.Label(self.productFrame, text="Name: ")
     self.nameTextVar = tk.StringVar()
@@ -62,7 +75,7 @@ class ProductWidget(BaseWidget):
     # Categories
     self.categoryLabel = tk.Label(self.productFrame, text="Categories: ")
     self.categoryButton = tk.Button(self.productFrame, text="Select...",
-                       command=self.openSelection)
+                       command=self.openCategorySelection)
     self.categoryList = self.getCategoryChoices()
     self.chosenCategories = []
     self.categoryText = tk.StringVar()
@@ -83,7 +96,7 @@ class ProductWidget(BaseWidget):
                        sticky=tk.N+tk.S+tk.W)
     # Pictures
     self.picturesFrame = tk.Frame(self.mainFrame)
-    self.picturesFrame.grid(columnspan=2, sticky=tk.N+tk.W)
+    self.picturesFrame.grid(columnspan=3, sticky=tk.N+tk.W)
     self.prodPicLabel = tk.Label(self.picturesFrame, text="Product Picture:")
     self.prodPicButton = tk.Button(self.picturesFrame, text="Choose Image...",
                        command=self.loadProdImage)
@@ -102,62 +115,29 @@ class ProductWidget(BaseWidget):
     self.varPicPreview.grid(row=0, column=5, sticky=tk.W)
     # Variants
     self.variantFrame = tk.Frame(self.mainFrame)
-    self.variantFrame.grid(columnspan=2, sticky=tk.N+tk.W)
+    self.variantFrame.grid(columnspan=3, sticky=tk.N+tk.W)
     self.variantTitle = tk.Label(self.variantFrame, text="VARIANTS")
     self.variants = []
     self.addVariantButton = tk.Button(self.variantFrame, image=self.plusImage,
-                       text="Add Variant", compound="left",
+                       text="Add Variant ", compound="left",
                        command=self.addVariant)
     self.variantTitle.grid(row=12, column=0, sticky=tk.N+tk.W)
     self.addVariantButton.grid(row=13, column=0, columnspan=2, sticky=tk.N+tk.W)
     self.id = 0
     # Save
-    self.saveButton = tk.Button(self.variantFrame, command=self.save,
-                       text="Save", image=self.checkImage, compound="left")
-    self.saveButton.grid(sticky=tk.W+tk.S)
+    if self.editionMode == 'new':
+      self.saveButton = tk.Button(self.variantFrame, command=self.save,
+                         text="Save ", image=self.checkImage, compound="left")
+      self.saveButton.grid(sticky=tk.W+tk.S)
+    elif self.editionMode == 'edit':
+      self.saveButton = tk.Button(self.variantFrame, command=self.update,
+                         text="Update ", image=self.checkImage, compound="left")
+      self.saveButton.grid(sticky=tk.W+tk.S)
   
   def save(self):
     """Uploads the current product to the database"""
-    name = self.nameTextVar.get().encode('utf-8')
-    active = self.activeState.get() == 1
-    desc = self.descText.get(1.0, tk.END).encode('utf-8').strip()
-    chosenBrandID = -1
-    brandText = self.brandTextVar.get().encode('utf-8')
-    for brandName, id in self.brandChoices:
-      if brandName == brandText:
-        chosenBrandID = id
-        break
-    catIds = [id for _, id in self.chosenCategories]
-    # Check the product info
-    if not name:
-      errorText = "Name cannot be blank"
-      tkMessageBox.showerror('ProductWidgetError', errorText)
-      raise ProductWidgetError(errorText)
-    elif chosenBrandID == -1:
-      errorText = "Product must have a brand"
-      tkMessageBox.showerror('ProductWidgetError', errorText)
-      raise ProductWidgetError(errorText)
-    elif not catIds:
-      errorText = "Product must have at least one category"
-      tkMessageBox.showerror('ProductWidgetError', errorText)
-      raise ProductWidgetError(errorText)
-    elif not (self.variants and self.variants[0]):
-      if not tkMessageBox.askokcancel("Confirm Product update/save",
-          "Product has no variant\nConfirm for save/update"):
-        raise ProductWidgetError("Creation cancelled by user")
-    for variant in self.variants:
-      (vName, price, weight) = variant.getInfo()
-      if not (vName and price):
-        errorText = "All variants need a name and price"
-        tkMessageBox.showerror('ProductWidgetError', errorText)
-        raise ProductWidgetError(errorText)
-      try:
-        int(price)
-        int(weight)
-      except ValueError:
-        errorText = "Variant price and weight must be int"
-        tkMessageBox.showerror('ProductWidgetError', errorText)
-        raise ProductWidgetError(errorText)
+    (name, active, desc, chosenBrandID, catIds) = self.getFromInfo()
+    self.checkValidity(name, chosenBrandID, catIds)
     # Save to Database, only commit after last one
     # product
     heads = ('name', 'description', 'active', 'brand_id')
@@ -210,6 +190,52 @@ class ProductWidget(BaseWidget):
       varImgKey.set_metadata('title', 'variants of ' + name)
     #TODO: add confirmation (and erase all or go to update product mode)
 
+  def getFormInfo(self):
+    """Retrieves all the information from the different entries and checkboxes"""
+    name = self.nameTextVar.get().encode('utf-8')
+    active = self.activeState.get() == 1
+    desc = self.descText.get(1.0, tk.END).encode('utf-8').strip()
+    chosenBrandID = -1
+    brandText = self.brandTextVar.get().encode('utf-8')
+    for brandName, id in self.brandChoices:
+      if brandName == brandText:
+        chosenBrandID = id
+        break
+    catIds = [id for _, id in self.chosenCategories]
+    return (name, active, desc, chosenBrandID, catIds)
+
+  def checkValidity(self, name, chosenBrandID, catIds):
+    """Checks if all the inputs are filled/valid"""
+    if not name:
+      errorText = "Name cannot be blank"
+      tkMessageBox.showerror('ProductWidgetError', errorText)
+      raise ProductWidgetError(errorText)
+    elif chosenBrandID == -1:
+      errorText = "Product must have a brand"
+      tkMessageBox.showerror('ProductWidgetError', errorText)
+      raise ProductWidgetError(errorText)
+    elif not catIds:
+      errorText = "Product must have at least one category"
+      tkMessageBox.showerror('ProductWidgetError', errorText)
+      raise ProductWidgetError(errorText)
+    elif not (self.variants and self.variants[0]):
+      if not tkMessageBox.askokcancel("Confirm Product update/save",
+          "Product has no variant\nConfirm for save/update"):
+        raise ProductWidgetError("Creation cancelled by user")
+    for variant in self.variants:
+      (vName, price, weight) = variant.getInfo()
+      if not (vName and price):
+        errorText = "All variants need a name and price"
+        tkMessageBox.showerror('ProductWidgetError', errorText)
+        raise ProductWidgetError(errorText)
+      try:
+        int(price)
+        int(weight)
+      except ValueError:
+        errorText = "Variant price and weight must be int"
+        tkMessageBox.showerror('ProductWidgetError', errorText)
+        raise ProductWidgetError(errorText)
+
   def getBrandChoices(self):
     """Gets all the brands/companies with their id"""
     brandTree = self.db.getBrandTree()
@@ -240,12 +266,17 @@ class ProductWidget(BaseWidget):
       children += self.recursiveCategoryNames(leaf, name)
     return [newLine] + children
 
-  def addVariant(self):
+  def addVariant(self, variantData=None):
     """Adds a new variant frame to be edited"""
     newVariant = VariantFrame(self.id, self.removeVariant(self.id),
                        self.variantFrame, self.minusImage)
     self.id += 1
     self.variants.append(newVariant)
+    if variantData:
+      id, info = variantData
+      newVariant.set(id=id, name=info['variant_name'],
+                       weight=str(info['variant_weight']),
+                       price=str(info['variant_price']))
     self.saveButton.grid_forget()
     newVariant.grid(columnspan=10)
     self.saveButton.grid(sticky=tk.W+tk.S)
@@ -261,7 +292,7 @@ class ProductWidget(BaseWidget):
           break
     return removeMe
 
-  def openSelection(self):
+  def openCategorySelection(self):
     """Opens and keeps focus on category selection window"""
     self.selectionWindow = CategorySelection(self.categorySelect,
                        self.categoryCancel, self.categoryList,
@@ -292,6 +323,64 @@ class ProductWidget(BaseWidget):
     """Loads the variant image into the ImagePreview widget"""
     self.varPicPreview.setImageFromFileName(askopenfilename())
 
+  def new(self):
+    """All texts become blank, and saving will create a new product in db"""
+    title = "New Product"
+    message = "Starting a new product will\nerase unsaved modifications"
+    if tkMessageBox.askokcancel(title, message, icon=tkMessageBox.WARNING):
+      self.editionMode = 'new'
+      self.updateMainFrame()
+
+  def openProductSelection(self):
+    """Opens product choosing window"""
+    title = "New Product"
+    message = "Loading a product will\nerase unsaved modifications"
+    if tkMessageBox.askokcancel(title, message, icon=tkMessageBox.WARNING):
+      productList = self.db.getAllProductsWithBrands()
+      self.productSelection = ProductSelection(self.productSelect,
+                         self.productCancel, productList,
+                         selectImage=self.downImage, cancelImage=self.crossImage)
+      self.productSelection.title("Product Selection")
+      self.productSelection.grab_set()
+
+  def productSelect(self, productID):
+    """Gets all the product info and pre-fills all the entries"""
+    productInfo = self.db.getProductInfoByID(productID)    
+    self.currentProduct = productInfo
+    self.editionMode = 'edit'
+    self.updateMainFrame()
+    self.nameTextVar.set(productInfo['product_name'])
+    self.activeState.set(productInfo['product_active'])
+    for name, id in self.brandChoices:
+      if id==productInfo['brand_id']:
+        self.brandTextVar.set(name)
+        break
+    for name, id in self.categoryList:
+      if id in productInfo['category_ids']:
+        self.chosenCategories.append((name, id))
+    catNames = [name for name, id in self.chosenCategories]
+    self.categoryText.set('\n'.join(catNames))
+    self.descText.insert(1.0, productInfo['product_description'])
+    for variantData in productInfo['variants'].items():
+      self.addVariant(variantData=variantData)
+    #images
+    keyName = str(productID)+'_'+productInfo['product_name']
+    prodImgKey = self.bucket.get_key(keyName)
+    prodImgPath = os.path.join(self.master.path, 'resources', 'product.jpg')
+    prodImgKey.get_contents_to_filename(prodImgPath)
+    self.prodPicPreview.setImageFromFileName(prodImgPath)
+    varImgKey = self.bucket.get_key(keyName+'_'+'variants')
+    varImgPath = os.path.join(os.getenv('LOCALAPPDATA'), 'cosmexo',
+                       'variant.jpg')
+    varImgKey.get_contents_to_filename(varImgPath)
+    self.varPicPreview.setImageFromFileName(varImgPath)
+    self.productSelection.grab_release()
+    self.productSelection.destroy()
+
+  def productCancel(self):
+    self.productSelection.grab_release()
+    self.productSelection.destroy()
+
 
 class VariantFrame(tk.Frame):
   """A line that enables variant editing"""
@@ -299,6 +388,7 @@ class VariantFrame(tk.Frame):
   def __init__(self, id, deleteCommand, master=None, image=None):
     tk.Frame.__init__(self, master)
     self.id=id
+    self.variantId = None
     # Name
     self.nameLabel = tk.Label(self, text="Name: ")
     self.nameVar = tk.StringVar()
@@ -326,6 +416,13 @@ class VariantFrame(tk.Frame):
     """Returns (name, price, weight)"""
     return (self.nameVar.get().encode('utf-8'), self.priceVar.get(),
                        self.weightVar.get())
+
+  def set(self, name='', price='', weight='', id=None):
+    """sets the entries to a specific value"""
+    self.nameVar.set(name)
+    self.priceVar.set(price)
+    self.weightVar.set(weight)
+    self.variantId = id
 
 
 class CategorySelection(tk.Toplevel):
@@ -374,6 +471,38 @@ class CategoryChoice(tk.Frame):
     self.checked.set(state)
     self.check = tk.Checkbutton(self, text=name, variable=self.checked)
     self.check.grid(sticky=tk.W)
+
+
+class ProductSelection(tk.Toplevel):
+  """A pop-up window that allows to select a product to edit"""
+  
+  def __init__(self, onSelect, onCancel, productList, selectImage=None,
+                       cancelImage=None):
+    tk.Toplevel.__init__(self)
+    self.onSelect = onSelect
+    self.selection = tk.IntVar()
+    self.selection.set(-1)
+    for p in productList:
+      t = ', '.join(p[1:])
+      button = tk.Radiobutton(self, text=t, variable=self.selection, value=p[0],
+                       indicatoron=0)
+      button.grid(sticky=tk.N+tk.W)
+    self.buttonFrame = tk.Frame(self)
+    self.buttonFrame.grid()
+    self.selectButton = tk.Button(self.buttonFrame, text="Select ",
+                       image=selectImage, compound=tk.LEFT, command=self.select)
+    self.cancelButton = tk.Button(self.buttonFrame, text="Cancel ",
+                       image=cancelImage, compound=tk.LEFT, command=onCancel)
+    self.selectButton.grid(row=0, column=0)
+    self.cancelButton.grid(row=0, column=1)
+
+  def select(self):
+    """Callback of select button, calls ProductWidget method with product id"""
+    if self.selection.get() == -1:
+      message = 'You need to select\nat least one product'
+      tkMessageBox.showerror('Product Choice Error', message)
+    else:
+      self.onSelect(self.selection.get())
 
 
 class ProductWidgetError(BaseException):
