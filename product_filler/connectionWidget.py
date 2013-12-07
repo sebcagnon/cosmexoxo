@@ -16,6 +16,9 @@ class ConnectionWidget(tk.Frame):
     """ select db connection file and connect button """
     # text variables
     self.dbConfigFileName = tk.StringVar()
+    filePath = self.master.config.get(u'key_file_path')
+    if filePath:
+      self.dbConfigFileName.set(filePath.decode('utf-8'))
     self.connectionStatus = tk.StringVar()
     self.connectionStatus.set('Not Connected')
     self.connectButtonText = tk.StringVar()
@@ -41,8 +44,9 @@ class ConnectionWidget(tk.Frame):
     """Handler of the 'connect' button, connects or disconnects from db"""
     if self.connectionStatus.get() != 'Connected':
       self.connectionStatus.set('Connecting...')
+      filePath = self.dbConfigFileName.get().encode('utf-8')
       try:
-        jsonFile = open(self.dbConfigFileName.get().encode('utf-8'), 'r')
+        jsonFile = open(filePath, 'r')
         self.connectionKeys = json.load(jsonFile)
         jsonFile.close()
         self.db = dbConnect.DBConnection(self.connectionKeys['database'])
@@ -51,11 +55,11 @@ class ConnectionWidget(tk.Frame):
       except:
         self.connectionStatus.set('ConnectionFailed')
         raise
-      else:
-        if self.master:
-          self.master.event_generate('<<Connection>>')
-        self.connectionStatus.set('Connected')
-        self.connectButtonText.set('Disconnect')
+      if self.master:
+        self.master.event_generate('<<Connection>>')
+      self.connectionStatus.set('Connected')
+      self.connectButtonText.set('Disconnect')
+      self.master.config.set('key_file_path', filePath)
     elif self.connectionStatus.get() == 'Connected':
       if self.master:
         self.master.event_generate('<<Disconnection>>')

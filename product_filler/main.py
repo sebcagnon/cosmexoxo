@@ -4,19 +4,20 @@ import sys
 import os
 import Tkinter as tk
 from tkFileDialog import askopenfilename
+import configuration
 import dbConnect
 import connectionWidget
 import categoriesWidget
 import brandsWidget
 import productWidget
 
-APP_PATH = r'c:\Users\luluseb\Documents\cosmexoxo\product_filler'
 
 class Application(tk.Frame):
   def __init__(self, master=None):
     tk.Frame.__init__(self, master)
     self.grid(sticky=tk.N+tk.S+tk.E+tk.W)
-    self.path = APP_PATH
+    self.path = os.path.dirname(os.path.abspath(__file__))
+    self.config = configuration.Configuration('cosmexo', 'config')
     self.createWidgets()
     self.db = None
 
