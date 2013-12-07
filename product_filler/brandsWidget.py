@@ -14,7 +14,7 @@ class BrandsWidget(BaseWidget):
                           id=-1,
                           type=None,
                           navbar=None)
-    label.grid(sticky=tk.W)
+    label.grid(sticky=tk.N+tk.W)
     for child in self.brandTree.leaves:
       self.recursiveLabelDisplay(child)
     if self.editState != self.HIDDEN:
@@ -33,7 +33,7 @@ class BrandsWidget(BaseWidget):
                           id=tree.cargo['id'],
                           navbar=tree.cargo['in_navbar'],
                           type=type)
-    label.grid(column=column, sticky=tk.W)
+    label.grid(column=column, sticky=tk.N+tk.W)
     for child in tree.leaves:
       self.recursiveLabelDisplay(child, column+1)
 
@@ -69,7 +69,7 @@ class BrandLabel(tk.Frame):
     self.type = type
     self.label = tk.Label(self, textvariable=self.textVar,
                       bg='white', bd=1, relief=tk.RAISED)
-    self.label.grid(row=0)
+    self.label.grid(row=0, sticky=tk.N)
     # create navbar checkbox
     if self.id != -1:
       self.navLabel = tk.Label(self, text="In Navbar?")

@@ -12,7 +12,7 @@ class CategoriesWidget(BaseWidget):
     label = CategoryLabel(self.mainFrame,
                           name='Add main\ncategory',
                           id=-1)
-    label.grid()
+    label.grid(sticky=tk.N+tk.W)
     for child in self.catTree.leaves:
       self.recursiveLabelDisplay(child)
     if self.editState != self.HIDDEN:
@@ -23,7 +23,7 @@ class CategoriesWidget(BaseWidget):
     label = CategoryLabel(self.mainFrame,
                           name=tree.cargo['name'],
                           id=tree.cargo['id'])
-    label.grid(column=column, columnspan=2, sticky=tk.W)
+    label.grid(column=column, columnspan=2, sticky=tk.N+tk.W)
     for child in tree.leaves:
       self.recursiveLabelDisplay(child, column+1)
 
@@ -53,7 +53,7 @@ class CategoryLabel(tk.Frame):
     tk.Frame.__init__(self, master)
     self.label = tk.Label(self, textvariable=self.textVar,
                       bg='white', bd=1, relief=tk.RAISED)
-    self.label.grid()
+    self.label.grid(sticky=tk.N)
     # create right-click menu
     self.menu = tk.Menu(self, tearoff=0)
     if self.id!=-1: # id=-1 for buttons only

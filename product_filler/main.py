@@ -29,12 +29,16 @@ class Application(tk.Frame):
     self.columnconfigure(0, weight=1)
     # database connection
     self.connectionWidget = connectionWidget.ConnectionWidget(self)
+    self.connectionWidget.grid(sticky=tk.N+tk.W)
     self.categoriesWidget = \
           categoriesWidget.CategoriesWidget('CATEGORY EDITOR', self)
+    self.categoriesWidget.grid(sticky=tk.N+tk.S+tk.E+tk.W, row=1, column=0)
     self.brandsWidget = \
           brandsWidget.BrandsWidget('COMPANIES/BRANDS EDITOR', self)
+    self.brandsWidget.grid(sticky=tk.N+tk.S+tk.E+tk.W, row=1, column=1)
     self.productWidget = \
           productWidget.ProductWidget('PRODUCT EDITOR', self)
+    self.productWidget.grid(sticky=tk.N+tk.S+tk.E+tk.W, row=2, columnspan=2)
 
     self.bind('<<Connection>>', self.onConnected)
     self.bind('<<Disconnection>>', self.onDisconnected)

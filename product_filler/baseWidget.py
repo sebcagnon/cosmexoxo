@@ -11,9 +11,6 @@ class BaseWidget(tk.Frame):
 
   def __init__(self, title, master=None):
     tk.Frame.__init__(self, master, border=2, relief=tk.GROOVE)
-    self.rowconfigure(0, weight=1)
-    self.columnconfigure(0, weight=1)
-    self.grid(sticky=tk.N+tk.S+tk.E+tk.W)
     self.createWidgets(title)
     self.editState = self.HIDDEN
 
@@ -21,10 +18,10 @@ class BaseWidget(tk.Frame):
     """Initialize the frame's widgets"""
     # Show or not
     self.title = tk.Label(self, text=str(title))
-    self.title.grid(row=0, column=0, sticky=tk.W)
+    self.title.grid(row=0, column=0, sticky=tk.N+tk.W)
     self.showButton = tk.Button(self, text='Show/Hide', command=self.showHide,
                                 state=tk.DISABLED)
-    self.showButton.grid(row=0, column=1, sticky=tk.E)
+    self.showButton.grid(row=0, column=1, sticky=tk.N+tk.E)
     self.mainFrame = tk.Frame(self)
 
   def activate(self, db):
@@ -50,7 +47,7 @@ class BaseWidget(tk.Frame):
     else:
       self.mainFrame.rowconfigure(0, weight=1)
       self.mainFrame.columnconfigure(0, weight=1)
-      self.mainFrame.grid(columnspan=2, sticky=tk.W)
+      self.mainFrame.grid(columnspan=2, sticky=tk.N+tk.W)
       self.editState = self.WAITING
 
   def createButtons(self):
