@@ -130,13 +130,13 @@ class ProductWidget(BaseWidget):
                          text="Save ", image=self.checkImage, compound="left")
       self.saveButton.grid(sticky=tk.W+tk.S)
     elif self.editionMode == 'edit':
-      self.saveButton = tk.Button(self.variantFrame, command=self.update,
+      self.saveButton = tk.Button(self.variantFrame, command=self.updateProduct,
                          text="Update ", image=self.checkImage, compound="left")
       self.saveButton.grid(sticky=tk.W+tk.S)
   
   def save(self):
     """Uploads the current product to the database"""
-    (name, active, desc, chosenBrandID, catIds) = self.getFromInfo()
+    (name, active, desc, chosenBrandID, catIds) = self.getFormInfo()
     self.checkValidity(name, chosenBrandID, catIds)
     # Save to Database, only commit after last one
     # product
@@ -188,7 +188,107 @@ class ProductWidget(BaseWidget):
       varImgKey.set_contents_from_filename(varImgFileName)
       varImgKey.set_metadata('alt', 'different variants of ' + name)
       varImgKey.set_metadata('title', 'variants of ' + name)
-    #TODO: add confirmation (and erase all or go to update product mode)
+    self.productSelect(productId)
+    tkMessageBox.showinfo('Product Upload Success',
+                       'The product was saved in\n'
+                       'in the database successfully.\n'
+                       'You are now in Update mode.\n'
+                       'Click "New" to start a new product.')
+
+  def updateProduct(self):
+    """Updates a product that is already in the database"""
+    (name, active, desc, chosenBrandID, catIds) = self.getFormInfo()
+    self.checkValidity(name, chosenBrandID, catIds)
+    productId = self.currentProduct['product_id']
+    # Update into Database, only commit after last one
+    # product
+    heads = ('name', 'description', 'active', 'brand_id')
+    vals = (name, desc, active, chosenBrandID)
+    res = self.db.simpleUpdate('product', heads, vals, productId, commit=False)
+    if not (res is True):
+      self.db.conn.rollback()
+      tkMessageBox.showerror('ProductWidgetError', res)
+      raise res
+    # product_category
+    # First delete relations that disappeared
+    for id in self.currentProduct['category_ids']:
+      if id not in catIds:
+        res = self.db.deleteProductCategoryLine(productId, id, commit=False)
+        if not (res is True):
+          self.db.conn.rollback()
+          tkMessageBox.showerror('ProductWidgetError', res)
+          raise res
+    # Then add any new category relationship
+    heads = ('product_id', 'category_id')
+    for id in catIds:
+      if id not in self.currentProduct['category_ids']:
+        vals = (productId, id)
+        res = self.db.simpleInsert('product_category', heads, vals, commit=False)
+        if not (res is True):
+          self.db.conn.rollback()
+          tkMessageBox.showerror('ProductWidgetError', res)
+          raise res
+    # variant
+    # First delete any variant that was deleted
+    variantIds = [variant.variantId for variant in self.variants]
+    for id in self.currentProduct['variant_ids']:
+      if id not in variantIds:
+        res = self.db.deleteLineFromId('variant', id)
+        if not (res is True):
+          self.db.conn.rollback()
+          tkMessageBox.showerror('ProductWidgetError', res)
+          raise res
+    # Then insert/update the variants from the form
+    heads = ('name', 'price', 'weight', 'product_id')
+    for variant in self.variants:
+      (vName, price, weight) = variant.getInfo()
+      vals = (vName, int(price), int(weight), productId)
+      if variant.variantId:
+        res = self.db.simpleUpdate('variant', heads, vals, variant.variantId,
+                       commit=False)
+      else:
+        res = self.db.simpleInsert('variant', heads, vals, commit=False)
+      if not (res is True):
+        self.db.conn.rollback()
+        tkMessageBox.showerror('ProductWidgetError', res)
+        raise res
+    # Finally commit
+    self.db.conn.commit()
+    # Upload Images to S3
+    oldName = self.currentProduct['product_name']
+    if name != oldName and not self.imagesModified:
+      oldProdKey = self.bucket.get_key(str(productId)+'_'+oldName)
+      if oldProdKey:
+        self.bucket.copy_key(str(productId)+'_'+name, self.bucket.name,
+                       str(productId)+'_'+oldName)
+      oldVarKey = self.bucket.get_key(str(productId)+'_'+oldName+
+                       '_'+'variants')
+      if oldVarKey:
+        self.bucket.copy_key(str(productId)+'_'+name+'_'+'variants',
+                       self.bucket.name,
+                       str(productId)+'_'+oldName+'_'+'variants')
+    elif self.imagesModified:
+      prodImgFileName = self.prodPicPreview.getImageFileName()
+      if prodImgFileName != self.placeholderPath:
+        prodImgKey = self.bucket.new_key(str(productId)+'_'+name)
+        prodImgKey.set_contents_from_filename(prodImgFileName)
+        prodImgKey.set_metadata('alt', 'image of ' + name)
+        prodImgKey.set_metadata('title', name)
+      varImgFileName = self.varPicPreview.getImageFileName()
+      if varImgFileName != self.placeholderPath:
+        varImgKey = self.bucket.new_key(str(productId)+'_'+name+'_'+'variants')
+        varImgKey.set_contents_from_filename(varImgFileName)
+        varImgKey.set_metadata('alt', 'different variants of ' + name)
+        varImgKey.set_metadata('title', 'variants of ' + name)
+      # don't forget to delete old images if name changed
+      if name != oldName:
+        self.bucket.delete_key(str(productId)+'_'+oldName)
+        self.bucket.delete_key(str(productId)+'_'+oldName+'_'+'variants')
+    self.productSelect(productId)
+    tkMessageBox.showinfo('Product Update Success',
+                       'The product was updated in\n'
+                       'in the database successfully.\n'
+                       'You are now in Update mode.\n')
 
   def getFormInfo(self):
     """Retrieves all the information from the different entries and checkboxes"""
@@ -317,10 +417,12 @@ class ProductWidget(BaseWidget):
 
   def loadProdImage(self):
     """Loads the product image into the ImagePreview widget"""
+    self.imagesModified = True
     self.prodPicPreview.setImageFromFileName(askopenfilename())
 
   def loadVarImage(self):
     """Loads the variant image into the ImagePreview widget"""
+    self.imagesModified = True
     self.varPicPreview.setImageFromFileName(askopenfilename())
 
   def new(self):
@@ -348,6 +450,7 @@ class ProductWidget(BaseWidget):
     productInfo = self.db.getProductInfoByID(productID)    
     self.currentProduct = productInfo
     self.editionMode = 'edit'
+    self.imagesModified = False
     self.updateMainFrame()
     self.nameTextVar.set(productInfo['product_name'])
     self.activeState.set(productInfo['product_active'])
@@ -366,16 +469,17 @@ class ProductWidget(BaseWidget):
     #images
     keyName = str(productID)+'_'+productInfo['product_name']
     prodImgKey = self.bucket.get_key(keyName)
-    prodImgPath = os.path.join(self.master.path, 'resources', 'product.jpg')
-    prodImgKey.get_contents_to_filename(prodImgPath)
-    self.prodPicPreview.setImageFromFileName(prodImgPath)
+    if prodImgKey:
+      prodImgPath = os.path.join(os.getenv('LOCALAPPDATA'), 'cosmexo',
+                         'product.jpg')
+      prodImgKey.get_contents_to_filename(prodImgPath)
+      self.prodPicPreview.setImageFromFileName(prodImgPath)
     varImgKey = self.bucket.get_key(keyName+'_'+'variants')
-    varImgPath = os.path.join(os.getenv('LOCALAPPDATA'), 'cosmexo',
-                       'variant.jpg')
-    varImgKey.get_contents_to_filename(varImgPath)
-    self.varPicPreview.setImageFromFileName(varImgPath)
-    self.productSelection.grab_release()
-    self.productSelection.destroy()
+    if varImgKey:
+      varImgPath = os.path.join(os.getenv('LOCALAPPDATA'), 'cosmexo',
+                         'variant.jpg')
+      varImgKey.get_contents_to_filename(varImgPath)
+      self.varPicPreview.setImageFromFileName(varImgPath)
 
   def productCancel(self):
     self.productSelection.grab_release()
@@ -503,6 +607,8 @@ class ProductSelection(tk.Toplevel):
       tkMessageBox.showerror('Product Choice Error', message)
     else:
       self.onSelect(self.selection.get())
+      self.grab_release()
+      self.destroy()
 
 
 class ProductWidgetError(BaseException):

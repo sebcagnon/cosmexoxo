@@ -162,6 +162,20 @@ class DBConnection(object):
       root.addChild(self.recTreeBuild(parent, children, ans, treeElements))
     return root
 
+  def deleteProductCategoryLine(self, productId, categoryId, commit=True):
+    """DELETE FROM product_category 
+       WHERE product_id=productId AND category_id=categoryId"""
+    try:
+      self.cur.execute(
+        """DELETE FROM product_category
+        WHERE product_id={pid} and category_id={cid};
+        """.format(pid=productId, cid=categoryId))
+      if commit:
+        self.conn.commit()
+      return True
+    except psycopg2.Error, e:
+      return e
+
   # COMPANIES/BRANDS
   def getBrandTree(self, printing=0):
     """Returns a nested dict representing the companies and their brands,
@@ -206,20 +220,29 @@ class DBConnection(object):
 
   def simpleInsert(self, table, headers, values, commit=True):
     """INSERT INTO table (headers) VALUES (values)"""
-    inputNames = '('
-    for header in headers:
-      inputNames += header + ', '
-    inputNames = inputNames[:-2] + ')'
-    inputValues = '('
-    for val in values:
-      v = self.formatValue(val)
-      inputValues += str(v) + ', '
-    inputValues = inputValues[:-2] + ')'
+    inputNames = self.createSQLList(headers)
+    inputValues = self.createSQLList(values, formatting=True)
     try:
       self.cur.execute(
         """INSERT INTO {table} {names}
         VALUES {vals};
         """.format(table=table, names=inputNames, vals=inputValues))
+      if commit:
+        self.conn.commit()
+      return True
+    except psycopg2.Error, e:
+      return e
+
+  def simpleUpdate(self, table, headers, values, id, commit=True):
+    """UPDATE table SET (headers)=(values) WHERE 'table'_id=id"""
+    inputNames = self.createSQLList(headers)
+    inputValues = self.createSQLList(values, formatting=True)
+    try:
+      self.cur.execute(
+        """UPDATE {table}
+           SET {columns}={values}
+           WHERE {table}_id = {id}
+        """.format(table=table, columns=inputNames, values=inputValues, id=id))
       if commit:
         self.conn.commit()
       return True
@@ -238,7 +261,18 @@ class DBConnection(object):
     except psycopg2.Error, e:
       return e
 
-  def formatValue(self, value, commit=True):
+  def createSQLList(self, names, formatting=False):
+    """Creates a sequel list from names,
+       uses formatValue is formatting is True"""
+    inputNames = '('
+    for name in names:
+      if formatting:
+        name = self.formatValue(name)
+      inputNames += str(name) + ', '
+    inputNames = inputNames[:-2] + ')'
+    return inputNames
+
+  def formatValue(self, value):
     """Format values for compatibility with database queries"""
     if value is True:
       return 'TRUE'
@@ -256,8 +290,12 @@ class DBConnection(object):
 if __name__=='__main__':
   print "Testing DBConnection"
   import os
-  path = os.path.join('..', '..', 'staging-db.json')
-  db = DBConnection(path)
+  import json
+  path = os.path.join('..', '..', 'staging_key.json')
+  jsonFile = open(path, 'r')
+  jsonDict = json.load(jsonFile)
+  jsonFile.close()
+  db = DBConnection(jsonDict['database'])
   print "Connected"
   print "Testing getCategoryTree"
   db.getCategoryTree(1)
