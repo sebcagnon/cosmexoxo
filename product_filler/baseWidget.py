@@ -1,5 +1,6 @@
 import Tkinter as tk
 import tkMessageBox
+from scrolledFrame import VerticalScrolledFrame
 
 class BaseWidget(tk.Canvas):
   """The base class for the category and company/brand widgets"""
@@ -22,7 +23,8 @@ class BaseWidget(tk.Canvas):
     self.showButton = tk.Button(self, text='Show/Hide', command=self.showHide,
                                 state=tk.DISABLED)
     self.showButton.grid(row=0, column=1, sticky=tk.N+tk.E)
-    self.mainFrame = tk.Frame(self, border=2, relief=tk.GROOVE)
+    self.scrollable = VerticalScrolledFrame(self, border=2, relief=tk.GROOVE)
+    self.mainFrame = self.scrollable.interior
 
   def activate(self, db):
     """Enables Show/Hide Button"""
@@ -42,12 +44,12 @@ class BaseWidget(tk.Canvas):
   def showHide(self):
     """Show/Hide the whole widget"""
     if self.editState != self.HIDDEN:
-      self.mainFrame.grid_forget()
+      self.scrollable.grid_forget()
       self.editState = self.HIDDEN
     else:
-      self.mainFrame.rowconfigure(0, weight=1)
-      self.mainFrame.columnconfigure(0, weight=1)
-      self.mainFrame.grid(columnspan=2, sticky=tk.N+tk.W)
+      #self.mainFrame.rowconfigure(0, weight=1)
+      #self.mainFrame.columnconfigure(0, weight=1)
+      self.scrollable.grid(columnspan=2, sticky=tk.N+tk.W)
       self.editState = self.WAITING
 
   def createButtons(self):
