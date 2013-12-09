@@ -1,7 +1,7 @@
 import Tkinter as tk
 import tkMessageBox
 
-class BaseWidget(tk.Frame):
+class BaseWidget(tk.Canvas):
   """The base class for the category and company/brand widgets"""
   HIDDEN = -1
   WAITING = 0
@@ -10,7 +10,7 @@ class BaseWidget(tk.Frame):
   DELETING = 3
 
   def __init__(self, title, master=None):
-    tk.Frame.__init__(self, master, border=2, relief=tk.GROOVE)
+    tk.Canvas.__init__(self, master)
     self.createWidgets(title)
     self.editState = self.HIDDEN
 
@@ -22,7 +22,7 @@ class BaseWidget(tk.Frame):
     self.showButton = tk.Button(self, text='Show/Hide', command=self.showHide,
                                 state=tk.DISABLED)
     self.showButton.grid(row=0, column=1, sticky=tk.N+tk.E)
-    self.mainFrame = tk.Frame(self)
+    self.mainFrame = tk.Frame(self, border=2, relief=tk.GROOVE)
 
   def activate(self, db):
     """Enables Show/Hide Button"""
