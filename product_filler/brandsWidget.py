@@ -9,11 +9,8 @@ class BrandsWidget(BaseWidget):
   def createButtons(self):
     """Creates the labels and buttons to edit categories"""
     self.brandTree = self.db.getBrandTree()
-    label = BrandLabel(master=self.mainFrame,
-                          name='Add New\nCompany',
-                          id=-1,
-                          type=None,
-                          navbar=None)
+    label = BrandLabel(master=self.mainFrame, name='Add New\nCompany',
+                          id=-1, type=None, navbar=None, mainWidget=self)
     label.grid(sticky=tk.N+tk.W)
     for child in self.brandTree.leaves:
       self.recursiveLabelDisplay(child)
@@ -32,7 +29,8 @@ class BrandsWidget(BaseWidget):
                           name=tree.cargo['name'],
                           id=tree.cargo['id'],
                           navbar=tree.cargo['in_navbar'],
-                          type=type)
+                          type=type,
+                          mainWidget=self)
     label.grid(column=column, sticky=tk.N+tk.W)
     for child in tree.leaves:
       self.recursiveLabelDisplay(child, column+1)
@@ -52,7 +50,7 @@ class BrandsWidget(BaseWidget):
 class BrandLabel(tk.Frame):
   """Labels with right-click menu for editing"""
 
-  def __init__(self, name, id, navbar, type, master=None):
+  def __init__(self, name, id, navbar, type, master=None, mainWidget=None):
     """
     master: the parent widget
     name: the name of the brand/company (str)
@@ -92,7 +90,7 @@ class BrandLabel(tk.Frame):
       self.menu.add_command(label='Delete', command=self.delete)
     self.label.bind('<Button-3>', self.openMenu)
     # shortcut
-    self.mainFrame = self.master.master
+    self.mainFrame = mainWidget
 
   def navbarCheckHandler(self, event):
     """Edits the in_navbar info when checkbutton is clicked"""

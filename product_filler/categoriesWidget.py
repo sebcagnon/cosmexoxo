@@ -9,9 +9,8 @@ class CategoriesWidget(BaseWidget):
   def createButtons(self):
     """Creates the labels and buttons to edit categories"""
     self.catTree = self.db.getCategoryTree()
-    label = CategoryLabel(self.mainFrame,
-                          name='Add main\ncategory',
-                          id=-1)
+    label = CategoryLabel(master=self.mainFrame, name='Add main\ncategory',
+                          id=-1, mainWidget=self)
     label.grid(sticky=tk.N+tk.W)
     for child in self.catTree.leaves:
       self.recursiveLabelDisplay(child)
@@ -20,9 +19,8 @@ class CategoriesWidget(BaseWidget):
 
   def recursiveLabelDisplay(self, tree, column=0):
     """Recursive method that creates tabulated labels"""
-    label = CategoryLabel(self.mainFrame,
-                          name=tree.cargo['name'],
-                          id=tree.cargo['id'])
+    label = CategoryLabel(self.mainFrame, name=tree.cargo['name'],
+                          id=tree.cargo['id'], mainWidget=self)
     label.grid(column=column, columnspan=2, sticky=tk.N+tk.W)
     for child in tree.leaves:
       self.recursiveLabelDisplay(child, column+1)
@@ -46,7 +44,7 @@ class CategoriesWidget(BaseWidget):
 class CategoryLabel(tk.Frame):
   """Labels with right-click menu for editing"""
 
-  def __init__(self, master=None, name='', id=-1):
+  def __init__(self, master=None, name='', id=-1, mainWidget=None):
     self.textVar = tk.StringVar()
     self.textVar.set(str(id) + ': ' + name)
     self.id = id
@@ -64,7 +62,7 @@ class CategoryLabel(tk.Frame):
       self.menu.add_command(label='Delete', command=self.delete)
     self.label.bind('<Button-3>', self.openMenu)
     # shortcut
-    self.mainFrame = self.master.master
+    self.mainFrame = mainWidget
 
   def openMenu(self, event):
     """Opens the right click menu for the label"""
