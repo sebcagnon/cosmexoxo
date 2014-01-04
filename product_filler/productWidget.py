@@ -5,6 +5,7 @@ import tkMessageBox
 from tkFileDialog import askopenfilename
 from baseWidget import BaseWidget
 from imagePreview import ImagePreview
+from scrolledFrame import VerticalScrolledFrame
 import ImageTk
 
 class ProductWidget(BaseWidget):
@@ -586,11 +587,13 @@ class ProductSelection(tk.Toplevel):
     self.onSelect = onSelect
     self.selection = tk.IntVar()
     self.selection.set(-1)
+    self.productListFrame = VerticalScrolledFrame(self)
     for p in productList:
       t = ', '.join(p[1:])
-      button = tk.Radiobutton(self, text=t, variable=self.selection, value=p[0],
-                       indicatoron=0)
+      button = tk.Radiobutton(self.productListFrame.interior, text=t,
+                       variable=self.selection, value=p[0], indicatoron=0)
       button.grid(sticky=tk.N+tk.W)
+    self.productListFrame.grid()
     self.buttonFrame = tk.Frame(self)
     self.buttonFrame.grid()
     self.selectButton = tk.Button(self.buttonFrame, text="Select ",
