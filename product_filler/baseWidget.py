@@ -47,8 +47,6 @@ class BaseWidget(tk.Canvas):
       self.scrollable.grid_forget()
       self.editState = self.HIDDEN
     else:
-      #self.mainFrame.rowconfigure(0, weight=1)
-      #self.mainFrame.columnconfigure(0, weight=1)
       self.scrollable.grid(columnspan=2, sticky=tk.N+tk.W)
       self.editState = self.WAITING
 
@@ -59,12 +57,14 @@ class BaseWidget(tk.Canvas):
   def updateMainFrame(self):
     """Updates the tree and the labels"""
     self.deleteMainFrame()
+    self.scrollable.grid(columnspan=2, sticky=tk.N+tk.W)
     self.createButtons()
 
   def deleteMainFrame(self):
     """Deletes the tree"""
-    for child in self.mainFrame.winfo_children():
-      child.destroy()
+    self.scrollable.destroy()
+    self.scrollable = VerticalScrolledFrame(self, border=2, relief=tk.GROOVE)
+    self.mainFrame = self.scrollable.interior
 
 
 class MainWidgetException(BaseException):
