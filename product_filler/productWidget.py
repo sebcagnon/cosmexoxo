@@ -106,14 +106,6 @@ class ProductWidget(BaseWidget):
     self.prodPicLabel.grid(row=0, column=0, sticky=tk.W)
     self.prodPicButton.grid(row=0, column=1, sticky=tk.W)
     self.prodPicPreview.grid(row=0, column=2, sticky=tk.W)
-    self.varPicLabel = tk.Label(self.picturesFrame, text="Variants Picture:")
-    self.varPicButton = tk.Button(self.picturesFrame, text="Choose Image...",
-                       command=self.loadVarImage)
-    self.varPicPreview = ImagePreview(size=40, master=self.picturesFrame,
-                       imageFileName=self.placeholderPath)
-    self.varPicLabel.grid(row=0, column=3, sticky=tk.W)
-    self.varPicButton.grid(row=0, column=4, sticky=tk.W)
-    self.varPicPreview.grid(row=0, column=5, sticky=tk.W)
     # Variants
     self.variantFrame = tk.Frame(self.mainFrame)
     self.variantFrame.grid(columnspan=3, sticky=tk.N+tk.W)
@@ -183,12 +175,6 @@ class ProductWidget(BaseWidget):
       prodImgKey.set_contents_from_filename(prodImgFileName)
       prodImgKey.set_metadata('alt', 'image of ' + name)
       prodImgKey.set_metadata('title', name)
-    varImgFileName = self.varPicPreview.getImageFileName()
-    if varImgFileName != self.placeholderPath:
-      varImgKey = self.bucket.new_key(str(productId)+'_'+name+'_'+'variants')
-      varImgKey.set_contents_from_filename(varImgFileName)
-      varImgKey.set_metadata('alt', 'different variants of ' + name)
-      varImgKey.set_metadata('title', 'variants of ' + name)
     self.productSelect(productId)
     tkMessageBox.showinfo('Product Upload Success',
                        'The product was saved in\n'
@@ -275,16 +261,9 @@ class ProductWidget(BaseWidget):
         prodImgKey.set_contents_from_filename(prodImgFileName)
         prodImgKey.set_metadata('alt', 'image of ' + name)
         prodImgKey.set_metadata('title', name)
-      varImgFileName = self.varPicPreview.getImageFileName()
-      if varImgFileName != self.placeholderPath:
-        varImgKey = self.bucket.new_key(str(productId)+'_'+name+'_'+'variants')
-        varImgKey.set_contents_from_filename(varImgFileName)
-        varImgKey.set_metadata('alt', 'different variants of ' + name)
-        varImgKey.set_metadata('title', 'variants of ' + name)
       # don't forget to delete old images if name changed
       if name != oldName:
         self.bucket.delete_key(str(productId)+'_'+oldName)
-        self.bucket.delete_key(str(productId)+'_'+oldName+'_'+'variants')
     self.productSelect(productId)
     tkMessageBox.showinfo('Product Update Success',
                        'The product was updated in\n'
@@ -421,11 +400,6 @@ class ProductWidget(BaseWidget):
     self.imagesModified = True
     self.prodPicPreview.setImageFromFileName(askopenfilename())
 
-  def loadVarImage(self):
-    """Loads the variant image into the ImagePreview widget"""
-    self.imagesModified = True
-    self.varPicPreview.setImageFromFileName(askopenfilename())
-
   def new(self):
     """All texts become blank, and saving will create a new product in db"""
     title = "New Product"
@@ -475,12 +449,6 @@ class ProductWidget(BaseWidget):
                          'product.jpg')
       prodImgKey.get_contents_to_filename(prodImgPath)
       self.prodPicPreview.setImageFromFileName(prodImgPath)
-    varImgKey = self.bucket.get_key(keyName+'_'+'variants')
-    if varImgKey:
-      varImgPath = os.path.join(os.getenv('LOCALAPPDATA'), 'cosmexo',
-                         'variant.jpg')
-      varImgKey.get_contents_to_filename(varImgPath)
-      self.varPicPreview.setImageFromFileName(varImgPath)
 
   def productCancel(self):
     self.productSelection.grab_release()
