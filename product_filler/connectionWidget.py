@@ -2,7 +2,7 @@ import Tkinter as tk
 from tkFileDialog import askopenfilename
 import dbConnect
 import json
-import boto
+import AWSManager
 
 class ConnectionWidget(tk.Frame):
   """Handles connection to database server"""
@@ -50,8 +50,10 @@ class ConnectionWidget(tk.Frame):
         self.connectionKeys = json.load(jsonFile)
         jsonFile.close()
         self.db = dbConnect.DBConnection(self.connectionKeys['database'])
-        self.s3 = boto.connect_s3(**self.connectionKeys['aws_access_key'])
-        self.bucket = self.s3.get_bucket(self.connectionKeys['s3_bucket'])
+        self.awsManager = AWSManager.AWSManager(
+                       self.connectionKeys['s3_bucket'],
+                       **self.connectionKeys['aws_access_key'])
+        self.awsManager.connect()
       except:
         self.connectionStatus.set('ConnectionFailed')
         raise
@@ -65,6 +67,7 @@ class ConnectionWidget(tk.Frame):
         self.master.event_generate('<<Disconnection>>')
       self.connectionStatus.set('Disconnecting')
       self.db.closeConnection()
+      self.awsManager.disconnect()
       self.connectionStatus.set('Not Connected')
       self.connectButtonText.set('Connect')
 

@@ -11,9 +11,9 @@ import ImageTk
 class ProductWidget(BaseWidget):
   """Widget for editing products"""
 
-  def activate(self, db, bucket):
-    """Enables show/hide, but adds bucket connection to widget"""
-    self.bucket = bucket
+  def activate(self, db, awsManager):
+    """Enables show/hide, and adds awsManager to widget"""
+    self.awsManager = awsManager
     self.editionMode = 'new'
     BaseWidget.activate(self, db)
 
@@ -171,10 +171,22 @@ class ProductWidget(BaseWidget):
     # Upload Images to S3
     prodImgFileName = self.prodPicPreview.getImageFileName()
     if prodImgFileName != self.placeholderPath:
-      prodImgKey = self.bucket.new_key(str(productId)+'_'+name)
-      prodImgKey.set_contents_from_filename(prodImgFileName)
-      prodImgKey.set_metadata('alt', 'image of ' + name)
-      prodImgKey.set_metadata('title', name)
+      keyName = createKey(productId, name)
+      metadata = {'alt':'picture of ' + str(name),
+                  'title':name}
+      self.awsManager.uploadImage(keyName, prodImgFileName, **metadata)
+    variantsData = self.db.getProductVariants(id=productId)
+    variantIds = sorted(variantsData['variant_ids'])
+    for i, variant in enumerate(self.variants):
+      variantImgPath = variant.getImagePath()
+      if variantImgPath != self.placeholderPath:
+        # using the fact that they were added in the same order
+        variantId = variantIds[i]
+        variantName = variant.getInfo()[0]
+        variantKey = createKey(productId, name, variantId, variantName)
+        metadata = {'alt':'picture of {} from {}'.format(variantName, name),
+                    'title':'{} from {}'.format(variantName, name)}
+        self.awsManager.uploadImage(variantKey, variantImgPath, **metadata)
     self.productSelect(productId)
     tkMessageBox.showinfo('Product Upload Success',
                        'The product was saved in\n'
@@ -349,7 +361,8 @@ class ProductWidget(BaseWidget):
   def addVariant(self, variantData=None):
     """Adds a new variant frame to be edited"""
     newVariant = VariantFrame(self.id, self.removeVariant(self.id),
-                       self.variantFrame, self.minusImage)
+                       self.variantFrame, deleteImage=self.minusImage,
+                       imagePath=self.placeholderPath)
     self.id += 1
     self.variants.append(newVariant)
     if variantData:
@@ -406,6 +419,8 @@ class ProductWidget(BaseWidget):
     message = "Starting a new product will\nerase unsaved modifications"
     if tkMessageBox.askokcancel(title, message, icon=tkMessageBox.WARNING):
       self.editionMode = 'new'
+      for variant in self.variants:
+        self.removeVariant(variant.id)()
       self.updateMainFrame()
 
   def openProductSelection(self):
@@ -426,6 +441,8 @@ class ProductWidget(BaseWidget):
     self.currentProduct = productInfo
     self.editionMode = 'edit'
     self.imagesModified = False
+    for variant in self.variants:
+        self.removeVariant(variant.id)()
     self.updateMainFrame()
     self.nameTextVar.set(productInfo['product_name'])
     self.activeState.set(productInfo['product_active'])
@@ -439,16 +456,14 @@ class ProductWidget(BaseWidget):
     catNames = [name for name, id in self.chosenCategories]
     self.categoryText.set('\n'.join(catNames))
     self.descText.insert(1.0, productInfo['product_description'])
+    #images
+    keyName = createKey(productID, productInfo['product_name'])
+    prodImgPath = os.path.join(os.getenv('LOCALAPPDATA'), 'cosmexo',
+                       'product.jpg')
+    if self.awsManager.getImageFromName(keyName, prodImgPath):
+      self.prodPicPreview.setImageFromFileName(prodImgPath)
     for variantData in productInfo['variants'].items():
       self.addVariant(variantData=variantData)
-    #images
-    keyName = str(productID)+'_'+productInfo['product_name']
-    prodImgKey = self.bucket.get_key(keyName)
-    if prodImgKey:
-      prodImgPath = os.path.join(os.getenv('LOCALAPPDATA'), 'cosmexo',
-                         'product.jpg')
-      prodImgKey.get_contents_to_filename(prodImgPath)
-      self.prodPicPreview.setImageFromFileName(prodImgPath)
 
   def productCancel(self):
     self.productSelection.grab_release()
@@ -458,7 +473,8 @@ class ProductWidget(BaseWidget):
 class VariantFrame(tk.Frame):
   """A line that enables variant editing"""
   
-  def __init__(self, id, deleteCommand, master=None, image=None):
+  def __init__(self, id, deleteCommand, master=None, deleteImage=None,
+                       imagePath=None):
     tk.Frame.__init__(self, master)
     self.id=id
     self.variantId = None
@@ -480,10 +496,17 @@ class VariantFrame(tk.Frame):
     self.weightEntry = tk.Entry(self, textvariable=self.weightVar, width=8)
     self.weightLabel.grid(row=0, column=4)
     self.weightEntry.grid(row=0, column=5)
+    # Image preview
+    self.picButton = tk.Button(self, text="Choose Image...",
+                       command=self.loadImage)
+    self.imagePreview = ImagePreview(size=40, master=self,
+                       imageFileName=imagePath)
+    self.picButton.grid(row=0, column=6)
+    self.imagePreview.grid(row=0, column=7)
     # Delete
-    self.deleteButton = tk.Button(self, image=image, text="Delete",
+    self.deleteButton = tk.Button(self, image=deleteImage, text="Delete",
                        compound=tk.LEFT, command=deleteCommand)
-    self.deleteButton.grid(row=0, column=6)
+    self.deleteButton.grid(row=0, column=8)
 
   def getInfo(self):
     """Returns (name, price, weight)"""
@@ -496,6 +519,14 @@ class VariantFrame(tk.Frame):
     self.priceVar.set(price)
     self.weightVar.set(weight)
     self.variantId = id
+
+  def loadImage(self):
+    """Loads the product image into the ImagePreview widget"""
+    self.imagePreview.setImageFromFileName(askopenfilename())
+
+  def getImagePath(self):
+    """Returns path of variant image"""
+    return self.imagePreview.getImageFileName()
 
 
 class CategorySelection(tk.Toplevel):
@@ -590,3 +621,7 @@ class ProductWidgetError(BaseException):
   
   def __str__(self):
     return repr(self.value)
+
+def createKey(*args):
+  """Creates key name from args"""
+  return '_'.join(map(str, args))
