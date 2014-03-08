@@ -32,8 +32,7 @@ class AWSManager(object):
     if self.connectionStatus != self.CONNECTED:
       raise AWSManagerError('Cannot upload image if not connected')
     key = self.bucket.new_key(keyName)
-    for k,v in metadata.items():
-      key.set_metadata(k, v)
+    key.update_metadata(metadata)
     key.set_contents_from_filename(imagePath)
 
   def getImageFromName(self, keyName, destinationFile):
@@ -52,6 +51,32 @@ class AWSManager(object):
     if self.connectionStatus != self.CONNECTED:
       raise AWSManagerError('Cannot delete key image if not connected')
     self.bucket.delete_key(keyName)
+
+  def updateName(self, oldName, newName):
+    """Changes the key name of an S3 object"""
+    if self.connectionStatus != self.CONNECTED:
+      raise AWSManagerError('Cannot update name if not connected')
+    if oldName == newName:
+      return
+    newKey = self.bucket.new_key(newName)
+    oldKey = self.bucket.get_key(oldName)
+    oldKey.copy(self.bucket, newKey, preserve_acl=True)
+    oldKey.delete()
+
+  def updateImage(self, name, newImagePath=None, newName=None, 
+                       newMetadata=None):
+    """Update image from new file, name and/or metadata of a key"""
+    if self.connectionStatus != self.CONNECTED:
+      raise AWSManagerError('Cannot update image if not connected')
+    if not (newImagePath or newName or newMetadata):
+      return
+    key = self.bucket.get_key(name)
+    if newMetadata:
+      key.metadata = newMetadata
+    if newImagePath:
+      key.set_contents_from_filename(newImagePath)
+    if newName:
+      self.updateName(name, newName)
 
 
 class AWSManagerError(BaseException):
@@ -73,6 +98,7 @@ if __name__=='__main__':
   parser.add_argument('jsonFile', type=argparse.FileType('r'))
   args = parser.parse_args()
   data = json.load(args.jsonFile)
+  imagesToErase = []
   try:
     # Testing creation and connection
     awsMgr = AWSManager(data['s3_bucket'], **data['aws_access_key'])
@@ -83,6 +109,7 @@ if __name__=='__main__':
     # Testing upload and download image
     testImgFileName = 'resources/placeholder.png'
     fileName2 = 'resources/placeholder2.png'
+    imagesToErase.append(fileName2)
     originalHash = hashlib.sha256(open(testImgFileName, 'rb').read()).digest()
     testKey = 'test_img'
     metadata = {'title':'test'}
@@ -97,8 +124,34 @@ if __name__=='__main__':
     newHash = hashlib.sha256(open(fileName2, 'rb').read()).digest()
     assert newHash == originalHash, 'image was modified between upload ' \
                                      'and download'
-    awsMgr.deleteKey(testKey)
-    key = awsMgr.bucket.get_key(testKey)
+
+    # Testing change name and update
+    newKey1 = 'test_img2'
+    awsMgr.updateName(testKey, newKey1)
+    key = awsMgr.bucket.get_key(newKey1)
+    assert key != None and key.metadata == metadata, 'updateName failed'
+    assert awsMgr.bucket.get_key(testKey) == None, 'updateName did not ' \
+                       'delete old key' 
+    newKey2 = 'test_img3'
+    newImg2 = 'resources/plus_icon.gif'
+    metadata2 = {'newtitle':'newTest'}
+    awsMgr.updateImage(newKey1, newImagePath=newImg2, newName=newKey2,
+                       newMetadata=metadata2)
+    assert awsMgr.bucket.get_key(newKey1) == None, 'updateImage did not ' \
+                       'delete old key'
+    key = awsMgr.bucket.get_key(newKey2)
+    assert (key != None) and key.metadata == metadata2, 'updateImage failed ' \
+                       'to create new key with new metadata'
+    oldHash = hashlib.sha256(open(newImg2, 'rb').read()).digest()
+    newImg2Copy = 'resources/plus_icon2.gif'
+    imagesToErase.append(newImg2Copy)
+    awsMgr.getImageFromName(newKey2, newImg2Copy)
+    newHash = hashlib.sha256(open(newImg2Copy, 'rb').read()).digest()
+    assert oldHash == newHash, 'updateImage failed to update to new image'
+
+    # Testing delete key
+    awsMgr.deleteKey(newKey2)
+    key = awsMgr.bucket.get_key(newKey2)
     assert key == None, 'deleteKey did not delete the key'
 
     # Testing disconnection handling
@@ -121,8 +174,14 @@ if __name__=='__main__':
       assert None, 'deleteKey should have raised'
     except AWSManagerError:
       pass
+    try:
+      awsMgr.updateName(testKey, newKey1)
+      assert None, 'updateName should have raised'
+    except AWSManagerError:
+      pass
   finally:
-    if os.path.exists(fileName2):
-      os.remove(fileName2)
+    for img in imagesToErase:
+      if os.path.exists(img):
+        os.remove(img)
 
   print 'All Tests Passed'
