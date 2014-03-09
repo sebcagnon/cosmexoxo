@@ -363,13 +363,21 @@ class ProductWidget(BaseWidget):
     newVariant = VariantFrame(self.id, self.removeVariant(self.id),
                        self.variantFrame, deleteImage=self.minusImage,
                        imagePath=self.placeholderPath)
-    self.id += 1
     self.variants.append(newVariant)
     if variantData:
       id, info = variantData
       newVariant.set(id=id, name=info['variant_name'],
                        weight=str(info['variant_weight']),
                        price=str(info['variant_price']))
+      variantKey = createKey(self.currentProduct['product_id'],
+                       self.currentProduct['product_name'],
+                       id, info['variant_name'])
+      destFile = os.path.join(os.getenv('LOCALAPPDATA'), 'cosmexo',
+                       'variant_{}.jpg'.format(self.id))
+      if self.awsManager.getImageFromName(variantKey, destFile):
+        newVariant.setImagePath(destFile)
+    self.id += 1
+    # Place variant before save button
     self.saveButton.grid_forget()
     newVariant.grid(columnspan=10)
     self.saveButton.grid(sticky=tk.W+tk.S)
@@ -419,9 +427,7 @@ class ProductWidget(BaseWidget):
     message = "Starting a new product will\nerase unsaved modifications"
     if tkMessageBox.askokcancel(title, message, icon=tkMessageBox.WARNING):
       self.editionMode = 'new'
-      for variant in self.variants:
-        self.removeVariant(variant.id)()
-      self.updateMainFrame()
+      self.clearAllInfo()
 
   def openProductSelection(self):
     """Opens product choosing window"""
@@ -441,9 +447,7 @@ class ProductWidget(BaseWidget):
     self.currentProduct = productInfo
     self.editionMode = 'edit'
     self.imagesModified = False
-    for variant in self.variants:
-        self.removeVariant(variant.id)()
-    self.updateMainFrame()
+    self.clearAllInfo()
     self.nameTextVar.set(productInfo['product_name'])
     self.activeState.set(productInfo['product_active'])
     for name, id in self.brandChoices:
@@ -466,8 +470,16 @@ class ProductWidget(BaseWidget):
       self.addVariant(variantData=variantData)
 
   def productCancel(self):
+    """Removes the product selection pop-up"""
     self.productSelection.grab_release()
     self.productSelection.destroy()
+
+  def clearAllInfo(self):
+    """Clears the info about the current product"""
+    for variant in self.variants:
+        self.removeVariant(variant.id)()
+    self.updateMainFrame()
+    self.id = 0
 
 
 class VariantFrame(tk.Frame):
@@ -527,6 +539,10 @@ class VariantFrame(tk.Frame):
   def getImagePath(self):
     """Returns path of variant image"""
     return self.imagePreview.getImageFileName()
+
+  def setImagePath(self, path):
+    """Sets the image path"""
+    self.imagePreview.setImageFromFileName(path)
 
 
 class CategorySelection(tk.Toplevel):
