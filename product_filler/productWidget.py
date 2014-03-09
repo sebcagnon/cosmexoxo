@@ -136,10 +136,7 @@ class ProductWidget(BaseWidget):
     heads = ('name', 'description', 'active', 'brand_id')
     vals = (name, desc, active, chosenBrandID)
     res = self.db.simpleInsert('product', heads, vals, commit=False)
-    if not (res is True):
-      self.db.conn.rollback()
-      tkMessageBox.showerror('ProductWidgetError', res)
-      raise res
+    self.checkDBResult(res)
     product = self.db.getProductBasics(name=name)
     if not product:
       self.db.conn.rollback()
@@ -152,20 +149,14 @@ class ProductWidget(BaseWidget):
     for id in catIds:
       vals = (productId, id)
       res = self.db.simpleInsert('product_category', heads, vals, commit=False)
-      if not (res is True):
-        self.db.conn.rollback()
-        tkMessageBox.showerror('ProductWidgetError', res)
-        raise res
+      self.checkDBResult(res)
     # variant
     heads = ('name', 'price', 'weight', 'product_id')
     for variant in self.variants:
       (vName, price, weight) = variant.getInfo()
       vals = (vName, int(price), int(weight), productId)
       res = self.db.simpleInsert('variant', heads, vals, commit=False)
-      if not (res is True):
-        self.db.conn.rollback()
-        tkMessageBox.showerror('ProductWidgetError', res)
-        raise res
+      self.checkDBResult(res)
     # Finally commit
     self.db.conn.commit()
     # Upload Images to S3
@@ -204,39 +195,27 @@ class ProductWidget(BaseWidget):
     heads = ('name', 'description', 'active', 'brand_id')
     vals = (name, desc, active, chosenBrandID)
     res = self.db.simpleUpdate('product', heads, vals, productId, commit=False)
-    if not (res is True):
-      self.db.conn.rollback()
-      tkMessageBox.showerror('ProductWidgetError', res)
-      raise res
+    self.checkDBResult(res)
     # product_category
     # First delete relations that disappeared
     for id in self.currentProduct['category_ids']:
       if id not in catIds:
         res = self.db.deleteProductCategoryLine(productId, id, commit=False)
-        if not (res is True):
-          self.db.conn.rollback()
-          tkMessageBox.showerror('ProductWidgetError', res)
-          raise res
+        self.checkDBResult(res)
     # Then add any new category relationship
     heads = ('product_id', 'category_id')
     for id in catIds:
       if id not in self.currentProduct['category_ids']:
         vals = (productId, id)
         res = self.db.simpleInsert('product_category', heads, vals, commit=False)
-        if not (res is True):
-          self.db.conn.rollback()
-          tkMessageBox.showerror('ProductWidgetError', res)
-          raise res
+        self.checkDBResult(res)
     # variant
     # First delete any variant that was deleted
     variantIds = [variant.variantId for variant in self.variants]
     for id in self.currentProduct['variant_ids']:
       if id not in variantIds:
         res = self.db.deleteLineFromId('variant', id)
-        if not (res is True):
-          self.db.conn.rollback()
-          tkMessageBox.showerror('ProductWidgetError', res)
-          raise res
+        self.checkDBResult(res)
     # Then insert/update the variants from the form
     heads = ('name', 'price', 'weight', 'product_id')
     for variant in self.variants:
@@ -247,35 +226,24 @@ class ProductWidget(BaseWidget):
                        commit=False)
       else:
         res = self.db.simpleInsert('variant', heads, vals, commit=False)
-      if not (res is True):
-        self.db.conn.rollback()
-        tkMessageBox.showerror('ProductWidgetError', res)
-        raise res
+      self.checkDBResult(res)
     # Finally commit
     self.db.conn.commit()
     # Upload Images to S3
     oldName = self.currentProduct['product_name']
-    if name != oldName and not self.imagesModified:
-      oldProdKey = self.bucket.get_key(str(productId)+'_'+oldName)
-      if oldProdKey:
-        self.bucket.copy_key(str(productId)+'_'+name, self.bucket.name,
-                       str(productId)+'_'+oldName)
-      oldVarKey = self.bucket.get_key(str(productId)+'_'+oldName+
-                       '_'+'variants')
-      if oldVarKey:
-        self.bucket.copy_key(str(productId)+'_'+name+'_'+'variants',
-                       self.bucket.name,
-                       str(productId)+'_'+oldName+'_'+'variants')
-    elif self.imagesModified:
-      prodImgFileName = self.prodPicPreview.getImageFileName()
-      if prodImgFileName != self.placeholderPath:
-        prodImgKey = self.bucket.new_key(str(productId)+'_'+name)
-        prodImgKey.set_contents_from_filename(prodImgFileName)
-        prodImgKey.set_metadata('alt', 'image of ' + name)
-        prodImgKey.set_metadata('title', name)
-      # don't forget to delete old images if name changed
-      if name != oldName:
-        self.bucket.delete_key(str(productId)+'_'+oldName)
+    oldKey = createKey(productId, oldName)
+    newKey = None
+    newMetadata = None 
+    newImage = None
+    if name != oldName:
+      newMetadata = {'alt':'picture of ' + str(name),
+                     'title':name}
+      newKey = createKey(productId, name)
+    if self.imageModified:
+      newImage = self.prodPicPreview.getImageFileName()
+    self.awsManager.updateImage(oldKey, newName=newKey, 
+                       newMetadata=newMetadata, newImagePath=newImage)
+    # Reloading Product info in Widget
     self.productSelect(productId)
     tkMessageBox.showinfo('Product Update Success',
                        'The product was updated in\n'
@@ -418,7 +386,7 @@ class ProductWidget(BaseWidget):
 
   def loadProdImage(self):
     """Loads the product image into the ImagePreview widget"""
-    self.imagesModified = True
+    self.imageModified = True
     self.prodPicPreview.setImageFromFileName(askopenfilename())
 
   def new(self):
@@ -446,7 +414,7 @@ class ProductWidget(BaseWidget):
     productInfo = self.db.getProductInfoByID(productID)    
     self.currentProduct = productInfo
     self.editionMode = 'edit'
-    self.imagesModified = False
+    self.imageModified = False
     self.clearAllInfo()
     self.nameTextVar.set(productInfo['product_name'])
     self.activeState.set(productInfo['product_active'])
@@ -481,6 +449,13 @@ class ProductWidget(BaseWidget):
     self.updateMainFrame()
     self.id = 0
 
+  def checkDBResult(self, res):
+    """Checks if DBConnect succeeded, throws error and roll back if not"""
+    if not (res is True):
+      self.db.conn.rollback()
+      tkMessageBox.showerror('ProductWidgetError', res)
+      raise res
+
 
 class VariantFrame(tk.Frame):
   """A line that enables variant editing"""
@@ -490,6 +465,7 @@ class VariantFrame(tk.Frame):
     tk.Frame.__init__(self, master)
     self.id=id
     self.variantId = None
+    self.imageModified = False
     # Name
     self.nameLabel = tk.Label(self, text="Name: ")
     self.nameVar = tk.StringVar()
@@ -535,6 +511,7 @@ class VariantFrame(tk.Frame):
   def loadImage(self):
     """Loads the product image into the ImagePreview widget"""
     self.imagePreview.setImageFromFileName(askopenfilename())
+    self.imageModified = True
 
   def getImagePath(self):
     """Returns path of variant image"""
