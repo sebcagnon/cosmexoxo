@@ -71,6 +71,13 @@ class AWSManager(object):
     if not (newImagePath or newName or newMetadata):
       return
     key = self.bucket.get_key(name)
+    if not key: # create new key
+      uploadName = newName if newName else name
+      if newMetadata:
+        self.uploadImage(uploadName, newImagePath, **newMetadata)
+      else:
+        self.uploadImage(uploadName, newImagePath)
+      return
     if newMetadata:
       key.metadata = newMetadata
     if newImagePath:
