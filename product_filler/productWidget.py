@@ -162,7 +162,7 @@ class ProductWidget(BaseWidget):
     # Upload Images to S3
     prodImgFileName = self.prodPicPreview.getImageFileName()
     if prodImgFileName != self.placeholderPath:
-      keyName = createKey(productId, name)
+      keyName = self.awsManager.createKey(productId, name)
       metadata = {'alt':'picture of ' + str(name),
                   'title':name}
       self.awsManager.uploadImage(keyName, prodImgFileName, **metadata)
@@ -174,7 +174,8 @@ class ProductWidget(BaseWidget):
         # using the fact that they were added in the same order
         variantId = variantIds[i]
         variantName = variant.getInfo()[0]
-        variantKey = createKey(productId, name, variantId, variantName)
+        variantKey = self.awsManager.createKey(productId, name,
+                       variantId, variantName)
         metadata = {'alt':'picture of {} from {}'.format(variantName, name),
                     'title':'{} from {}'.format(variantName, name)}
         self.awsManager.uploadImage(variantKey, variantImgPath, **metadata)
@@ -232,14 +233,14 @@ class ProductWidget(BaseWidget):
 
     # Upload Images to S3
     oldName = self.currentProduct['product_name']
-    oldKey = createKey(productId, oldName)
+    oldKey = self.awsManager.createKey(productId, oldName)
     newKey = None
     newMetadata = None 
     newImage = None
     if name != oldName:
       newMetadata = {'alt':'picture of ' + str(name),
                      'title':name}
-      newKey = createKey(productId, name)
+      newKey = self.awsManager.createKey(productId, name)
     if self.imageModified:
       newImage = self.prodPicPreview.getImageFileName()
     self.awsManager.updateImage(oldKey, newName=newKey, 
@@ -249,7 +250,8 @@ class ProductWidget(BaseWidget):
       if id not in variantIds:
         oldName = self.currentProduct['product_name']
         oldVariantName = self.currentProduct['variants'][id]['variant_name']
-        vKey = createKey(productId, oldName, id, oldVariantName)
+        vKey = self.awsManager.createKey(productId, oldName, id,
+                       oldVariantName)
         self.awsManager.deleteKey(vKey)
     # update images for all the other keys
     variantsInfo = self.db.getProductVariants(id=productId)
@@ -259,24 +261,24 @@ class ProductWidget(BaseWidget):
       if vImgPath != self.placeholderPath:
         vName = variant.getInfo()[0]
         vId = variant.variantId
-        newKey = createKey(productId, name, vId, vName)
+        newKey = self.awsManager.createKey(productId, name, vId, vName)
         metadata = {'alt':'picture of {} from {}'.format(vName, name),
                     'title':'{} from {}'.format(vName, name)}
         if variant.variantId:
           # update case
           oldName = self.currentProduct['product_name']
           oldVName = self.currentProduct['variants'][vId]['variant_name']
-          oldKey = createKey(productId, oldName, vId, oldVName)
+          oldKey = self.awsManager.createKey(productId, oldName, vId, oldVName)
           self.awsManager.updateImage(oldKey, newName=newKey,
                        newMetadata=metadata, newImagePath=vImgPath)
         else:
           # create case: need to find id first
           for key, val in variantsInfo['variants'].items():
             if variant.getInfo() == (val['variant_name'],
-                       val['variant_price'], dbVariants['variant_weight']):
+                       str(val['variant_price']), str(val['variant_weight'])):
               vId = key
               break
-          newKey = createKey(productId, name, vId, vName)
+          newKey = self.awsManager.createKey(productId, name, vId, vName)
           self.awsManager.uploadImage(newKey, vImgPath, **metadata)
 
     # Reloading Product info in Widget
@@ -373,7 +375,7 @@ class ProductWidget(BaseWidget):
       newVariant.set(id=id, name=info['variant_name'],
                        weight=str(info['variant_weight']),
                        price=str(info['variant_price']))
-      variantKey = createKey(self.currentProduct['product_id'],
+      variantKey = self.awsManager.createKey(self.currentProduct['product_id'],
                        self.currentProduct['product_name'],
                        id, info['variant_name'])
       destFile = os.path.join(os.getenv('LOCALAPPDATA'), 'cosmexo',
@@ -465,7 +467,7 @@ class ProductWidget(BaseWidget):
     self.categoryText.set('\n'.join(catNames))
     self.descText.insert(1.0, productInfo['product_description'])
     #images
-    keyName = createKey(productID, productInfo['product_name'])
+    keyName = self.awsManager.createKey(productID, productInfo['product_name'])
     prodImgPath = os.path.join(os.getenv('LOCALAPPDATA'), 'cosmexo',
                        'product.jpg')
     if self.awsManager.getImageFromName(keyName, prodImgPath):
@@ -650,7 +652,3 @@ class ProductWidgetError(BaseException):
   
   def __str__(self):
     return repr(self.value)
-
-def createKey(*args):
-  """Creates key name from args"""
-  return '_'.join(map(str, args))
