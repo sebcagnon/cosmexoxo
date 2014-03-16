@@ -566,6 +566,7 @@ class CategorySelection(tk.Toplevel):
   def __init__(self, onSelect, onCancel, categoryList, chosenList=None,
                        selectImage=None, cancelImage=None):
     tk.Toplevel.__init__(self)
+    self.choicesFrame = VerticalScrolledFrame(self)
     if chosenList == None:
       chosenList = []
     self.onSelect = onSelect
@@ -574,9 +575,11 @@ class CategorySelection(tk.Toplevel):
       state=0
       if (name, id) in chosenList:
         state=1
-      self.choices.append(CategoryChoice(id, name, state=state, master=self))
+      self.choices.append(CategoryChoice(id, name, state=state, 
+                       master=self.choicesFrame.interior))
     for choice in self.choices:
       choice.grid(stick=tk.W)
+    self.choicesFrame.grid()
     self.buttonFrame = tk.Frame(self)
     self.buttonFrame.grid()
     self.selectButton = tk.Button(self.buttonFrame, text="Select ",
