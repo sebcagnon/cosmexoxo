@@ -229,6 +229,7 @@ class ProductWidget(BaseWidget):
       self.checkDBResult(res)
     # Finally commit
     self.db.conn.commit()
+
     # Upload Images to S3
     oldName = self.currentProduct['product_name']
     oldKey = createKey(productId, oldName)
@@ -243,6 +244,41 @@ class ProductWidget(BaseWidget):
       newImage = self.prodPicPreview.getImageFileName()
     self.awsManager.updateImage(oldKey, newName=newKey, 
                        newMetadata=newMetadata, newImagePath=newImage)
+    # delete unused variant images
+    for id in self.currentProduct['variant_ids']:
+      if id not in variantIds:
+        oldName = self.currentProduct['product_name']
+        oldVariantName = self.currentProduct['variants'][id]['variant_name']
+        vKey = createKey(productId, oldName, id, oldVariantName)
+        self.awsManager.deleteKey(vKey)
+    # update images for all the other keys
+    variantsInfo = self.db.getProductVariants(id=productId)
+    for variant in self.variants:
+      # always update if current image is different from placeholder
+      vImgPath = variant.getImagePath()
+      if vImgPath != self.placeholderPath:
+        vName = variant.getInfo()[0]
+        vId = variant.variantId
+        newKey = createKey(productId, name, vId, vName)
+        metadata = {'alt':'picture of {} from {}'.format(vName, name),
+                    'title':'{} from {}'.format(vName, name)}
+        if variant.variantId:
+          # update case
+          oldName = self.currentProduct['product_name']
+          oldVName = self.currentProduct['variants'][vId]['variant_name']
+          oldKey = createKey(productId, oldName, vId, oldVName)
+          self.awsManager.updateImage(oldKey, newName=newKey,
+                       newMetadata=metadata, newImagePath=vImgPath)
+        else:
+          # create case: need to find id first
+          for key, val in variantsInfo['variants'].items():
+            if variant.getInfo() == (val['variant_name'],
+                       val['variant_price'], dbVariants['variant_weight']):
+              vId = key
+              break
+          newKey = createKey(productId, name, vId, vName)
+          self.awsManager.uploadImage(newKey, vImgPath, **metadata)
+
     # Reloading Product info in Widget
     self.productSelect(productId)
     tkMessageBox.showinfo('Product Update Success',
