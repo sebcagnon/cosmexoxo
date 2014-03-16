@@ -1,4 +1,5 @@
 import boto
+import string
 
 class AWSManager(object):
   """Class that handles the connection, upload and download of S3 objects"""
@@ -85,6 +86,12 @@ class AWSManager(object):
     if newName:
       self.updateName(name, newName)
 
+  def createKey(self, *args):
+    """Creates key name from args"""
+    step1 = '_'.join(map(str, args))
+    return step1.translate(string.maketrans(' ', '-'),
+                         string.punctuation.translate(None, '-_'))
+
 
 class AWSManagerError(BaseException):
   """Error raised when trying to use a disconnected AWSManager"""
@@ -112,6 +119,10 @@ if __name__=='__main__':
     awsMgr.connect()
     assert awsMgr.connectionStatus == awsMgr.CONNECTED, 'Connection failure'
     print 'Connected'
+    
+    # Testing createKey:
+    assert awsMgr.createKey(29, 'mascada boom', 40, 'Very-b@d_ke!#') == \
+                       '29_mascada-boom_40_Very-bd_ke', 'createKey failed'
 
     # Testing upload and download image
     testImgFileName = 'resources/placeholder.png'
