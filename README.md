@@ -1,6 +1,12 @@
-# Started from node-js-sample
+# Cosmexoxo
 
-This is a barebones Node.js app using the [Express](http://expressjs.com/) framework.
+This project is a shopping website supported by a database. The goal is to sell cosmetics, thus the name. But most of the code is reusable for any shopping website.
+
+## Current Status
+
+The database entry software (Product Filler) is ready, and is currently used to fill a database of products.
+
+The website only has navigation bar, and will soon be able to display products taken from the database. From there the cart and payment system needs to be added.
 
 ## Running Locally
 
