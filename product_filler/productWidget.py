@@ -290,7 +290,7 @@ class ProductWidget(BaseWidget):
 
   def getFormInfo(self):
     """Retrieves all the information from the different entries and checkboxes"""
-    name = self.nameTextVar.get().encode('utf-8')
+    name = self.nameTextVar.get().encode('utf-8').strip()
     active = self.activeState.get() == 1
     desc = self.descText.get(1.0, tk.END).encode('utf-8').strip()
     chosenBrandID = -1
@@ -536,7 +536,7 @@ class VariantFrame(tk.Frame):
 
   def getInfo(self):
     """Returns (name, price, weight)"""
-    return (self.nameVar.get().encode('utf-8'), self.priceVar.get(),
+    return (self.nameVar.get().encode('utf-8').strip(), self.priceVar.get(),
                        self.weightVar.get())
 
   def set(self, name='', price='', weight='', id=None):
