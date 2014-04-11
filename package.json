@@ -10,7 +10,9 @@
     "express": "~3.3.4",
     "ejs": "0.8.4",
     "ejs-locals": "1.0.x",
-    "pg": "2.x"
+    "pg": "2.x",
+    "async": "0.6.x",
+    "underscore": "1.5.x"
   },
   "engines": {
     "node": "0.10.13",
