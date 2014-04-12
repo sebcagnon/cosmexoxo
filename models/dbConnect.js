@@ -35,17 +35,28 @@ var config = {
 module.exports = {
 
   // Get product info from db and format it into a nice Product object
-  getProduct : function (productId, onSuccess, onError) {
+  getProduct : function (productId, callback) {
     async.parallel([
         async.apply(getProductBasics, productId),
         async.apply(getProductCategories, productId),
         async.apply(getProductVariants, productId)
       ],
       function(err, result) {
-        if (err) return onError(err);
+        if (err) return callback(err);
         var product = createProduct(result)
-        onSuccess(product);
+        callback(null, product);
       })
+  },
+
+  getProductsList : function (callback) {
+    pg.connect(config, function onConnected(err, client, done) {
+      if (err) return callback(err);
+      var str = 'SELECT product_id, name FROM product_info.product';
+      client.query(str, function onQueryFinished(err, result) {
+        callback(err, result.rows);
+        done();
+      });
+    });
   },
 
   // Closes remaining connections to the database
