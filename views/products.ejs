@@ -3,8 +3,8 @@
   <ul>
   <% for (var i=0; i<products.length; i++) {%>
     <li>
-      <a href="/product/<%= products[i]['product_id']%>">
-        <%= products[i]['name'] %>
+      <a href="/product/<%= products[i].product_id%>">
+        <%= products[i].name %>
       </a>
     </li>
   <% } %>

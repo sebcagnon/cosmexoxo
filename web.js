@@ -17,7 +17,11 @@ app.configure( function () {
   app.use("/styles", express.static(__dirname + '/public/styles'));
   app.use("/bootstrap", express.static(__dirname + '/public/bootstrap'));
   app.use("/js", express.static(__dirname + '/public/js'));
-  app.locals.displayPrice = require('./public/js/displayPrice');
+});
+
+app.locals({
+  displayPrice: require('./public/js/displayPrice'),
+  S3URL: process.env.S3URL || "http://staging-media.cosmexo.com"
 });
 
 app.get('/', function(request, response) {
@@ -45,15 +49,18 @@ app.get('/brand/', function(request, response) {
 });
 
 app.get('/product/:productID', function(request, response) {
-  productData = {};
-  response.render('product', productData);
+  db.getProduct(request.params.productID, function getProductCb(err, product) {
+    if (err) return response.render('404',
+                      {text:'Could not get product: ' + err});
+    response.render('product', {product:product});
+  });
 });
 
 // debug function to show all products available
 app.get('/products', function(request, response) {
-  db.getProductsList(function getProducsCallback(err, productList) {
+  db.getProductsList(function getProducsCb(err, productList) {
     if (err) return response.render('404',
-                               {text:'Could not get Products list: ' + err});
+                      {text:'Could not get Products list: ' + err});
     response.render('products', {products:productList});
   });
 });

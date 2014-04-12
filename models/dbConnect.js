@@ -64,6 +64,13 @@ var db = {
   // to allow for programs to finish nicely.
   close : function () {
     pg.end();
+  },
+
+  // Creates an key for AWS S3 from products/variants name and id
+  createKey : function (keyParts) {
+    var key = keyParts.join('_');
+    return replaceAll(' ', '-', key)
+           .replace(/[!"#$%&'()\*\+,\.\/:;\<=\>\?@\[\\\]\^`\{\|\}~]/g, '');
   }
 
 }; // end of exported functions
@@ -129,6 +136,8 @@ function createProduct(result) {
   var product = {
     product_id: basics.product_id,
     name: basics.name,
+    desc: basics.description,
+    key: db.createKey([basics.product_id, basics.name]),
     brand_name: basics.brand_name,
     company_name: basics.company_name,
     categories: _.pluck(result[1], 'name'),
@@ -136,7 +145,9 @@ function createProduct(result) {
                 return {variant_id: variant.variant_id,
                         name: variant.name,
                         price: variant.price,
-                        weight: variant.weight}
+                        weight: variant.weight,
+                        key: db.createKey([basics.product_id, basics.name,
+                                           variant.variant_id, variant.name])}
               })
   };
   return product;
@@ -144,8 +155,13 @@ function createProduct(result) {
 
 // helper functions
 
+
+// Replaces all occurences of 'find' by 'replace' in 'str'
 function replaceAll(find, replace, str) {
   return str.replace(new RegExp(find, 'g'), replace);
 }
+
+
+
 
 module.exports = db;
