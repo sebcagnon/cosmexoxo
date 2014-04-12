@@ -1,22 +1,22 @@
-var dbConnect = require('../models/dbConnect.js')
+var db = require('../models/dbConnect')
 
 console.log("Testing getProduct");
 
 function callback1(err, result) {
   if (err) {
     console.log('Error in getProduct: ' + err);
-    dbConnect.close();
+    db.close();
     return;
   }
   console.log('getProduct result:');
   console.log(result);
-  dbConnect.getProductsList(callback2);
+  db.getProductsList(callback2);
 }
 
 function callback2(err, result) {
   if (err) {
     console.log('Error in getProductsList: ' + err);
-    dbConnect.close();
+    db.close();
     return;
   }
   console.log('getProductsList result:')
@@ -26,7 +26,7 @@ function callback2(err, result) {
 
 function onFinished() {
   console.log('Finished!');
-  dbConnect.close();
+  db.close();
 }
 
-dbConnect.getProduct(24, callback1);
+db.getProduct(24, callback1);

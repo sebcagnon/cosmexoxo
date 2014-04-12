@@ -1,4 +1,4 @@
-var productsDB = require ('../models/products.js');
+var productsDB = require ('./models/products.js');
 
 console.log('List of Brands:');
 console.log(productsDB.getBrandList());

@@ -2,15 +2,14 @@ var express = require('express')
   , fs = require("fs")
   , engine = require("ejs-locals")
   , http = require('http')
-  , products = require('./models/products');
-
+  , products = require('./models/products')
+  , db = require('./models/dbConnect');
 
 var app = express();
 app.use(express.logger());
 app.set('port', process.env.PORT || 8080);
 
 app.configure( function () {
-  console.log('setting view engine');
   app.set('views', __dirname + '/views');
   app.engine('ejs', engine);
   app.set('view engine', 'ejs');
@@ -26,21 +25,51 @@ app.get('/', function(request, response) {
 });
 
 app.get('/brand/:brandName', function(request, response) {
-  formattedName = request.params.brandName[0].toUpperCase() + request.params.brandName.substring(1).toLowerCase();
-  if ( products.isBrand(request.params.brandName) ) {  
-    response.render('brand', { isBrand:true, brandName:formattedName, products:products.getProductsByBrand(formattedName)});
+  var name = request.params.brandName;
+  var newName = name[0].toUpperCase() + name.substring(1).toLowerCase();
+  if ( products.isBrand(name) ) {
+    response.render('brand', { isBrand:true,
+                               brandName:newName,
+                               products:products.getProductsByBrand(newName)});
   } else {
-    response.render('brand', { isBrand:false, brandName:formattedName, brands:products.getBrandList()});
+    response.render('brand', { isBrand:false,
+                               brandName:formattedName,
+                               brands:products.getBrandList()});
   }
 });
 
 app.get('/brand/', function(request, response) {
-  response.render('brand', { isBrand:false, brandName:'', brands:products.getBrandList()});
+  response.render('brand', { isBrand:false,
+                             brandName:'',
+                             brands:products.getBrandList()});
 });
 
 app.get('/product/:productID', function(request, response) {
   productData = {};
   response.render('product', productData);
+});
+
+// debug function to show all products available
+app.get('/products', function(request, response) {
+  db.getProductsList(function getProducsCallback(err, productList) {
+    if (err) return response.render('404',
+                               {text:'Could not get Products list: ' + err});
+    response.render('products', {products:productList});
+  });
+});
+
+// Handling pages not handled by app.get
+app.use(function(req, res, next){
+  res.status(404);
+  if (req.accepts('html')) {
+    res.render('404', { text: req.url });
+    return;
+  }
+  if (req.accepts('json')) {
+    res.send({ error: 'Not found' });
+    return;
+  }
+  res.type('txt').send('Not found');
 });
 
 http.createServer(app).listen(app.get('port'), function () {

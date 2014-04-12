@@ -1,4 +1,4 @@
-var displayPrice = require('../public/js/displayPrice')
+var displayPrice = require('./public/js/displayPrice')
 
 console.log('0.00:\t' + displayPrice(0));
 console.log('1.00:\t' + displayPrice(100));

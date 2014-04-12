@@ -5,7 +5,7 @@ var _ = require('underscore');
 
 // initializing db values
 
-var PGPASS_FILE = '../.pgpass';
+var PGPASS_FILE = './.pgpass';
 if (process.env.DATABASE_URL) {
   var pgregex = /postgres:\/\/([^:]+):([^@]+)@([^:]+):(\d+)\/(.+)/;
   var match = process.env.DATABASE_URL.match(pgregex);
@@ -32,7 +32,7 @@ var config = {
   ssl: true
 }
 
-module.exports = {
+var db = {
 
   // Get product info from db and format it into a nice Product object
   getProduct : function (productId, callback) {
@@ -66,7 +66,7 @@ module.exports = {
     pg.end();
   }
 
-} // end of exported functions
+}; // end of exported functions
 
 
 // query functions meant to be used in async
@@ -148,3 +148,4 @@ function replaceAll(find, replace, str) {
   return str.replace(new RegExp(find, 'g'), replace);
 }
 
+module.exports = db;
