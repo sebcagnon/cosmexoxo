@@ -66,12 +66,12 @@ var db = {
     brandsRequest(callback);
   },
 
-  // same as getAllBrands, but filters to only keep active ones
-  getActiveBrands : function (callback) {
+  // same as getAllBrands, but filters to only keep in_navbar ones
+  getNavbarBrands : function (callback) {
     brandsRequest(function onBrands(err, brandTree) {
       if (err) return callback(err);
       var filteredTree = filterBrands(brandTree);
-      callback(null, brandTree);
+      callback(null, filteredTree);
     });
   },
 
@@ -195,7 +195,6 @@ function brandsRequest(callback) {
 function createTree(brandsList) {
   var brandTree = [];
   var currentCompany = null;
-  console.log(brandsList)
   for (var i=0; i<brandsList.length; i++) {
     var line = brandsList[i];
     if (currentCompany == null || line.company_id != currentCompany.id) {
@@ -214,7 +213,26 @@ function createTree(brandsList) {
 
 // Only keeps brands that are in_navbar
 function filterBrands(brandTree) {
-  return brandTree;
+  var filteredTree = [];
+  var others = {id:-1, name:'Others', in_navbar:true, brands:[]};
+  var currentCompany = null;
+  filteredTree.push(others);
+  for (var ic=0; ic<brandTree.length; ic++) {
+    if (brandTree[ic].in_navbar == true) {
+      currentCompany = {id:brandTree[ic].id, name:brandTree[ic].name,
+                        in_navbar:brandTree[ic].in_navbar, brands:[]};
+      filteredTree.push(currentCompany);
+    } else {
+      currentCompany = others;
+    }
+    for (var ib=0; ib<brandTree[ic].brands.length; ib++) {
+      var brand = brandTree[ic].brands[ib];
+      var brandCopy = {id:brand.id, name:brand.name,
+                       in_navbar:brand.in_navbar};
+      if (brandCopy.in_navbar == true) currentCompany.brands.push(brandCopy);
+    }
+  }
+  return filteredTree;
 }
 
 

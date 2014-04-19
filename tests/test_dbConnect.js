@@ -47,6 +47,17 @@ function testBrandTree(err, result) {
   for (var i=0; i<company.brands.length; i++) {
     console.log(company.brands[i]);
   }
+  db.getNavbarBrands(testGetNavbarBrands);
+}
+
+function testGetNavbarBrands(err, result) {
+  if (err) {
+    console.log('Error in getAllBrands: ' + err);
+    db.close();
+    return;
+  }
+  console.log('getNavbarBrands result:');
+  console.log(result);
   onFinished();
 }
 
