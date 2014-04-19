@@ -58,6 +58,17 @@ function testGetNavbarBrands(err, result) {
   }
   console.log('getNavbarBrands result:');
   console.log(result);
+  db.getProductsByBrand('Elixir', testGetProductsByBrand);
+}
+
+function testGetProductsByBrand(err, result) {
+  if (err) {
+    console.log('Error in getProductsByBrand: ' + err);
+    db.close();
+    return;
+  }
+  console.log('getProductsByBrand result:');
+  console.log(result);
   onFinished();
 }
 

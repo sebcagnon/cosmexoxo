@@ -54,7 +54,30 @@ var db = {
       if (err) return callback(err);
       var str = 'SELECT product_id, name FROM product_info.product';
       client.query(str, function onQueryFinished(err, result) {
-        callback(err, result.rows);
+        if (err) {
+          callback(err);
+        } else {
+          callback(null, result.rows);
+        }
+        done();
+      });
+    });
+  },
+
+  // Returns a list of all products from 1 brand as the pair {product_id, name}
+  getProductsByBrand : function (brandName, callback) {
+    pg.connect(config, function prodByBrandQuery(err, client, done) {
+      if (err) return callback(err);
+      var str = 'SELECT p.product_id, p.name FROM product_info.product p\
+                 LEFT JOIN product_info.brand b ON p.brand_id = b.brand_id\
+                 WHERE b.name = $1';
+      client.query(str, [brandName], function onQueryFinished(err, result) {
+        if (err) {
+          callback(err);
+        } else {
+          callback(null, result.rows);
+        }
+        done();
         done();
       });
     });
