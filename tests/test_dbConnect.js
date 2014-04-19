@@ -69,6 +69,33 @@ function testGetProductsByBrand(err, result) {
   }
   console.log('getProductsByBrand result:');
   console.log(result);
+  db.getAllCategories(testGetAllCategories);
+}
+
+function testGetAllCategories(err, result) {
+  if (err) {
+    console.log('Error in getAllCategories: ' + err);
+    db.close();
+    return;
+  }
+  console.log('getAllCategories result:');
+  console.log('Raw:');
+  console.log(result);
+  console.log('Pretty:');
+  for (var i=0; i<result.length; i++) {
+    displayCategoryNode(result[i], 1);
+  }
+  db.getProductsByCategory('Shampoo', testGetProductsByCategory);
+}
+
+function testGetProductsByCategory(err, result) {
+  if (err) {
+    console.log('Error in getProductsByCategory: ' + err);
+    db.close();
+    return;
+  }
+  console.log('getProductsByCategory result:');
+  console.log(result);
   onFinished();
 }
 
@@ -78,3 +105,15 @@ function onFinished() {
 }
 
 db.getProduct(24, testGetProduct1);
+
+
+// helper functions
+
+// displays a node and prints all its children with one more tab
+function displayCategoryNode(node, n) {
+  space = Array(n).join('\t');
+  console.log(space + node.id + ': ' + node.name);
+  for (var i=0; i<node.children.length; i++) {
+    displayCategoryNode(node.children[i], n+1);
+  }
+}

@@ -78,7 +78,6 @@ var db = {
           callback(null, result.rows);
         }
         done();
-        done();
       });
     });
   },
@@ -95,6 +94,31 @@ var db = {
       if (err) return callback(err);
       var filteredTree = filterBrands(brandTree);
       callback(null, filteredTree);
+    });
+  },
+
+  // gets all categories and returns them as a nice tree structure
+  getAllCategories : function (callback) {
+    categoriesRequest(callback);
+  },
+
+  getProductsByCategory : function (categoryName, callback) {
+    pg.connect(config, function prodByCatQuery(err, client, done) {
+      if (err) return callback(err);
+      var str = 'SELECT p.product_id, p.name FROM product_info.product p\
+                 INNER JOIN product_info.product_category pc\
+                  ON p.product_id = pc.product_id\
+                 INNER JOIN product_info.category c\
+                  ON pc.category_id = c.category_id\
+                 WHERE c.name = $1';
+      client.query(str, [categoryName], function onQueryFinished(err, result) {
+        if (err) {
+          callback(err);
+        } else {
+          callback(null, result.rows);
+        }
+        done();
+      });
     });
   },
 
@@ -207,7 +231,7 @@ function brandsRequest(callback) {
         done();
         return callback(err);
       }
-      var brandTree = createTree(result.rows);
+      var brandTree = createBrandTree(result.rows);
       callback(null, brandTree);
       done();
     });
@@ -215,7 +239,7 @@ function brandsRequest(callback) {
 }
 
 // creates the company/brand tree from brandsRequest result
-function createTree(brandsList) {
+function createBrandTree(brandsList) {
   var brandTree = [];
   var currentCompany = null;
   for (var i=0; i<brandsList.length; i++) {
@@ -258,6 +282,52 @@ function filterBrands(brandTree) {
   return filteredTree;
 }
 
+// PG request to select all categories and create tree
+function categoriesRequest(callback) {
+  pg.connect(config, function onConnected(err, client, done) {
+    if (err) return callback(err);
+    var str = "SELECT child.category_id as id, child.name,\
+               parent.category_id as parent_id\
+               FROM product_info.category child\
+               LEFT JOIN product_info.category parent\
+                ON child.parent_id = parent.category_id\
+               ORDER BY 1";
+    client.query(str, function onCategoryQuery(err, result) {
+      if (err) {
+        done();
+        return callback(err);
+      }
+      var categoryTree = createCategoryTree(result.rows);
+      callback(null, categoryTree);
+      done();
+    });
+  });
+}
+
+// creates category tree from categoriesRequest result
+function createCategoryTree(categories) {
+  var categoryTree = []; // real tree
+  var dict = {}; // easy access of previously accessed cat by ID
+  while (categories.length > 0)  {
+    var cat = categories.shift();
+    if (cat.children == undefined) {
+      cat.children = [];
+    }
+    dict[cat.id] = cat;
+    if (dict[cat.parent_id] != undefined) {
+      dict[cat.parent_id].children.push(cat);
+      delete cat.parent_id;
+    } else if (cat.parent_id != null) {
+      // didn't meet the parent yet... let's put it at the end again
+      categories.push(cat);
+    } else {
+      // it's a root!
+      categoryTree.push(cat);
+      delete cat.parent_id;
+    }
+  }
+  return categoryTree;
+}
 
 // helper functions
 
