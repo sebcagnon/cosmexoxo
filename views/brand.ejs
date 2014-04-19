@@ -1,18 +1,11 @@
 <% layout('layout') -%>
 <div class="span12">
-  <% if (!isBrand) {%>
-    <% if (brandName !== '') {%>
-      <h2>This brand is not Available: <%= brandName %></h2>
-    <% } %>
-    <h1>List of available brands</h1>
-    <p>blahblahblah</p>
-  <% } else {%>
-    <h1><%= brandName %></h1>
-    <h2>Best Japanese Companies</h2>
-    <ul>
-    <% for (id in products) {%>
-      <li><%= products[id]["name"] %>: <%= displayPrice(products[id]["price"]) %></li>
-    <% } %>
-    </ul>
+  <h1><%= brandName %></h1>
+  <% for (var i=0; i<products.length; i++) {
+      product = products[i]; %>
+    <div class="span3">
+      <a href="/product/<%= product.product_id %>"><%= product.name %></a>
+    </div>
   <% } %>
+  </ul>
 </div>

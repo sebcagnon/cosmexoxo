@@ -28,25 +28,27 @@ app.get('/', function(request, response) {
   response.render('index');
 });
 
-app.get('/brand/:brandName', function(request, response) {
-  var name = request.params.brandName;
-  var newName = name[0].toUpperCase() + name.substring(1).toLowerCase();
-  if ( products.isBrand(name) ) {
-    response.render('brand', { isBrand:true,
-                               brandName:newName,
-                               products:products.getProductsByBrand(newName)});
-  } else {
-    response.render('brand', { isBrand:false,
-                               brandName:formattedName,
-                               brands:products.getBrandList()});
-  }
+app.get('/brands/:brandName', function(request, response) {
+  var brandName = request.params.brandName;
+  db.getProductsByBrand(brandName, function getProdByBrandCb(err, products) {
+    if (err || products.length == 0) {
+      response.redirect('/brands?nobrand=' + brandName);
+    } else {
+      response.render('brand', {brandName:brandName, products:products})
+    }
+  });
 });
 
 app.get('/brands', function(request, response) {
+  var params = { alert:request.query.nobrand };
   db.getAllBrands(function getAllBrandsCb(err, brandTree) {
-    if (err) return response.render('brands',
-                      {error:'Could not get brands list from Database'});
-    response.render('brands', {error:undefined, companies:brandTree});
+    if (err) {
+      params.error = err;
+      return response.render('brands', params);
+    }
+    params.error = undefined;
+    params.companies = brandTree;
+    response.render('brands', params);
   });
 });
 
