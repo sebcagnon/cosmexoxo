@@ -1,0 +1,22 @@
+<% layout('layout') -%>
+<div class="span12" id="brands">
+  <h1>All Companies and Brands</h1>
+  <% if (error) { %>
+  <p><%= error %></p>
+  <% } else { %>
+  <ul>
+    <% for (var ic=0; ic<companies.length; ic++) { %>
+    <li>
+      <%= companies[ic].name %>
+      <ul>
+        <% for (var ib=0; ib<companies[ic].brands.length; ib++) {
+          brand = companies[ic].brands[ib]; %>
+        <li>
+          <a href="/brands/<%= brand.name %>"><%= brand.name %></a>
+        </li>
+        <% } %>
+      </ul>
+    </li>
+    <% } %>
+  </ul>
+  <% } // end of else %>

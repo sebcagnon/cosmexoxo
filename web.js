@@ -42,10 +42,12 @@ app.get('/brand/:brandName', function(request, response) {
   }
 });
 
-app.get('/brand/', function(request, response) {
-  response.render('brand', { isBrand:false,
-                             brandName:'',
-                             brands:products.getBrandList()});
+app.get('/brands', function(request, response) {
+  db.getAllBrands(function getAllBrandsCb(err, brandTree) {
+    if (err) return response.render('brands',
+                      {error:'Could not get brands list from Database'});
+    response.render('brands', {error:undefined, companies:brandTree});
+  });
 });
 
 app.get('/product/:productID', function(request, response) {
