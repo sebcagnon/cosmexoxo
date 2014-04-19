@@ -48,6 +48,7 @@ var db = {
       })
   },
 
+  // Returns a list of all products as the pair {product_id, name}
   getProductsList : function (callback) {
     pg.connect(config, function onConnected(err, client, done) {
       if (err) return callback(err);
@@ -56,6 +57,21 @@ var db = {
         callback(err, result.rows);
         done();
       });
+    });
+  },
+
+  // returns list of all companies with their respective brands
+  // also give their IDs and whether they are active
+  getAllBrands : function (callback) {
+    brandsRequest(callback);
+  },
+
+  // same as getAllBrands, but filters to only keep active ones
+  getActiveBrands : function (callback) {
+    brandsRequest(function onBrands(err, brandTree) {
+      if (err) return callback(err);
+      var filteredTree = filterBrands(brandTree);
+      callback(null, brandTree);
     });
   },
 
@@ -152,6 +168,55 @@ function createProduct(result) {
   };
   return product;
 }
+
+// PG request to select all brands and companies
+function brandsRequest(callback) {
+  pg.connect(config, function onConnected(err, client, done) {
+    if (err) return callback(err);
+    var str = "SELECT c.company_id, c.name, c.in_navbar,\
+      b.brand_id as brand_id, b.name as brand_name,\
+      b.in_navbar as brand_navbar\
+      FROM product_info.company c\
+      LEFT JOIN product_info.brand b ON b.company_id = c.company_id\
+      ORDER BY c.company_id";
+    client.query(str, function onBrandQuery(err, result) {
+      if (err) {
+        done();
+        return callback(err);
+      }
+      var brandTree = createTree(result.rows);
+      callback(null, brandTree);
+      done();
+    });
+  });
+}
+
+// creates the company/brand tree from brandsRequest result
+function createTree(brandsList) {
+  var brandTree = [];
+  var currentCompany = null;
+  console.log(brandsList)
+  for (var i=0; i<brandsList.length; i++) {
+    var line = brandsList[i];
+    if (currentCompany == null || line.company_id != currentCompany.id) {
+      currentCompany = {id:line.company_id,
+                        name:line.name,
+                        in_navbar:line.in_navbar,
+                        brands:[]};
+      brandTree.push(currentCompany);
+    }
+    currentCompany.brands.push({id:line.brand_id,
+                                name:line.brand_name,
+                                in_navbar:line.brand_navbar});
+  }
+  return brandTree;
+}
+
+// Only keeps brands that are in_navbar
+function filterBrands(brandTree) {
+  return brandTree;
+}
+
 
 // helper functions
 
