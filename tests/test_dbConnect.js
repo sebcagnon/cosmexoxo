@@ -85,6 +85,8 @@ function testGetAllCategories(err, result) {
   for (var i=0; i<result.length; i++) {
     displayCategoryNode(result[i], 1);
   }
+  console.log('findSubTree results:')
+  console.log(db.findSubTree('Mascara', result));
   db.getProductsByCategory('Shampoo', testGetProductsByCategory);
 }
 

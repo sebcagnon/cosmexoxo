@@ -2,8 +2,9 @@ var express = require('express')
   , fs = require("fs")
   , engine = require("ejs-locals")
   , http = require('http')
-  , products = require('./models/products')
-  , db = require('./models/dbConnect');
+  , async = require('async')
+  , products = require('./models/products') 
+  , db = require('./models/dbConnect'); // product info requests
 
 var app = express();
 app.use(express.logger());
@@ -19,15 +20,18 @@ app.configure( function () {
   app.use("/js", express.static(__dirname + '/public/js'));
 });
 
+// site wide variables for webpages
 app.locals({
   displayPrice: require('./public/js/displayPrice'),
   S3URL: process.env.S3URL || "http://staging-media.cosmexo.com"
 });
 
+// home page
 app.get('/', function(request, response) {
   response.render('index');
 });
 
+// displays the products of the brand 'brandName'
 app.get('/brands/:brandName', function(request, response) {
   var brandName = request.params.brandName;
   db.getProductsByBrand(brandName, function getProdByBrandCb(err, products) {
@@ -39,6 +43,7 @@ app.get('/brands/:brandName', function(request, response) {
   });
 });
 
+// displays the list of brands sorted by companies
 app.get('/brands', function(request, response) {
   var params = { alert:request.query.nobrand };
   db.getAllBrands(function getAllBrandsCb(err, brandTree) {
@@ -60,12 +65,39 @@ app.get('/product/:productID', function(request, response) {
   });
 });
 
-// debug function to show all products available
+// debug page to show all products available
 app.get('/products', function(request, response) {
   db.getProductsList(function getProducsCb(err, productList) {
     if (err) return response.render('404',
                       {text:'Could not get Products list: ' + err});
     response.render('products', {products:productList});
+  });
+});
+
+// displays the products of one category, and the sub-categories
+app.get('/categories/:catName', function(request, response) {
+  var catName = request.params.catName;
+  async.parallel([
+    db.getAllCategories,
+    async.apply(db.getProductsByCategory, catName)
+    ],
+    function onCategory(err, result) {
+      if (err || result[1].length == 0) {
+        response.redirect('/categories?nocategory=' + catName);
+      } else {
+        var subTree = db.findSubTree(catName, result[0]);
+        console.log(subTree);
+        console.log(result[1]);
+        response.render('category', {catTree:subTree, products:result[1]});
+      }
+    });
+});
+
+// display the hirarchy of categories
+app.get('/categories', function(request, response) {
+  db.getAllCategories(function getCategoriesCb(err, categories) {
+    if (err) return;
+    response.render('categories', {catTree:categories});
   });
 });
 

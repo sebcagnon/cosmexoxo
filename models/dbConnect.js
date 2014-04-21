@@ -122,6 +122,19 @@ var db = {
     });
   },
 
+  // finds a category in the tree by name, and returns the subtree
+  findSubTree : function (name, tree) {
+    for (var i=0; i<tree.length; i++) {
+      if (tree[i].name == name) {
+        return tree[i];
+      } else {
+        var sub = db.findSubTree(name, tree[i].children);
+        if (sub != undefined) return sub;
+      }
+    }
+    return;
+  },
+
   // Closes remaining connections to the database
   // after queries have all returned
   // to allow for programs to finish nicely.

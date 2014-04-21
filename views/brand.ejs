@@ -2,7 +2,7 @@
 <div class="span12">
   <h1><%= brandName %></h1>
   <% for (var i=0; i<products.length; i++) {
-      product = products[i]; %>
+      var product = products[i]; %>
     <div class="span3">
       <a href="/product/<%= product.product_id %>"><%= product.name %></a>
     </div>
