@@ -2,7 +2,7 @@
 <div class="span12" id="brands">
   <h1>All Companies and Brands</h1>
   <% if (alert) { %>
-  <div class="alert alert-danger">
+  <div class="alert alert-warning">
     <p><b>Error</b>: could not find the brand <b><%= alert %></b>. You will find
     the complete list of available brands below.</p>
   </div>
@@ -20,7 +20,7 @@
         <% for (var ib=0; ib<companies[ic].brands.length; ib++) {
           brand = companies[ic].brands[ib]; %>
         <li>
-          <a href="/brands/<%= brand.name %>"><%= brand.name %></a>
+          <%- utils.link_to("/brands/" + brand.name, brand.name) %>
         </li>
         <% } %>
       </ul>
