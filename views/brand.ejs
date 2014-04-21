@@ -1,6 +1,11 @@
 <% layout('layout') -%>
 <div class="span12">
   <h1><%= brandName %></h1>
+  <% if (products.length==0) { %>
+    <div class="alert alert-info">
+      No products available for this brand
+    </div>
+  <% } %>
   <% for (var i=0; i<products.length; i++) {
       var product = products[i]; %>
     <div class="span3">

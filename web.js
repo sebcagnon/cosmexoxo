@@ -37,7 +37,7 @@ app.get('/', function(request, response) {
 app.get('/brands/:brandName', function(request, response) {
   var brandName = decodeURIComponent(request.params.brandName);
   db.getProductsByBrand(brandName, function getProdByBrandCb(err, products) {
-    if (err || products.length == 0) {
+    if (err) {
       response.redirect('/brands?nobrand=' + brandName);
     } else {
       response.render('brand', {brandName:brandName, products:products})
