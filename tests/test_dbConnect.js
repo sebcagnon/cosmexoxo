@@ -1,4 +1,4 @@
-var db = require('../models/dbConnect')
+var db = require('../models/dbConnect');
 
 console.log('Testing key function');
 var arr = [29, 'mascada boom', 40, 'Very-b@d_ke!#'];
@@ -113,7 +113,7 @@ db.getProduct(24, testGetProduct1);
 
 // displays a node and prints all its children with one more tab
 function displayCategoryNode(node, n) {
-  space = Array(n).join('\t');
+  var space = Array(n).join('\t');
   console.log(space + node.id + ': ' + node.name);
   for (var i=0; i<node.children.length; i++) {
     displayCategoryNode(node.children[i], n+1);
