@@ -30,7 +30,7 @@ var config = {
   host: host,
   port: port,
   ssl: true
-}
+};
 
 var db = {
 
