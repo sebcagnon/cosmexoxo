@@ -3,6 +3,11 @@
   <h1><%= catTree.name %></h1>
     <div class="span12">
       <h2>Products</h2>
+      <% if (products.length == 0) { %>
+      	<div class="alert alert-info">
+      		There are no products available in this category.
+      	</div>
+      <% } %>
 	    <% for (var i=0; i<products.length; i++) {
 	      var product = products[i]; %>
 		  <div class="span3">

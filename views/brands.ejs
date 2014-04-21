@@ -3,13 +3,13 @@
   <h1>All Companies and Brands</h1>
   <% if (alert) { %>
   <div class="alert alert-warning">
-    <p><b>Error</b>: could not find the brand <b><%= alert %></b>. You will find
-    the complete list of available brands below.</p>
+    <b>Error</b>: could not find the brand <b><%= alert %></b>. You will find
+    the complete list of available brands below.
   </div>
   <% } %>
   <% if (error) { %>
   <div class="alert alert-danger">
-    <p><%= error %></p>
+    <%= error %>
   </div>
   <% } else { %>
   <ul>
