@@ -68,14 +68,19 @@ var db = {
   getProductsByBrand : function (brandName, callback) {
     pg.connect(config, function prodByBrandQuery(err, client, done) {
       if (err) return callback(err);
-      var str = 'SELECT p.product_id, p.name FROM product_info.product p\
+      var str = 'SELECT p.product_id, p.name, p.description as desc\
+                 FROM product_info.product p\
                  LEFT JOIN product_info.brand b ON p.brand_id = b.brand_id\
                  WHERE b.name = $1';
       client.query(str, [brandName], function onQueryFinished(err, result) {
         if (err) {
           callback(err);
         } else {
-          callback(null, result.rows);
+          callback(null, _.map(result.rows, function addKeys (row) {
+            row.key = db.createKey([row.product_id, row.name]);
+            row.link = '/product/' + row.product_id;
+            return row;
+          }));
         }
         done();
       });
@@ -105,7 +110,8 @@ var db = {
   getProductsByCategory : function (categoryName, callback) {
     pg.connect(config, function prodByCatQuery(err, client, done) {
       if (err) return callback(err);
-      var str = 'SELECT p.product_id, p.name FROM product_info.product p\
+      var str = 'SELECT p.product_id, p.name, p.description as desc\
+                 FROM product_info.product p\
                  INNER JOIN product_info.product_category pc\
                   ON p.product_id = pc.product_id\
                  INNER JOIN product_info.category c\
@@ -115,7 +121,11 @@ var db = {
         if (err) {
           callback(err);
         } else {
-          callback(null, result.rows);
+          callback(null, _.map(result.rows, function addKeys (row) {
+            row.key = db.createKey([row.product_id, row.name]);
+            row.link = '/product/' + row.product_id;
+            return row;
+          }));
         }
         done();
       });
@@ -216,6 +226,7 @@ function createProduct(result) {
     key: db.createKey([basics.product_id, basics.name]),
     brand_name: basics.brand_name,
     company_name: basics.company_name,
+    link: '/product/' + basics.product_id,
     categories: _.pluck(result[1], 'name'),
     variants: _.map(result[2], function selector(variant) {
                 return {variant_id: variant.variant_id,
