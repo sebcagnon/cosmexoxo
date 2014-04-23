@@ -1,18 +1,22 @@
 <% layout('layout') -%>
 <div class="span12" id="product">
   <div class="span4" id="productImage">
-    <img class="img-responsive" src="<%= S3URL + '/' + product.key %>">
+    <%- utils.responsiveImage(S3URL + '/' + product.key,
+                              'picture of ' + product.name) %>
   </div>
-  <div class="span7">
+  <div class="span7" id="productDesc">
     <h1><%= product.brand_name %> <%= product.name %></h1>
     <h3>by <%= product.company_name %></h3>
     <p><%= product.desc %></p>
   </div>
 </div>
 <div class="span12" id="variants">
-  <% for (var i=0; i<product.variants.length; i++) { %>
+  <% for (var i=0; i<product.variants.length; i++) {
+      variant = product.variants[i] %>
   <div class="span3" id="variant">
-    <img class="img-responsive" src="<%= S3URL+'/'+product.variants[i].key%>">
+    <%- utils.responsiveImage(S3URL + '/' + variant.key,
+                              alt='Picture of a ' + variant.name + ' of ' +
+                                  product.name) %>
     <p><%= product.variants[i].name %></p>
     <p>Price: <%= product.variants[i].price %>$</p>
     <a href="#">Buy Now!</a>
@@ -20,12 +24,14 @@
   <% } %>
 </div>
 <div class="span12" id="similarProducts">
-  <p><a href="/brands/<%= product.brand_name %>">
-    More products from <%= product.brand_name %>
-  </a></p>
-  <% for (var i=0; i<product.categories.length; i++) {%>
-  <p><a href="categories/<%= product.categories[i] %>">
-    More <%= product.categories[i] %> products
-  </a></p>
+  <p>
+  <%- utils.link_to('/brands/' + product.brand_name,
+                    'More products from ' + product.brand_name) %>
+  </p>
+  <% for (var i=0; i<product.categories.length; i++) { %>
+  <p>
+    <%- utils.link_to('/categories/' + product.categories[i],
+                    'More ' + product.categories[i] + ' products') %>
+  </p>
   <% } %>
 </div>
