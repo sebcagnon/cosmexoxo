@@ -6,11 +6,23 @@
       No products available for this brand
     </div>
   <% } %>
-  <% for (var i=0; i<products.length; i++) {
-      var product = products[i]; %>
-    <div class="span3">
-      <a href="/product/<%= product.product_id %>"><%= product.name %></a>
-    </div>
-  <% } %>
+  <ul class="thumbnails">
+    <% for (var i=0; i<products.length; i++) {
+        var product = products[i]; %>
+      <li class="span3">
+        <div class="thumbnail">
+          <a href="<%= product.link %>">
+            <%- utils.responsiveImage(S3URL +'/'+ product.key, product.name) %>
+          </a>
+          <h3><%- product.name %></h3>
+          <p><%- product.desc.slice(0, 40)%>...</p>
+          <p>
+            <a class="btn btn-primary" href="<%= product.link %>">
+              Read more
+            </a>
+          </p>
+        </div>
+      </li>
+    <% } %>
   </ul>
 </div>
