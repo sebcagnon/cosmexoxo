@@ -11,17 +11,25 @@
   </div>
 </div>
 <div class="span12" id="variants">
-  <% for (var i=0; i<product.variants.length; i++) {
-      variant = product.variants[i] %>
-  <div class="span3" id="variant">
-    <%- utils.responsiveImage(S3URL + '/' + variant.key,
-                              alt='Picture of a ' + variant.name + ' of ' +
-                                  product.name) %>
-    <p><%= product.variants[i].name %></p>
-    <p>Price: <%= product.variants[i].price %>$</p>
-    <a href="#">Buy Now!</a>
-  </div>
-  <% } %>
+  <ul class="thumbnails">
+    <% for (var i=0; i<product.variants.length; i++) {
+        var variant = product.variants[i]; %>
+      <li class="span3">
+        <div class="thumbnail">
+          <%- utils.responsiveImage(S3URL +'/'+ variant.key,
+                                    'Picture of a ' + variant.name + ' of ' +
+                                    product.name) %>
+          <h3><%- variant.name %></h3>
+          <p>Price: <%= product.variants[i].price %>$</p>
+          <p>
+            <a class="btn btn-primary" href="#">
+              Buy Now!
+            </a>
+          </p>
+        </div>
+      </li>
+    <% } %>
+  </ul>
 </div>
 <div class="span12" id="similarProducts">
   <p>
