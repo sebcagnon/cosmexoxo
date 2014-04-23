@@ -20,6 +20,13 @@ var utils = {
     }
     resultStr += '\n' + space + '</ul>';
     return resultStr;
+  },
+
+  // creates the html for a responsive image
+  responsiveImage : function (link, alt, title) {
+    title = title || alt;
+    return '<img class="img-responsive" src="' + link + '" alt="' + alt +
+            '" title="' + title + '">';
   }
 }; // end of exported functions
 

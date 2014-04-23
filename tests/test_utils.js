@@ -19,7 +19,10 @@ function onFinished() {
 }
 
 // start tests by getting all categories
-console.log('link_to results:')
+console.log('link_to results:');
 console.log(utils.link_to('/categories/Eye Liner', 'Eye Liner products'));
+console.log('responsive image:');
+console.log(utils.responsiveImage('http://www.example.com/myimage.jpg',
+                          "example image"));
 
 db.getAllCategories(testDisplayCategoryTree);
