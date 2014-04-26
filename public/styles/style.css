@@ -120,6 +120,11 @@ ul.dropdown-menu {
   background-image: none;
 }
 
+li.dropdown-submenu > ul {
+    columns: 2;
+    -webkit-columns: 2;
+    -moz-columns: 2;
+}
 
 .dropdown-submenu{position:relative;}
 .dropdown-submenu>.dropdown-menu {
