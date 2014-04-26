@@ -1,16 +1,14 @@
 body {
+  padding-top: 60px;
   padding-bottom: 20px;
   font-family: 'Didact Gothic', sans-serif;
 }
 
 @media (min-width: 980px) {
   body {
-    padding-top: 60px;
     padding-bottom: 40px;
   }
 }
-
-
 
 /* Custom container */
 .container {
@@ -25,20 +23,8 @@ body {
   padding-top: 15px;
 }
 
-/* debugging
-.span3, .span6, .span1, .span8 {
-  border: solid 1px red;
-}
-*/
-
-/* Customize the navbar links to be fill the entire space of the .navbar */
-.navbar .brand {
-  padding-left: 5px;
-  padding-top: 5px;
-}
-
 /* navbar colors */
-.navbar-inner, .navbar .btn-navbar {
+.navbar-inner, .navbar .navbar-btn {
   background: #696d75; /* Old browsers */
   background: -moz-linear-gradient(top, #696d75 1%, #363636 100%); /* FF3.6+ */
   background: -webkit-gradient(linear, left top, left bottom, color-stop(1%,#696d75), color-stop(100%,#363636)); /* Chrome,Safari4+ */
@@ -49,36 +35,34 @@ body {
   filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#696d75', endColorstr='#363636',GradientType=0 ); /* IE6-9 */
 }
 
-.navbar .brand, .navbar .nav li a{
+.navbar .navbar-brand, .navbar .nav li a{
   color: #EEEEEE;
   font-weight: bold;
-  text-align: center;
   border-left: 1px solid rgba(255,255,255,.75);
   border-right: 1px solid rgba(255,255,255,.9);
+  border-bottom: 2px solid #000000;
 }
 
-.navbar .nav .active > a,.navbar .brand.active,
+.navbar .nav .active > a,.navbar .navbar-brand.active,
 .navbar .nav li.dropdown.open > .dropdown-toggle {
   color: #EEEEEE;
   background-color: #363636;
   font-weight: bold;
-  text-align: center;
 }
 
 .navbar .nav li a:hover {
   color: #FFFFFF;
-  height: 18px;
+  /*height: 18px;*/
   border-bottom: 2px solid #E61990;
 }
 
 .navbar .nav li.img a:hover{
-  height: 50px;
+  height: 56px;
   border:1px 1px 1px 1px solid #E61990;
 }
 
-.navbar .brand:hover {
+.navbar .navbar-brand:hover {
   color: #FFFFFF;
-  height: 22px;
   border-bottom: 2px solid #E61990;
 }
 
@@ -98,7 +82,6 @@ body {
 }
 
 /* navbar dropdown menus */
-
 .navbar .nav li.dropdown > .dropdown-toggle .caret,
 .navbar .nav li.dropdown.open > .dropdown-toggle .caret,
 .navbar .nav li.dropdown.open > .dropdown-toggle:hover .caret
@@ -114,10 +97,12 @@ body {
 }
 
 .navbar .nav ul.dropdown-menu li a, .navbar .nav ul.dropdown-menu li.nav-header {
-  color:#000000;
+  color: #F5177B;
+  border-bottom: 0px;
 }
 
 .navbar .nav ul.dropdown-menu li a:hover, .navbar .nav ul.dropdown-menu li a:focus {
-  background-color:#E61990;
-  background-image:none;
+  color: #FFFFFF;
+  background-color: #F5177B;
+  background-image: none;
 }
