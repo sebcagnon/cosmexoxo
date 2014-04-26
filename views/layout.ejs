@@ -6,19 +6,71 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="Shop online with the best selection of Beauty & Cosmetics products from Asia on CosmeXOXO">
     <meta name="author" content="Lulu Yin">
-    
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <!-- Styles -->
     <link rel="stylesheet" href="/bootstrap/css/bootstrap.min.css" media="all">
     <link rel="stylesheet" href="/bootstrap/css/bootstrap-responsive.min.css" media="all">
     <link rel="stylesheet" type="text/css" href="/styles/style.css">
     <link href="http://fonts.googleapis.com/css?family=Didact+Gothic:300,400,500,700,300italic,400italic,500italic,700italic" rel="stylesheet" type="text/css">
-    
+
     <link rel="shortcut icon" href="/images/favicon.ico?v=2">
   </head>
 
   <body>
     <div class="container">
-      <!-- header + navbar -->
+      <!-- Navbar -->
+      <div class="navbar navbar-inverse navbar-fixed-top">
+        <div class="navbar-inner">
+          <div class="container">
+            <!-- .btn-navbar is used as the toggle -->
+            <!-- for collapsed navbar content -->
+            <a class="btn btn-navbar" data-toggle="collapse"
+               data-target=".nav-collapse">
+              <span class="icon-bar"></span>
+              <span class="icon-bar"></span>
+              <span class="icon-bar"></span>
+            </a>
+            <a href="/" class="brand">
+              <i class="icon-home icon-white" style="margin-top:8px"></i> CosmeXO
+            </a>
+            <div class="nav-collapse collapse">
+              <ul class="nav">
+                <li class="dropdown">
+                  <a href="/brand/" class="dropdown-toggle"
+                     data-toggle="dropdown">
+                    By Brand <b class="caret"></b>
+                  </a>
+                  <ul class="dropdown-menu">
+                    <% for (var i=0; i<brands.length; i++) {
+                        for (var j=0; j<brands[i].brands.length; j++) {
+                          var brand = brands[i].brands[j]; %>
+                    <li>
+                      <%- utils.link_to('/brands/' + brand.name, brand.name) %>
+                    </li>
+                    <% }
+                    } %>
+                    <li class="divider"></li>
+                    <li>
+                      <%- utils.link_to('/brands','All Companies and Brands') %>
+                    </li>
+                    <li class="divider"></li>
+                    <li class="img">
+                      <a href="#"><img src="http://placehold.it/150x50"></a>
+                    </li>
+                  </ul>
+                </li>
+                <li class="active"><a href="#">Point Makeup</a></li>
+                <li><a href="#">Base Makeup</a></li>
+                <li><a href="#">Skin Care</a></li>
+                <li><a href="#">Health & Fitness</a></li>
+                <li><a href="#">New</a></li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- header -->
       <div class="row-fluid">
         <div class="span6">
           <a href="/"><img src="/images/header.png"></a>
@@ -39,33 +91,9 @@
           <button class="btn btn-large btn-link">Checkout</button></a>
         </div>
       </div>
-      <div class="navbar">
-        <div class="navbar-inner">
-          <div class="container">
-            <a href="/" class="brand active"><i class="icon-home icon-white" style="margin-top:8px"></i> CosmeXO</a>
-            <ul class="nav">
-              <li class="dropdown">
-                <a href="/brand/">By Brand <b class="caret"></b></a>
-                <ul class="dropdown-menu">
-                  <li class="nav-header">Brands</li>
-                  <li><a href="/brand/shiseido">Shiseido</a></li>
-                  <li><a href="#">Kanebo</a></li>
-                  <li class="divider"></li>
-                  <li class="img"><a href="#"><img src="http://placehold.it/150x50"></a></li>
-                </ul>
-              </li>
-              <li><a href="#">Point Makeup</a></li>
-              <li><a href="#">Base Makeup</a></li>
-              <li><a href="#">Skin Care</a></li>
-              <li><a href="#">Health & Fitness</a></li>
-              <li><a href="#">New</a></li>
-            </ul>
-          </div>
-        </div>
-      </div>
-      
+
 <%- body %>
-      
+
     </div> <!-- end container -->
     <script type="text/javascript" src="/js/jquery-1.10.2.min.js"></script>
     <script type="text/javascript" src="/bootstrap/js/bootstrap.min.js"></script>

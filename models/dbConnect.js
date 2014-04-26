@@ -287,7 +287,6 @@ function filterBrands(brandTree) {
   var filteredTree = [];
   var others = {id:-1, name:'Others', in_navbar:true, brands:[]};
   var currentCompany = null;
-  filteredTree.push(others);
   for (var ic=0; ic<brandTree.length; ic++) {
     if (brandTree[ic].in_navbar == true) {
       currentCompany = {id:brandTree[ic].id, name:brandTree[ic].name,
@@ -303,6 +302,7 @@ function filterBrands(brandTree) {
       if (brandCopy.in_navbar == true) currentCompany.brands.push(brandCopy);
     }
   }
+  filteredTree.push(others);
   return filteredTree;
 }
 

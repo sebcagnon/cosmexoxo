@@ -28,6 +28,10 @@ app.locals({
   utils: utils
 });
 
+// Creates navbar variables and refresh it every day
+refreshNavbar(app);
+setInterval(refreshNavbar, 24*60*60*1000, app);
+
 // home page
 app.get('/', function(request, response) {
   response.render('index');
@@ -126,3 +130,21 @@ app.use(function(req, res, next){
 http.createServer(app).listen(app.get('port'), function () {
   console.log("Listening on " + app.get('port'));
 });
+
+//called every once in a while to refresh the navbar variables
+function refreshNavbar (app) {
+  async.parallel([
+    db.getNavbarBrands,
+    db.getAllCategories
+    ],
+    function refreshNavbarCb (err, result) {
+      if (err) return console.log('Error while updating navbar');
+      app.locals.brands = result[0];
+      var categories = result[1];
+      for (var i=0; i<categories.length; i++) {
+        categories[i].children = undefined;
+      }
+      app.locals.categories = categories;
+      console.log('Navbar refreshed');
+    });
+}
