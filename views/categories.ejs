@@ -1,5 +1,5 @@
 <% layout('layout') -%>
-<div class="span12" id="categories">
+<div class="col-md-12" id="categories">
   <h1>All Categories</h1>
   <% if (alert) { %>
   <div class="alert alert-warning">
@@ -11,5 +11,5 @@
     <p><%= error %></p>
   </div>
   <% } else { %>
-    <%- utils.displayCategoryTree(catTree, 2) %>
+    <%- utils.displayCategoryTree(catTree, 2, 0) %>
   <% } %>

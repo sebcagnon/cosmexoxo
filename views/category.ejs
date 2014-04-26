@@ -1,41 +1,44 @@
 <% layout('layout') -%>
-<div class="span12">
-  <h1><%= catTree.name %></h1>
-    <div class="span12">
-      <h2>Products</h2>
-      <% if (products.length == 0) { %>
-      	<div class="alert alert-info">
-      		There are no products available in this category.
-      	</div>
-      <% } %>
-	    <ul class="thumbnails">
-		    <% for (var i=0; i<products.length; i++) {
-		        var product = products[i]; %>
-		      <li class="span3">
-		        <div class="thumbnail">
-		          <a href="<%= product.link %>">
-		            <%- utils.responsiveImage(S3URL +'/'+ product.key,
-		                                      product.name) %>
-		          </a>
-		          <h3><%- product.name %></h3>
-		          <p><%- product.desc.slice(0, 40)%>...</p>
-		          <p>
-		            <a class="btn btn-primary" href="<%= product.link %>">
-		              Read more
-		            </a>
-		          </p>
-		        </div>
-		      </li>
-		    <% } %>
-		  </ul>
-	</div>
-	<div class="span12">
-	  <h2>Subcategories</h2>
-	  <% for (var i=0; i<catTree.children.length; i++) {
-	    var cat = catTree.children[i]; %>
-	    <div class="span3">
-		  <a href="/categories/<%= cat.name %>"><%= cat.name %></a>
-	    </div>
-	  <% } %>
+<div class="row">
+  <div class="col-md-12">
+    <h1><%= catTree.name %></h1>
+  </div>
+  <div class="span12">
+    <h2>Products</h2>
+    <% if (products.length == 0) { %>
+    	<div class="alert alert-info">
+    		There are no products available in this category.
+    	</div>
+    <% } %>
+  </div>
+<% for (var i=0; i<products.length; i++) {
+    var product = products[i]; %>
+<% if (i%4==0) { %>
+</div>
+<div class="row">
+<% } %>
+  <div class="col-xs-6 col-sm-6 col-md-3">
+    <div class="thumbnail">
+      <a href="<%= product.link %>">
+        <%- utils.responsiveImage(S3URL +'/'+ product.key, product.name) %>
+      </a>
+      <h3><%- product.name %></h3>
+      <p><%- product.desc.slice(0, 40)%>...</p>
+      <p>
+        <a class="btn btn-primary" href="<%= product.link %>">
+          Read more
+        </a>
+      </p>
     </div>
+  </div>
+<% } %>
+</div>
+<div class="row">
+  <h2>Subcategories</h2>
+  <% for (var i=0; i<catTree.children.length; i++) {
+    var cat = catTree.children[i]; %>
+    <div class="col-md-3">
+	    <%- utils.link_to('/categories/' + cat.name, cat.name) %>
+    </div>
+  <% } %>
 </div>

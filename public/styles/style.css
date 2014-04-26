@@ -92,7 +92,8 @@ ul.dropdown-menu {
   background-image: none;
 }
 
-li.dropdown-submenu > ul {
+li.dropdown-submenu > ul,
+ul.columns2 {
     columns: 2;
     -webkit-columns: 2;
     -moz-columns: 2;
@@ -137,4 +138,8 @@ li.dropdown-submenu > ul.dropdown-menu li a {
   -webkit-border-radius:6px 0 6px 6px;
   -moz-border-radius:6px 0 6px 6px;
   border-radius:6px 0 6px 6px;
+}
+
+.thumbnail .img-responsive {
+  max-height: 250px;
 }
