@@ -140,11 +140,7 @@ function refreshNavbar (app) {
     function refreshNavbarCb (err, result) {
       if (err) return console.log('Error while updating navbar');
       app.locals.brands = result[0];
-      var categories = result[1];
-      for (var i=0; i<categories.length; i++) {
-        categories[i].children = undefined;
-      }
-      app.locals.categories = categories;
+      app.locals.categories = result[1];
       console.log('Navbar refreshed');
     });
 }
