@@ -59,7 +59,7 @@ class ProductWidget(BaseWidget):
     self.activeLabel = tk.Label(self.productFrame, text="Active? ")
     self.activeState = tk.IntVar()
     self.activeState.set(1)
-    self.activeCheck = tk.Checkbutton(self.productFrame, 
+    self.activeCheck = tk.Checkbutton(self.productFrame,
                        variable=self.activeState)
     self.activeLabel.grid(row=1, column=0, sticky=tk.N+tk.W)
     self.activeCheck.grid(row=1, column=1, sticky=tk.N+tk.W)
@@ -69,7 +69,7 @@ class ProductWidget(BaseWidget):
     brandNames = [name for name,id in self.brandChoices]
     self.brandTextVar = tk.StringVar()
     self.brandTextVar.set('Choose brand...')
-    self.brandMenu = tk.OptionMenu(self.productFrame, self.brandTextVar, 
+    self.brandMenu = tk.OptionMenu(self.productFrame, self.brandTextVar,
                        *brandNames)
     self.brandLabel.grid(row=2, column=0, sticky=tk.N+tk.W)
     self.brandMenu.grid(row=2, column=1, sticky=tk.W+tk.N)
@@ -81,7 +81,7 @@ class ProductWidget(BaseWidget):
     self.chosenCategories = []
     self.categoryText = tk.StringVar()
     self.categoryText.set('')
-    self.categoryListLabel = tk.Label(self.productFrame, 
+    self.categoryListLabel = tk.Label(self.productFrame,
                        textvariable=self.categoryText)
     self.categoryLabel.grid(row=3, column=0, sticky=tk.N+tk.W)
     self.categoryButton.grid(row=3, column=1, sticky=tk.N+tk.W)
@@ -126,7 +126,7 @@ class ProductWidget(BaseWidget):
       self.saveButton = tk.Button(self.variantFrame, command=self.updateProduct,
                          text="Update ", image=self.checkImage, compound="left")
       self.saveButton.grid(sticky=tk.W+tk.S)
-  
+
   def save(self):
     """Uploads the current product to the database"""
     (name, active, desc, chosenBrandID, catIds) = self.getFormInfo()
@@ -160,12 +160,18 @@ class ProductWidget(BaseWidget):
     # Finally commit
     self.db.conn.commit()
     # Upload Images to S3
+    success = True
     prodImgFileName = self.prodPicPreview.getImageFileName()
     if prodImgFileName != self.placeholderPath:
       keyName = self.awsManager.createKey(productId, name)
       metadata = {'alt':'picture of ' + str(name),
                   'title':name}
-      self.awsManager.uploadImage(keyName, prodImgFileName, **metadata)
+      try:
+        self.awsManager.uploadImage(keyName, prodImgFileName, **metadata)
+      except Exception, e:
+        success = False
+        print 'Error while uploading product image: ', prodImgFileName
+        print e
     variantsData = self.db.getProductVariants(id=productId)
     variantIds = sorted(variantsData['variant_ids'])
     for i, variant in enumerate(self.variants):
@@ -178,13 +184,25 @@ class ProductWidget(BaseWidget):
                        variantId, variantName)
         metadata = {'alt':'picture of {} from {}'.format(variantName, name),
                     'title':'{} from {}'.format(variantName, name)}
-        self.awsManager.uploadImage(variantKey, variantImgPath, **metadata)
+        try:
+          self.awsManager.uploadImage(variantKey, variantImgPath, **metadata)
+        except Exception, e:
+          success = False
+          print 'Error while uploading variant image: ', variantImgPath
+          print e
     self.productSelect(productId)
-    tkMessageBox.showinfo('Product Upload Success',
+    if success:
+      tkMessageBox.showinfo('Product Upload Success',
                        'The product was saved in\n'
                        'in the database successfully.\n'
                        'You are now in Update mode.\n'
                        'Click "New" to start a new product.')
+    else:
+      tkMessageBox.showwarning('Product Upload Half-Succes',
+                         'The product was saved in the database.\n'
+                         'Sorry: not all images could be uploaded.\n'
+                         'You are now in Update mode.\n'
+                         'Click "New" to start a new product.')
 
   def updateProduct(self):
     """Updates a product that is already in the database"""
@@ -235,7 +253,7 @@ class ProductWidget(BaseWidget):
     oldName = self.currentProduct['product_name']
     oldKey = self.awsManager.createKey(productId, oldName)
     newKey = None
-    newMetadata = None 
+    newMetadata = None
     newImage = None
     if name != oldName:
       newMetadata = {'alt':'picture of ' + str(name),
@@ -243,7 +261,7 @@ class ProductWidget(BaseWidget):
       newKey = self.awsManager.createKey(productId, name)
     if self.imageModified:
       newImage = self.prodPicPreview.getImageFileName()
-    self.awsManager.updateImage(oldKey, newName=newKey, 
+    self.awsManager.updateImage(oldKey, newName=newKey,
                        newMetadata=newMetadata, newImagePath=newImage)
     # delete unused variant images
     for id in self.currentProduct['variant_ids']:
@@ -449,7 +467,7 @@ class ProductWidget(BaseWidget):
 
   def productSelect(self, productID):
     """Gets all the product info and pre-fills all the entries"""
-    productInfo = self.db.getProductInfoByID(productID)    
+    productInfo = self.db.getProductInfoByID(productID)
     self.currentProduct = productInfo
     self.editionMode = 'edit'
     self.imageModified = False
@@ -497,7 +515,7 @@ class ProductWidget(BaseWidget):
 
 class VariantFrame(tk.Frame):
   """A line that enables variant editing"""
-  
+
   def __init__(self, id, deleteCommand, master=None, deleteImage=None,
                        imagePath=None):
     tk.Frame.__init__(self, master)
@@ -562,7 +580,7 @@ class VariantFrame(tk.Frame):
 
 class CategorySelection(tk.Toplevel):
   """A pop-up window for selecting the categories"""
-  
+
   def __init__(self, onSelect, onCancel, categoryList, chosenList=None,
                        selectImage=None, cancelImage=None):
     tk.Toplevel.__init__(self)
@@ -575,7 +593,7 @@ class CategorySelection(tk.Toplevel):
       state=0
       if (name, id) in chosenList:
         state=1
-      self.choices.append(CategoryChoice(id, name, state=state, 
+      self.choices.append(CategoryChoice(id, name, state=state,
                        master=self.choicesFrame.interior))
     for choice in self.choices:
       choice.grid(stick=tk.W)
@@ -600,7 +618,7 @@ class CategorySelection(tk.Toplevel):
 
 class CategoryChoice(tk.Frame):
   """A label + checkbox with an idea for easy selection"""
-  
+
   def __init__(self, id, name, state=0, master=None):
     tk.Frame.__init__(self, master)
     self.id = id
@@ -613,7 +631,7 @@ class CategoryChoice(tk.Frame):
 
 class ProductSelection(tk.Toplevel):
   """A pop-up window that allows to select a product to edit"""
-  
+
   def __init__(self, onSelect, onCancel, productList, selectImage=None,
                        cancelImage=None):
     tk.Toplevel.__init__(self)
@@ -649,9 +667,9 @@ class ProductSelection(tk.Toplevel):
 
 class ProductWidgetError(BaseException):
   """Error raised when trying to save/update a product"""
-  
+
   def __init__(self, value):
     self.value = value
-  
+
   def __str__(self):
     return repr(self.value)
