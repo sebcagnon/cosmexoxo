@@ -2,8 +2,11 @@
 
 var utils = {
   // returns the HTML for links
-  link_to : function (target, text) {
-    return '<a href="' + encodeURI(target) + '">' + text + '</a>';
+  link_to : function (target, text, addedHTML) {
+    var resultStr = '<a href="' + encodeURI(target) + '"';
+    if (addedHTML != undefined) resultStr += ' ' + addedHTML;
+    resultStr += '>' + text + '</a>';
+    return resultStr;
   },
 
   // returns the HTML for displaying the category tree
