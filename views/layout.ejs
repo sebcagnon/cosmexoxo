@@ -46,7 +46,7 @@
               <ul class="dropdown-menu">
               <% for (var i=0; i<categories.length; i++) {
                   var category = categories[i]; %>
-                <li class="menu-item dropdown dropdown-submenu">
+                <li class="dropdown dropdown-submenu">
                   <%- utils.link_to('/categories/' + category.name,
                           category.name,
                           'class="dropdown-toggle" data-toggle="dropdown"') %>

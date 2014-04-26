@@ -24,17 +24,6 @@ body {
 }
 
 /* navbar colors */
-.navbar-inner, .navbar .navbar-btn {
-  background: #696d75; /* Old browsers */
-  background: -moz-linear-gradient(top, #696d75 1%, #363636 100%); /* FF3.6+ */
-  background: -webkit-gradient(linear, left top, left bottom, color-stop(1%,#696d75), color-stop(100%,#363636)); /* Chrome,Safari4+ */
-  background: -webkit-linear-gradient(top, #696d75 1%,#363636 100%); /* Chrome10+,Safari5.1+ */
-  background: -o-linear-gradient(top, #696d75 1%,#363636 100%); /* Opera 11.10+ */
-  background: -ms-linear-gradient(top, #696d75 1%,#363636 100%); /* IE10+ */
-  background: linear-gradient(to bottom, #696d75 1%,#363636 100%); /* W3C */
-  filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#696d75', endColorstr='#363636',GradientType=0 ); /* IE6-9 */
-}
-
 .navbar .navbar-brand, .navbar .nav li a{
   color: #EEEEEE;
   font-weight: bold;
@@ -43,16 +32,9 @@ body {
   border-bottom: 2px solid #000000;
 }
 
-.navbar .nav .active > a,.navbar .navbar-brand.active,
-.navbar .nav li.dropdown.open > .dropdown-toggle {
-  color: #EEEEEE;
-  background-color: #363636;
-  font-weight: bold;
-}
-
-.navbar .nav li a:hover {
+.navbar .nav li a:hover,
+.navbar .navbar-brand:hover {
   color: #FFFFFF;
-  /*height: 18px;*/
   border-bottom: 2px solid #E61990;
 }
 
@@ -61,18 +43,8 @@ body {
   border:1px 1px 1px 1px solid #E61990;
 }
 
-.navbar .navbar-brand:hover {
-  color: #FFFFFF;
-  border-bottom: 2px solid #E61990;
-}
-
 .navbar .nav li a:focus  {
   color: #FFFFFF;
-}
-
-.navbar .nav > .active > a:focus{
-  color: #FFFFFF;
-  background-color: #797979;
 }
 
 .navbar .nav .active > a:hover,
@@ -102,9 +74,10 @@ li.dropdown.open a:focus {
   border-bottom-color: #FFFFFF;
 }
 
-.navbar .nav ul.dropdown-menu li a,
-.navbar .nav ul.dropdown-menu li.nav-header {
+.navbar-inverse .navbar-nav .open .dropdown-menu > li > a,
+.navbar-inverse .navbar-nav .open .dropdown-menu > li > a:focus {
   color: #66D9EF;
+  background-color: #272822;
   border-bottom: 0px;
 }
 
@@ -112,8 +85,7 @@ ul.dropdown-menu {
   background-color: #272822;
 }
 
-.navbar .nav ul.dropdown-menu li a:hover,
-.navbar .nav ul.dropdown-menu li a:focus,
+.navbar-inverse .navbar-nav .open .dropdown-menu > li > a:hover,
 .navbar .nav ul.dropdown-menu li.dropdown.open > .dropdown-toggle {
   color: #FFFFFF;
   background-color: #F5177B;
@@ -124,6 +96,10 @@ li.dropdown-submenu > ul {
     columns: 2;
     -webkit-columns: 2;
     -moz-columns: 2;
+}
+
+li.dropdown-submenu > ul.dropdown-menu li a {
+  border: 0px
 }
 
 .dropdown-submenu{position:relative;}
