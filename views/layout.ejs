@@ -41,16 +41,25 @@
             <li class="dropdown">
               <a href="/categories" class="dropdown-toggle"
                  data-toggle="dropdown">
-                SHOW BY CATEGORIES <b class="caret"></b>
+                SHOP BY CATEGORIES <b class="caret"></b>
               </a>
               <ul = class="dropdown-menu">
-                <% for (var i=0; i<categories.length; i++) {
-                    var category = categories[i]; %>
-                  <li>
-                    <%- utils.link_to('/categories/' + category.name,
-                                      category.name) %>
-                  </li>
-                <% } %>
+              <% for (var i=0; i<categories.length; i++) {
+                  var category = categories[i]; %>
+                <li class="menu-item dropdown dropdown-submenu">
+                  <%- utils.link_to('/categories/' + category.name,
+                          category.name,
+                          'class="dropdown-toggle" data-toggle="dropdown"') %>
+                  <ul class="dropdown-menu">
+                  <% for (var j=0; j<category.children.length; j++) {
+                      var child = category.children[j]; %>
+                    <li>
+                      <%- utils.link_to('/categories/'+child.name, child.name) %>
+                    </li>
+                  <% } %>
+                  </ul>
+                </li>
+              <% } %>
               </ul>
             </li>
             <li class="dropdown">
@@ -82,7 +91,7 @@
       </div>
     </div>
 
-    <div class="container-fluid">
+    <div class="container">
       <!-- header -->
       <div class="row">
         <div class="col-md-6">
@@ -113,5 +122,6 @@
     <script type="text/javascript" src="/js/jquery-1.10.2.min.js"></script>
     <script type="text/javascript" src="/bootstrap/js/bootstrap.min.js"></script>
     <script type="text/javascript" src="/js/priceDisplays.js"></script>
+    <script type="text/javascript" src="/js/page-scripts.js"></script>
   </body>
 </html>
