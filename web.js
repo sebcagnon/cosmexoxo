@@ -3,12 +3,15 @@ var express = require('express')
   , engine = require("ejs-locals")
   , http = require('http')
   , async = require('async')
+  , nconf = require('nconf')
   , utils = require('./models/utils')
   , db = require('./models/dbConnect'); // product info requests
 
+nconf.env().file('./.env');
+
 var app = express();
 app.use(express.logger());
-app.set('port', process.env.PORT || 8080);
+app.set('port', nconf.PORT || 8080);
 
 app.configure( function () {
   app.set('views', __dirname + '/views');
@@ -16,15 +19,15 @@ app.configure( function () {
   app.set('view engine', 'ejs');
   app.use("/images", express.static(__dirname + '/public/images'));
   app.use("/styles", express.static(__dirname + '/public/styles'));
-  app.use("/bootstrap", express.static(__dirname + '/public/bootstrap'));
   app.use("/js", express.static(__dirname + '/public/js'));
 });
 
 // site wide variables for webpages
 app.locals({
   displayPrice: require('./public/js/displayPrice'),
-  S3URL: process.env.S3URL || "http://staging-media.cosmexo.com",
-  utils: utils
+  S3URL: nconf.get('S3URL'),
+  utils: utils,
+  URL: nconf.get('URL')
 });
 
 // Creates navbar variables and refresh it every day
