@@ -2,6 +2,7 @@ var express = require('express')
   , fs = require("fs")
   , engine = require("ejs-locals")
   , http = require('http')
+  , paypalxo = require('./models/paypalxo')
   , async = require('async')
   , nconf = require('nconf')
   , utils = require('./models/utils')
@@ -33,6 +34,10 @@ app.locals({
 // Creates navbar variables and refresh it every day
 refreshNavbar(app);
 setInterval(refreshNavbar, 24*60*60*1000, app);
+
+// configure paypalxo API
+var paypalString =  nconf.get('PAYPAL');
+paypalxo.configureFromString(paypalString);
 
 // home page
 app.get('/', function(request, response) {
@@ -112,6 +117,57 @@ app.get('/products', function(request, response) {
     if (err) return response.render('404',
                       {text:'Could not get Products list: ' + err});
     response.render('products', {products:productList});
+  });
+});
+
+// adds payment testing page
+app.get('/payment', function(request, response) {
+  response.render('payment-test', {state:'ask'});
+});
+
+app.get('/paymentSuccess', function(request, response) {
+  var token = request.query.token;
+  paypalxo.ec.getExpressCheckoutDetails({token:token}, function (err, details) {
+    if (err) return response.redirect('/paymentFailure');
+    console.log(details);
+    var params = {token:token, payerid:details.PAYERID};
+    paypalxo.ec.doExpressCheckoutPayment(params, function (err, answer) {
+      if (err || answer.PAYMENTINFO_0_PAYMENTSTATUS != 'Completed') {
+        response.render('payment-test', {state:'success'});
+      } else {
+        var params = {
+          state:'failed',
+          reason: answer.PAYMENTINFO_0_PAYMENTSTATUS
+        };
+        response.render('payment-test', params);
+      }
+    });
+  });
+});
+
+app.get('/paymentFailure', function(request, response) {
+  response.render('payment-test', {state:'failed', reason:'could not set EC'});
+});
+
+// handle paypal button
+app.post('/pay', function(request, response) {
+  // Prepare the data
+  var data = {
+    paymentrequest_0_amt: '10.00',
+    paymentrequest_0_currencycode: 'USD',
+    returnurl: app.locals.URL + '/paymentSuccess',
+    cancelurl: app.locals.URL + '/paymentFailure',
+    paymentrequest_0_paymentaction: 'Sale'
+  };
+  console.log('setExpressCheckout')
+  paypalxo.ec.setExpressCheckout(data, function setECCallback (err, ans) {
+    if (err) {
+      console.log(err);
+      return response.redirect('/paymentFailure');
+    }
+    // TODO: USE SESSION!!
+    app.locals.token = ans.TOKEN;
+    return response.redirect(paypalxo.ec.getLoginURL(ans.TOKEN));
   });
 });
 
