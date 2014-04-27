@@ -3,7 +3,6 @@ var express = require('express')
   , engine = require("ejs-locals")
   , http = require('http')
   , async = require('async')
-  , products = require('./models/products')
   , utils = require('./models/utils')
   , db = require('./models/dbConnect'); // product info requests
 
