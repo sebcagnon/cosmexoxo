@@ -120,7 +120,7 @@ function svcsRequest(path, data, callback) {
 	// Convert the POST to a JSON string
 	if (paypalxo.requestFormat === 'JSON') {
 		contentType = 'application/json';
-		postData = JSON.stringify(data); 
+		postData = JSON.stringify(data);
 	} else {
 		contentType = 'application/x-www-form-urlencoded';
 		postData = querystring.stringify(data);
@@ -223,6 +223,27 @@ paypalxo.ap.getLoginURL = function (payKey) {
 };
 
 
+/* Configuration */
+// Configure with your paypal credentials
+// data should contain the keys: user, pwd, signature, version[, useSandbox]
+paypalxo.configure = function(data) {
+	for (var attribute in data) {
+		paypalxo[attribute] = data[attribute];
+	}
+};
+
+// configure using a string user:pwd:signature:version:useSandbox
+paypalxo.configureFromString = function (confString) {
+	var arr = confString.split(':');
+	var config = {
+		user: arr[0],
+		pwd: arr[1],
+		signature: arr[2],
+		version: arr[3]
+	};
+	if (arr.length == 5) config.useSandbox = 1;
+	paypalxo.configure(config);
+};
 
 
 /* Export methods */
