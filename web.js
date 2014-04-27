@@ -12,7 +12,7 @@ nconf.env().file('./.env');
 
 var app = express();
 app.use(express.logger());
-app.set('port', nconf.PORT || 8080);
+app.set('port', nconf.get('PORT') || 8080);
 
 app.configure( function () {
   app.set('views', __dirname + '/views');
@@ -37,7 +37,13 @@ setInterval(refreshNavbar, 24*60*60*1000, app);
 
 // configure paypalxo API
 var paypalString =  nconf.get('PAYPAL');
-paypalxo.configureFromString(paypalString);
+if (paypalString) {
+  paypalxo.configureFromString(paypalString);
+} else {
+  console.log('could not configure paypalString');
+  console.log('Locals: ' + app.locals);
+  console.log('paypal: ' + nconf.get('PAYPAL'));
+}
 
 // home page
 app.get('/', function(request, response) {
