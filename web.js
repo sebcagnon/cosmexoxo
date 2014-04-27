@@ -21,6 +21,7 @@ app.configure( function () {
   app.use("/images", express.static(__dirname + '/public/images'));
   app.use("/styles", express.static(__dirname + '/public/styles'));
   app.use("/js", express.static(__dirname + '/public/js'));
+  app.use("/bootstrap", express.static(__dirname + '/public/bootstrap'));
 });
 
 // site wide variables for webpages
@@ -163,7 +164,8 @@ app.post('/pay', function(request, response) {
     paymentrequest_0_currencycode: 'USD',
     returnurl: app.locals.URL + '/paymentSuccess',
     cancelurl: app.locals.URL + '/paymentFailure',
-    paymentrequest_0_paymentaction: 'Sale'
+    paymentrequest_0_paymentaction: 'Sale',
+    solutiontype: 'Sole'
   };
   console.log('setExpressCheckout')
   paypalxo.ec.setExpressCheckout(data, function setECCallback (err, ans) {
