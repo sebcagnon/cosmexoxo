@@ -47,8 +47,10 @@ app.use(express.session({
 app.use( function (request, response, next) {
   var sess = request.session;
   if (sess.cart == undefined) {
-    sess.cart = {};
+    sess.cart = [];
   }
+  console.log(sess.cart + ': ' + sess.cart.length);
+  response.locals.cartSize = sess.cart.length;
   next();
 });
 
@@ -68,6 +70,7 @@ if (paypalString) {
 
 // home page
 app.get('/', function(request, response) {
+  console.log(response.locals);
   response.render('index');
 });
 

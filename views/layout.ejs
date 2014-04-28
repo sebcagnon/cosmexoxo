@@ -101,18 +101,29 @@
         </div>
         <div class="contact-search col-md-4">
           <div class="col-md-12">
-            <a href="#"><button class="btn btn-large btn-link"><i class="icon-envelope"></i> Contact Us</button></a>
+            <a href="#">
+              <button class="btn btn-large btn-link">
+                <i class="icon-envelope"></i> Contact Us
+              </button>
+            </a>
           </div>
           <div class="col-md-12">
             <div class="input-append" >
               <input type="text" class="col-md-12">
-              <button class="btn btn-primary" type="button"><i class="icon-search icon-white"></i> Search</button>
+              <button class="btn btn-primary" type="button">
+                <i class="icon-search icon-white"></i> Search
+              </button>
             </div>
           </div>
         </div>
         <div class="col-md-2" style="text-align:center">
-          <a href="#"><img src="/images/shopping_basket_fushia.png">
-          <button class="btn btn-large btn-link">Checkout</button></a>
+          <a href="#">
+            <img src="images/shopping_basket_fushia.png">
+            <%= cartSize %> item(s)
+          </a>
+          <a href="#">
+            <button class="btn btn-large btn-link">Checkout</button>
+          </a>
         </div>
       </div>
 
@@ -123,5 +134,6 @@
     <script type="text/javascript" src="/bootstrap/js/bootstrap.min.js"></script>
     <script type="text/javascript" src="/js/priceDisplays.js"></script>
     <script type="text/javascript" src="/js/page-scripts.js"></script>
+    <script type="text/javascript" src="/js/addToCart.js">
   </body>
 </html>
