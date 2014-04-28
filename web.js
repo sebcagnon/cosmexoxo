@@ -19,6 +19,7 @@ app.configure( function () {
   app.set('views', __dirname + '/views');
   app.engine('ejs', engine);
   app.set('view engine', 'ejs');
+  app.use(express.bodyParser());
   app.use("/images", express.static(__dirname + '/public/images'));
   app.use("/styles", express.static(__dirname + '/public/styles'));
   app.use("/js", express.static(__dirname + '/public/js'));
@@ -202,7 +203,16 @@ app.post('/pay', function(request, response) {
   });
 });
 
-app.get('/views', function (request, response) {
+// handles products added to cart
+app.post('/addToCart', function (request, response) {
+  var newProduct = request.body;
+  // TODO: verify var!!
+  request.session.cart.push(newProduct); // danger writing client data into db!
+  var data = {cartSize: request.session.cart.length};
+  response.send(JSON.stringify(data));
+});
+
+app.get('/cart', function (request, response) {
   var sess = request.session;
   response.setHeader('Content-Type', 'text/html');
   response.write('<h1>Session Summary</h1>');

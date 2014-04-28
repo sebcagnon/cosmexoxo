@@ -29,5 +29,18 @@ $('ul.dropdown-menu [data-toggle=dropdown]').on('click mouseenter',
     var newpos = parent.width() - 5;
     }
     menu.css({ left:newpos });
-}
+  }
+});
+
+$(".addToCart").submit(function addToCart (e) {
+    e.preventDefault(); // Prevents the page from refreshing
+    var $this = $(this); // `this` refers to the current form element
+    $.post(
+        $this.attr("action"), // Gets the URL to sent the post to
+        $this.serialize(), // Serializes form data in standard format
+        function(data) {
+          $("#cartSize").text(data.cartSize + ' item(s)');
+        },
+        "json" // The format the response should be in "json"
+    );
 });

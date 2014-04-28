@@ -21,11 +21,15 @@
                                 'Picture of a ' + variant.name + ' of ' +
                                 product.name) %>
       <h3><%- variant.name %></h3>
-      <p>Price: <%= product.variants[i].price %>$</p>
+      <p>Price: <%= variant.price %>$</p>
       <p>
-        <a class="btn btn-primary" href="#">
-          Buy Now!
-        </a>
+        <form action="/addToCart" class="addToCart" method="post">
+          <input type="hidden" name="product_id"
+                 value="<%= product.product_id %>">
+          <input type="hidden" name="variant_id"
+                 value="<%= variant.variant_id %>">
+          <input type="submit" value="Add to cart" class="btn btn-primary">
+        </form>
       </p>
     </div>
   </div>
