@@ -33,6 +33,10 @@ var config = {
 };
 
 var db = {
+  // Allow to retrieve pg config to use in other modules (ex: cookie session)
+  getConfig : function () {
+    return config;
+  },
 
   // Get product info from db and format it into a nice Product object
   getProduct : function (productId, callback) {

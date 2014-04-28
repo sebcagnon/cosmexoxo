@@ -1,6 +1,6 @@
 var express = require('express')
-  , fs = require("fs")
-  , engine = require("ejs-locals")
+  , pgSession = require('connect-pg-simple')(express)
+  , engine = require('ejs-locals')
   , http = require('http')
   , paypalxo = require('./models/paypalxo')
   , async = require('async')
@@ -14,6 +14,7 @@ var app = express();
 app.use(express.logger());
 app.set('port', nconf.get('PORT') || 8080);
 
+// configures views engine and static content
 app.configure( function () {
   app.set('views', __dirname + '/views');
   app.engine('ejs', engine);
@@ -30,6 +31,25 @@ app.locals({
   S3URL: nconf.get('S3URL'),
   utils: utils,
   URL: nconf.get('URL')
+});
+
+// sets up cookie session
+app.use(express.cookieParser());
+app.use(express.session({
+  store: new pgSession({
+    conString: db.getConfig()
+  }),
+  secret: nconf.get('COOKIE_SECRET'),
+  cookie: {maxAge: 1000*60*60*24*3} // 3 days session
+}));
+
+// initialize sessions here
+app.use( function (request, response, next) {
+  var sess = request.session;
+  if (sess.cart == undefined) {
+    sess.cart = {};
+  }
+  next();
 });
 
 // Creates navbar variables and refresh it every day
@@ -177,6 +197,15 @@ app.post('/pay', function(request, response) {
     app.locals.token = ans.TOKEN;
     return response.redirect(paypalxo.ec.getLoginURL(ans.TOKEN));
   });
+});
+
+app.get('/views', function (request, response) {
+  var sess = request.session;
+  response.setHeader('Content-Type', 'text/html');
+  response.write('<h1>Session Summary</h1>');
+  response.write('<p>cart: ' + JSON.stringify(sess.cart) + '</p>');
+  response.write('<p>expires in: ' + (sess.cookie.maxAge / 1000) + 's</p>');
+  response.end();
 });
 
 // Handling pages not handled by app.get

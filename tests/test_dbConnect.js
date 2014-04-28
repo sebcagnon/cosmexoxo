@@ -10,6 +10,9 @@ if (!db.createKey(arr2)=='34_hello_35_how-are-you') {
   throw 'Error in createKey: ' + db.createKey(arr2) || 'AssertionError';
 }
 
+console.log('Testing getConfig:');
+console.log(db.getConfig());
+
 console.log("Testing getProduct");
 
 function testGetProduct1(err, result) {
