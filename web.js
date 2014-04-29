@@ -47,11 +47,13 @@ app.use(express.session({
 // initialize sessions here
 app.use( function (request, response, next) {
   var sess = request.session;
-  if (sess.cart == undefined) {
+  var cart = sess.cart; // save on synchronous db calls!!
+  if (cart == undefined) {
     sess.cart = [];
+    response.locals.cartSize = 0;
+  } else {
+    response.locals.cartSize = cart.length;
   }
-  console.log(sess.cart + ': ' + sess.cart.length);
-  response.locals.cartSize = sess.cart.length;
   next();
 });
 
@@ -158,21 +160,26 @@ app.get('/payment', function(request, response) {
 
 app.get('/paymentSuccess', function(request, response) {
   var token = request.query.token;
-  paypalxo.ec.getExpressCheckoutDetails({token:token}, function (err, details) {
-    if (err) return response.redirect('/paymentFailure');
-    console.log(details);
-    var params = {token:token, payerid:details.PAYERID};
-    paypalxo.ec.doExpressCheckoutPayment(params, function (err, answer) {
-      if (err || answer.PAYMENTINFO_0_PAYMENTSTATUS != 'Completed') {
-        response.render('payment-test', {state:'success'});
-      } else {
-        var params = {
-          state:'failed',
-          reason: answer.PAYMENTINFO_0_PAYMENTSTATUS
-        };
-        response.render('payment-test', params);
-      }
-    });
+  var payerid = request.query.PayerID;
+  var params = {token:token};
+  paypalxo.ec.getExpressCheckoutDetails(params, function (err, details) {
+    console.log('CheckoutDetails: \n' + JSON.stringify(details));
+  });
+  params.payerid = payerid;
+  params.paymentrequest_0_amt= '10.00';
+  params.paymentrequest_0_currencycode= 'USD';
+  params.paymentrequest_0_paymentaction= 'Sale';
+  paypalxo.ec.doExpressCheckoutPayment(params, function (err, answer) {
+    console.log('ExpressCheckoutPayment:\n' + JSON.stringify(answer));
+    if (err || answer.PAYMENTINFO_0_PAYMENTSTATUS != 'Completed') {
+      var params = {
+        state:'failed',
+        reason: JSON.stringify(err) || answer.PAYMENTINFO_0_PAYMENTSTATUS
+      };
+      response.render('payment-test', params);
+    } else {
+      response.render('payment-test', {state:'success'});
+    }
   });
 });
 
