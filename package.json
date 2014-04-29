@@ -14,7 +14,8 @@
     "connect-pg-simple": "1.0.x",
     "async": "0.6.x",
     "underscore": "1.5.x",
-    "nconf": "0.6.x"
+    "nconf": "0.6.x",
+    "express-validator":"2.1.x"
   },
   "engines": {
     "node": "0.10.13",

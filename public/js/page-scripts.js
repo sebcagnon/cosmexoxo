@@ -39,6 +39,8 @@ $(".addToCart").submit(function addToCart (e) {
         $this.attr("action"), // Gets the URL to sent the post to
         $this.serialize(), // Serializes form data in standard format
         function(data) {
+          if (data.error)
+            return console.log('request returned an error: ' + data.error);
           $("#cartSize").text(data.cartSize + ' item(s)');
         },
         "json" // The format the response should be in "json"

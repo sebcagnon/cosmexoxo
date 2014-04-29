@@ -22,15 +22,32 @@
                                 product.name) %>
       <h3><%- variant.name %></h3>
       <p>Price: <%= variant.price %>$</p>
-      <p>
-        <form action="/addToCart" class="addToCart" method="post">
-          <input type="hidden" name="product_id"
-                 value="<%= product.product_id %>">
-          <input type="hidden" name="variant_id"
-                 value="<%= variant.variant_id %>">
-          <input type="submit" value="Add to cart" class="btn btn-primary">
-        </form>
-      </p>
+      <form action="/addToCart" class="form-horizontal addToCart"
+            method="post" role="form">
+        <input type="hidden" name="product_id"
+               value="<%= product.product_id %>">
+        <input type="hidden" name="variant_id"
+               value="<%= variant.variant_id %>">
+        <div class="form-group">
+          <label class="control-label col-sm-4 col-md-4 col-lg-4 required"
+                 for="form-quantity">
+            Quantity:
+          </label>
+          <div class="col-sm-4 col-md-8 col-lg-8">
+            <div class="row">
+              <div class="col-sm-12">
+                <select class="form-control" name="quantity"
+                        id="form-quantity">
+                  <% for (var k=1; k<11; k++) { %>
+                  <option><%= k %></option>
+                  <% } %>
+                </select>
+              </div>
+            </div>
+          </div>
+        </div>
+        <input type="submit" value="Add to cart" class="btn btn-primary">
+      </form>
     </div>
   </div>
 <% } %>

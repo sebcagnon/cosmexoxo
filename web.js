@@ -5,6 +5,7 @@ var express = require('express')
   , paypalxo = require('./models/paypalxo')
   , async = require('async')
   , nconf = require('nconf')
+  , exValidator = require('express-validator')
   , utils = require('./models/utils')
   , db = require('./models/dbConnect'); // product info requests
 
@@ -20,6 +21,7 @@ app.configure( function () {
   app.engine('ejs', engine);
   app.set('view engine', 'ejs');
   app.use(express.bodyParser());
+  app.use(exValidator());
   app.use("/images", express.static(__dirname + '/public/images'));
   app.use("/styles", express.static(__dirname + '/public/styles'));
   app.use("/js", express.static(__dirname + '/public/js'));
@@ -212,10 +214,19 @@ app.post('/pay', function(request, response) {
 
 // handles products added to cart
 app.post('/addToCart', function (request, response) {
+  //validation
+  request.checkBody('product_id').notEmpty().isInt();
+  request.checkBody('variant_id').notEmpty().isInt();
+  request.checkBody('quantity').notEmpty().isInt();
+  // check for errors
+  var errors = request.validationErrors();
+  if (errors) {
+    console.log("Validation errors in addToCart: " + JSON.stringify(errors));
+    return response.send(JSON.stringify({error:'Could not validate input'}));
+  }
   var newProduct = request.body;
-  // TODO: verify var!!
+  var data = { cartSize: request.session.cart.length + 1 };
   request.session.cart.push(newProduct); // danger writing client data into db!
-  var data = {cartSize: request.session.cart.length};
   response.send(JSON.stringify(data));
 });
 
