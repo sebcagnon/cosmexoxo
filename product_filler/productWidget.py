@@ -135,15 +135,11 @@ class ProductWidget(BaseWidget):
     # product
     heads = ('name', 'description', 'active', 'brand_id')
     vals = (name, desc, active, chosenBrandID)
-    res = self.db.simpleInsert('product', heads, vals, commit=False)
+    res = self.db.simpleInsert('product', heads, vals,
+                        commit=False, returning='product_id')
     self.checkDBResult(res)
-    product = self.db.getProductBasics(name=name)
-    if not product:
-      self.db.conn.rollback()
-      errorText = "Could not fetch product info"
-      tkMessageBox.showerror('ProductWidgetError', errorText)
-      raise ProductWidgetError(errorText)
-    productId = product['product_id']
+    # simple insert returns the id here
+    productId = res
     # product_category
     heads = ('product_id', 'category_id')
     for id in catIds:
@@ -507,7 +503,7 @@ class ProductWidget(BaseWidget):
 
   def checkDBResult(self, res):
     """Checks if DBConnect succeeded, throws error and roll back if not"""
-    if not (res is True):
+    if isinstance(res, Exception):
       self.db.conn.rollback()
       tkMessageBox.showerror('ProductWidgetError', res)
       raise res

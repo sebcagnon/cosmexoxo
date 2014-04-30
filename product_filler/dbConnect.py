@@ -163,7 +163,7 @@ class DBConnection(object):
     return root
 
   def deleteProductCategoryLine(self, productId, categoryId, commit=True):
-    """DELETE FROM product_category 
+    """DELETE FROM product_category
        WHERE product_id=productId AND category_id=categoryId"""
     try:
       self.cur.execute(
@@ -218,18 +218,28 @@ class DBConnection(object):
     except psycopg2.Error, e:
       return e
 
-  def simpleInsert(self, table, headers, values, commit=True):
+  def simpleInsert(self, table, headers, values, commit=True, returning=None):
     """INSERT INTO table (headers) VALUES (values)"""
     inputNames = self.createSQLList(headers)
     inputValues = self.createSQLList(values, formatting=True)
+    if returning is not None:
+      end = " RETURNING {value};".format(value=returning)
+    else:
+      end = ";"
+    query = """INSERT INTO {table} {names}
+               VALUES {vals}{end}
+            """.format(table=table, names=inputNames,
+                       vals=inputValues, end=end)
     try:
-      self.cur.execute(
-        """INSERT INTO {table} {names}
-        VALUES {vals};
-        """.format(table=table, names=inputNames, vals=inputValues))
+      self.cur.execute(query)
       if commit:
         self.conn.commit()
-      return True
+      try:
+        res = self.cur.fetchone()[0]
+      except psycopg2.ProgrammingError:
+        # when there is no returning statement
+        res = True
+      return res or True
     except psycopg2.Error, e:
       return e
 
