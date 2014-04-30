@@ -13,8 +13,8 @@ import productWidget
 
 
 class Application(tk.Frame):
-  def __init__(self, master=None):
-    tk.Frame.__init__(self, master)
+  def __init__(self, master=None, name='root'):
+    tk.Frame.__init__(self, master, name=name)
     self.grid(sticky=tk.N+tk.S+tk.E+tk.W)
     self.path = os.path.dirname(os.path.abspath(__file__))
     self.config = configuration.Configuration('cosmexo', 'config')

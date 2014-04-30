@@ -1,4 +1,5 @@
 import os
+import sys
 import dbConnect
 import Tkinter as tk
 import tkMessageBox
@@ -439,7 +440,14 @@ class ProductWidget(BaseWidget):
   def loadProdImage(self):
     """Loads the product image into the ImagePreview widget"""
     self.imageModified = True
-    self.prodPicPreview.setImageFromFileName(askopenfilename())
+    path = self.master.config.get(u'last_img_file_path') or \
+           os.path.abspath(os.path.dirname(sys.argv[0]))
+    imgFile = askopenfilename(initialdir=path)
+    if imgFile is '':
+      return
+    self.master.config.set(u'last_img_file_path',
+                           os.path.abspath(os.path.dirname(imgFile)))
+    self.prodPicPreview.setImageFromFileName(imgFile)
 
   def new(self):
     """All texts become blank, and saving will create a new product in db"""
@@ -562,7 +570,15 @@ class VariantFrame(tk.Frame):
 
   def loadImage(self):
     """Loads the product image into the ImagePreview widget"""
-    self.imagePreview.setImageFromFileName(askopenfilename())
+    parent = self.nametowidget('.root')
+    path = parent.config.get(u'last_img_file_path') or \
+           os.path.abspath(os.path.dirname(sys.argv[0]))
+    imgFile = askopenfilename(initialdir=path)
+    if imgFile is '':
+      return
+    parent.config.set(u'last_img_file_path',
+                           os.path.abspath(os.path.dirname(imgFile)))
+    self.imagePreview.setImageFromFileName(imgFile)
     self.imageModified = True
 
   def getImagePath(self):
