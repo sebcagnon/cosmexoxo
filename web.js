@@ -169,9 +169,12 @@ app.get('/paymentSuccess', function(request, response) {
     console.log('CheckoutDetails: \n' + JSON.stringify(details));
   });
   params.payerid = payerid;
-  params.paymentrequest_0_amt= '10.00';
+  params.paymentrequest_0_amt= cart.reduce(sumPrice, 0).toString();
   params.paymentrequest_0_currencycode= 'USD';
   params.paymentrequest_0_paymentaction= 'Sale';
+  request.session.cart = {}; // re-init cart in session
+  response.locals.cartSize = 0;
+  return response.render('payment-test', {state:'success'});
   paypalxo.ec.doExpressCheckoutPayment(params, function (err, answer) {
     console.log('ExpressCheckoutPayment:\n' + JSON.stringify(answer));
     if (err || answer.PAYMENTINFO_0_PAYMENTSTATUS != 'Completed') {
@@ -181,6 +184,8 @@ app.get('/paymentSuccess', function(request, response) {
       };
       response.render('payment-test', params);
     } else {
+      request.session.cart = {}; // re-init cart in session
+      response.locals.cartSize = 0;
       response.render('payment-test', {state:'success'});
     }
   });
@@ -192,15 +197,26 @@ app.get('/paymentFailure', function(request, response) {
 
 // handle paypal button
 app.post('/pay', function(request, response) {
+  var cart = request.session.cart;
   // Prepare the data
   var data = {
-    paymentrequest_0_amt: '10.00',
+    paymentrequest_0_amt: cart.reduce(sumPrice, 0).toString(),
+    paymentrequest_0_itmamt: cart.reduce(sumPrice, 0).toString(),
     paymentrequest_0_currencycode: 'USD',
     returnurl: app.locals.URL + '/paymentSuccess',
     cancelurl: app.locals.URL + '/paymentFailure',
     paymentrequest_0_paymentaction: 'Sale',
-    solutiontype: 'Sole'
+    solutiontype: 'Sole',
+    landingpage: 'Billing'
   };
+  var prefix = 'L_PAYMENTREQUEST_0_';
+  for (var i=0; i<cart.length; i++) {
+    var item = cart[i];
+    data[prefix+'NAME'+i] = item.variant.name + ' of ' + item.name;
+    data[prefix+'AMT'+i] = item.variant.price;
+    data[prefix+'QTY'+i] = item.quantity;
+    data[prefix+'URL'+i] = item.link;
+  }
   console.log('setExpressCheckout')
   paypalxo.ec.setExpressCheckout(data, function setECCallback (err, ans) {
     if (err) {
@@ -209,7 +225,7 @@ app.post('/pay', function(request, response) {
     }
     // TODO: USE SESSION!!
     app.locals.token = ans.TOKEN;
-    return response.redirect(paypalxo.ec.getLoginURL(ans.TOKEN));
+    return response.redirect(paypalxo.ec.getLoginURL(ans.TOKEN, true));
   });
 });
 
@@ -252,9 +268,7 @@ app.post('/addToCart', function (request, response) {
 
 app.get('/cart', function (request, response) {
   var cart = request.session.cart;
-  cart.itemTotal = cart.reduce(function sumPrice (prev, curr, ind, arr) {
-    return prev + curr.variant.price * curr.quantity;
-  }, 0);
+  cart.itemTotal = cart.reduce(sumPrice, 0);
   response.render('cart', {cart:cart});
 });
 
@@ -288,4 +302,9 @@ function refreshNavbar (app) {
       app.locals.categories = result[1];
       console.log('Navbar refreshed');
     });
+}
+
+//function to get the sum of the price of all items in the cart
+function sumPrice (prev, curr, ind, arr) {
+  return prev + curr.variant.price * curr.quantity;
 }
