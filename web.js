@@ -51,7 +51,7 @@ app.use(express.session({
 app.use( function (request, response, next) {
   var cart = request.session.cart; // save on synchronous db calls!!
   if (cart == undefined) {
-    sess.cart = [];
+    request.session.cart = [];
     response.locals.cartSize = 0;
   } else {
     response.locals.cartSize = cart.length;
@@ -183,7 +183,7 @@ app.get('/paymentSuccess', function(request, response) {
       };
       response.render('payment-test', params);
     } else {
-      request.session.cart = {}; // re-init cart in session
+      request.session.cart = []; // re-init cart in session
       response.locals.cartSize = 0;
       response.render('payment-test', {state:'success'});
     }
@@ -206,7 +206,8 @@ app.post('/pay', function(request, response) {
     cancelurl: app.locals.URL + '/paymentFailure',
     paymentrequest_0_paymentaction: 'Sale',
     solutiontype: 'Sole',
-    landingpage: 'Billing'
+    landingpage: 'Billing',
+    buyeremailoptinenable: 1
   };
   var prefix = 'L_PAYMENTREQUEST_0_';
   for (var i=0; i<cart.length; i++) {
