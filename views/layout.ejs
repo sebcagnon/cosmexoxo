@@ -11,6 +11,7 @@
     <!-- Styles -->
     <link rel="stylesheet" href="/bootstrap/css/bootstrap.min.css" media="all">
     <link rel="stylesheet" href="/bootstrap/css/bootstrap-responsive.min.css" media="all">
+    <link rel="stylesheet" href="/styles/whhg.css">
     <link rel="stylesheet" type="text/css" href="/styles/style.css">
     <link href="http://fonts.googleapis.com/css?family=Didact+Gothic:300,400,500,700,300italic,400italic,500italic,700italic" rel="stylesheet" type="text/css">
 
@@ -36,7 +37,8 @@
             <span class="glyphicon glyphicon-home"></span> CosmeXO
           </a>
         </div>
-        <div class="collapse navbar-collapse" id="cosmexo-navbar-collapse">
+        <div class="collapse navbar-collapse"
+             id="cosmexo-navbar-collapse">
           <ul class="nav navbar-nav">
             <li class="dropdown">
               <a href="/categories" class="dropdown-toggle"
@@ -86,6 +88,11 @@
                 </li>
               </ul>
             </li>
+            <li>
+              <a href="/cart" style:"font-size:80pt;">
+                SHOPPING BAG <i class="icon icon-shoppingcartalt"></i>
+                <span class="badge"><%= cartSize %></span>
+              </a>
           </ul>
         </div>
       </div>

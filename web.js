@@ -25,6 +25,7 @@ app.configure( function () {
   app.use("/images", express.static(__dirname + '/public/images'));
   app.use("/styles", express.static(__dirname + '/public/styles'));
   app.use("/js", express.static(__dirname + '/public/js'));
+  app.use("/font", express.static(__dirname + '/public/font'));
   app.use("/bootstrap", express.static(__dirname + '/public/bootstrap'));
 });
 

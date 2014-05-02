@@ -35,12 +35,12 @@ body {
 .navbar .nav li a:hover,
 .navbar .navbar-brand:hover {
   color: #FFFFFF;
-  border-bottom: 2px solid #E61990;
+  border-bottom: 2px solid #F5177B;
 }
 
 .navbar .nav li.img a:hover{
   height: 56px;
-  border:1px 1px 1px 1px solid #E61990;
+  border:1px 1px 1px 1px solid #F5177B;
 }
 
 .navbar .nav li a:focus  {
@@ -55,8 +55,18 @@ body {
 
 li.dropdown.open a,
 li.dropdown.open a:focus {
-  border-bottom: 2px solid #E61990;
+  border-bottom: 2px solid #F5177B;
   border-right: 1px solid rgba(255,255,255,.9);
+}
+
+.navbar .badge {
+  background-color: #EEEEEE;
+  color: #000000;
+}
+
+.navbar .icon {
+  color: #F5177B;
+  font-weight: normal;
 }
 
 /* navbar dropdown menus */
