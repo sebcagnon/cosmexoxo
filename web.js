@@ -49,8 +49,7 @@ app.use(express.session({
 
 // initialize sessions here
 app.use( function (request, response, next) {
-  var sess = request.session;
-  var cart = sess.cart; // save on synchronous db calls!!
+  var cart = request.session.cart; // save on synchronous db calls!!
   if (cart == undefined) {
     sess.cart = [];
     response.locals.cartSize = 0;
@@ -169,10 +168,10 @@ app.get('/paymentSuccess', function(request, response) {
     console.log('CheckoutDetails: \n' + JSON.stringify(details));
   });
   params.payerid = payerid;
-  params.paymentrequest_0_amt= cart.reduce(sumPrice, 0).toString();
+  // params.paymentrequest_0_amt= cart.reduce(sumPrice, 0).toString();
   params.paymentrequest_0_currencycode= 'USD';
   params.paymentrequest_0_paymentaction= 'Sale';
-  request.session.cart = {}; // re-init cart in session
+  request.session.cart = []; // re-init cart in session
   response.locals.cartSize = 0;
   return response.render('payment-test', {state:'success'});
   paypalxo.ec.doExpressCheckoutPayment(params, function (err, answer) {
