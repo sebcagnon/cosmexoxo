@@ -167,13 +167,13 @@ app.get('/paymentSuccess', function(request, response) {
   paypalxo.ec.getExpressCheckoutDetails(params, function (err, details) {
     console.log('CheckoutDetails: \n' + JSON.stringify(details));
   });
+  var cart = request.session.cart;
   params.payerid = payerid;
-  // params.paymentrequest_0_amt= cart.reduce(sumPrice, 0).toString();
+  params.paymentrequest_0_amt= cart.reduce(sumPrice, 0).toString();
   params.paymentrequest_0_currencycode= 'USD';
   params.paymentrequest_0_paymentaction= 'Sale';
   request.session.cart = []; // re-init cart in session
   response.locals.cartSize = 0;
-  return response.render('payment-test', {state:'success'});
   paypalxo.ec.doExpressCheckoutPayment(params, function (err, answer) {
     console.log('ExpressCheckoutPayment:\n' + JSON.stringify(answer));
     if (err || answer.PAYMENTINFO_0_PAYMENTSTATUS != 'Completed') {
