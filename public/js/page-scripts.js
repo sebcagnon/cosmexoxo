@@ -44,7 +44,7 @@ $(".addToCart").submit(function addToCart (e) {
         function(data) {
           if (data.error)
             return console.log('request returned an error: ' + data.error);
-          $("#cartSize").text(data.cartSize + ' item(s)');
+          $("#cartSize").text(data.cartSize);
           btn.removeClass("btn-primary active disabled")
             .addClass("btn-success").attr("value", "Added");
           $this.children("#loadImg").remove();
