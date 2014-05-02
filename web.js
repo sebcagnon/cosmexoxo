@@ -218,16 +218,35 @@ app.post('/addToCart', function (request, response) {
   request.checkBody('product_id').notEmpty().isInt();
   request.checkBody('variant_id').notEmpty().isInt();
   request.checkBody('quantity').notEmpty().isInt();
+  request.sanitize('product_id').toInt();
+  request.sanitize('variant_id').toInt();
+  request.sanitize('quantity').toInt();
   // check for errors
   var errors = request.validationErrors();
   if (errors) {
     console.log("Validation errors in addToCart: " + JSON.stringify(errors));
     return response.send(JSON.stringify({error:'Could not validate input'}));
   }
-  var newProduct = request.body;
-  var data = { cartSize: request.session.cart.length + 1 };
-  request.session.cart.push(newProduct); // danger writing client data into db!
-  response.send(JSON.stringify(data));
+  var newProduct = {
+    product_id: request.param('product_id'),
+    variant_id: request.param('variant_id'),
+    quantity: request.param('quantity')
+  };
+  // get full data from db
+  var dbProduct = db.getProduct(newProduct.product_id,
+                                function addProductToCart (err, dbProduct) {
+    // replace variants with only 1 variant from order
+    for (var i=0; i<dbProduct.variants.length; i++) {
+      if (dbProduct.variants[i].variant_id == newProduct.variant_id) {
+        dbProduct.variant = dbProduct.variants[i];
+      }
+    }
+    dbProduct.variants = undefined;
+    dbProduct.quantity = newProduct.quantity;
+    var data = { cartSize: request.session.cart.length + 1 };
+    request.session.cart.push(dbProduct);
+    response.send(JSON.stringify(data));
+  });
 });
 
 app.get('/cart', function (request, response) {
