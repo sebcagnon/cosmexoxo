@@ -1,6 +1,16 @@
 <% layout('layout') -%>
 <div class="row">
-  <h1>Your Shopping Cart</h1>
+  <div class="col-sm-6 col-md-6">
+    <h1>Your Shopping Cart</h1>
+  </div>
+  <div class="col-sm-6 col-md-6">
+    <form name="input" action="pay" method="post">
+      <input type="image" src="https://www.paypal.com/en_US/i/btn/btn_xpressCheckout.gif" value="submit" class="pull-right btn-next">
+      </input>
+  </form>
+  </div>
+</div>
+<div class="row">
   <div class="table-responsive">
     <table class="table table-hover table-bordered">
       <thead>
@@ -33,12 +43,39 @@
         </tr>
         <% } %>
         <tr>
-          <td colspan="3" align="right"><h4>Total Items Price</h4></td>
+          <td colspan="3" class="td-right"><h4>Total Items Price</h4></td>
           <td><%- cart.reduce(function sumPrice (prev, curr, ind, arr) {
             return prev + curr.variant.price * curr.quantity;
             }, 0) %> $
         </tr>
+        <tr>
+          <td colspan="3" class="td-right">
+            <h4>Estimated Shipping (EMS)</h4>
+          </td>
+          <td>
+            <select name="shippingCost" id="shippingCost">
+              <option value="30">US: 30$</option>
+              <option value="40">Europe: 40$</option>
+              <option value="35">Asia: 35$</option>
+            </select>
+          </td>
+        </tr>
+        <tr>
+          <td colspan="3" class="td-right">
+            <h4>Estimated Order Total</h4>
+          </td>
+          <td>
+            <h4><%- cart.reduce(function sumPrice (prev, curr, ind, arr) {
+            return prev + curr.variant.price * curr.quantity;
+            }, 0) + 30 %> $</h4>
+          </td>
+        </tr>
       </tbody>
     </table>
   </div>
+  <!-- <button class="btn btn-next pull-right">>> Checkout with Paypal</button> -->
+  <form name="input" action="pay" method="post">
+    <input type="image" src="https://www.paypal.com/en_US/i/btn/btn_xpressCheckout.gif" value="submit" class="pull-right btn-next">
+    </input>
+  </form>
 </div>

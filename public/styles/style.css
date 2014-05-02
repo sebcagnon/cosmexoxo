@@ -70,12 +70,6 @@ li.dropdown.open a:focus {
   font-weight: normal;
 }
 
-/* Shopping cart page */
-td > a > .img-responsive {
-  height: 50px;
-  float: left;
-}
-
 /* navbar dropdown menus */
 .navbar .nav li.dropdown > .dropdown-toggle .caret,
 .navbar .nav li.dropdown.open > .dropdown-toggle .caret,
@@ -163,4 +157,25 @@ li.dropdown-submenu > ul.dropdown-menu li a {
 
 #productImage .img-responsive {
   max-height: 350px;
+}
+
+/* Shopping cart page */
+td > a > .img-responsive {
+  height: 50px;
+  float: left;
+}
+
+.td-right {
+  text-align: right;
+}
+
+.btn-next {
+  margin-bottom: 10px;
+}
+
+@media ( min-width: 768px ) {
+  .btn-next {
+    margin-top: 25px;
+    margin-bottom: 0px
+  }
 }
