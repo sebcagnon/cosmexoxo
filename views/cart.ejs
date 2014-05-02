@@ -1,0 +1,44 @@
+<% layout('layout') -%>
+<div class="row">
+  <h1>Your Shopping Cart</h1>
+  <div class="table-responsive">
+    <table class="table table-hover table-bordered">
+      <thead>
+        <tr>
+          <th>Product</th>
+          <th>Unit Price</th>
+          <th>Quantity</th>
+          <th>Total Product Price</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        <% for (var i=0; i<cart.length; i++) {
+            var product = cart[i]; %>
+        <tr>
+          <td>
+            <%- utils.link_to('/product/' + product.product_id,
+                utils.responsiveImage(
+                  S3URL+'/'+product.variant.key,
+                  'Picture of '+product.variant.name+' of '+product.name))
+            %><%- utils.link_to('/product/' + product.product_id,
+                                product.variant.name +' of ' + product.name) %>
+            <br>by <%- utils.link_to('/brands/' + product.brand_name,
+                                     product.brand_name) %>
+          </td>
+          <td><%= product.variant.price %> $</td>
+          <td><%= product.quantity %></td>
+          <td><%= product.variant.price * product.quantity %> $</td>
+          <td><button class="btn btn-danger btn-sm">Remove</button></td>
+        </tr>
+        <% } %>
+        <tr>
+          <td colspan="3" align="right"><h4>Total Items Price</h4></td>
+          <td><%- cart.reduce(function sumPrice (prev, curr, ind, arr) {
+            return prev + curr.variant.price * curr.quantity;
+            }, 0) %> $
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>

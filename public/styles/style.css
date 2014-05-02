@@ -59,6 +59,7 @@ li.dropdown.open a:focus {
   border-right: 1px solid rgba(255,255,255,.9);
 }
 
+/* navbar cart icon and badge */
 .navbar .badge {
   background-color: #EEEEEE;
   color: #000000;
@@ -67,6 +68,12 @@ li.dropdown.open a:focus {
 .navbar .icon {
   color: #F5177B;
   font-weight: normal;
+}
+
+/* Shopping cart page */
+td > a > .img-responsive {
+  height: 50px;
+  float: left;
 }
 
 /* navbar dropdown menus */

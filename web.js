@@ -251,12 +251,8 @@ app.post('/addToCart', function (request, response) {
 });
 
 app.get('/cart', function (request, response) {
-  var sess = request.session;
-  response.setHeader('Content-Type', 'text/html');
-  response.write('<h1>Session Summary</h1>');
-  response.write('<p>cart: ' + JSON.stringify(sess.cart) + '</p>');
-  response.write('<p>expires in: ' + (sess.cookie.maxAge / 1000) + 's</p>');
-  response.end();
+  var cart = request.session.cart;
+  response.render('cart', {cart:cart});
 });
 
 // Handling pages not handled by app.get

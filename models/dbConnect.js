@@ -235,8 +235,8 @@ function createProduct(result) {
     variants: _.map(result[2], function selector(variant) {
                 return {variant_id: variant.variant_id,
                         name: variant.name,
-                        price: variant.price,
-                        weight: variant.weight,
+                        price: parseInt(variant.price),
+                        weight: parseInt(variant.weight),
                         key: db.createKey([basics.product_id, basics.name,
                                            variant.variant_id, variant.name])}
               })
