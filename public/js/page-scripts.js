@@ -35,6 +35,9 @@ $('ul.dropdown-menu [data-toggle=dropdown]').on('click mouseenter',
 $(".addToCart").submit(function addToCart (e) {
     e.preventDefault(); // Prevents the page from refreshing
     var $this = $(this); // `this` refers to the current form element
+    var btn = $this.children(":submit");
+    btn.addClass("active disabled");
+    btn.after('<img id="loadImg" src="/images/ajax-loader.gif" alt="loading">');
     $.post(
         $this.attr("action"), // Gets the URL to sent the post to
         $this.serialize(), // Serializes form data in standard format
@@ -42,6 +45,9 @@ $(".addToCart").submit(function addToCart (e) {
           if (data.error)
             return console.log('request returned an error: ' + data.error);
           $("#cartSize").text(data.cartSize + ' item(s)');
+          btn.removeClass("btn-primary active disabled")
+            .addClass("btn-success").attr("value", "Added");
+          $this.children("#loadImg").remove();
         },
         "json" // The format the response should be in "json"
     );
