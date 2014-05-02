@@ -252,6 +252,9 @@ app.post('/addToCart', function (request, response) {
 
 app.get('/cart', function (request, response) {
   var cart = request.session.cart;
+  cart.itemTotal = cart.reduce(function sumPrice (prev, curr, ind, arr) {
+    return prev + curr.variant.price * curr.quantity;
+  }, 0);
   response.render('cart', {cart:cart});
 });
 

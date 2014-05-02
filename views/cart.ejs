@@ -5,7 +5,9 @@
   </div>
   <div class="col-sm-6 col-md-6">
     <form name="input" action="pay" method="post">
-      <input type="image" src="https://www.paypal.com/en_US/i/btn/btn_xpressCheckout.gif" value="submit" class="pull-right btn-next">
+      <input type="image"
+             src="https://www.paypal.com/en_US/i/btn/btn_xpressCheckout.gif" value="submit"
+             class="pull-right btn-next">
       </input>
   </form>
   </div>
@@ -44,9 +46,7 @@
         <% } %>
         <tr>
           <td colspan="3" class="td-right"><h4>Total Items Price</h4></td>
-          <td><%- cart.reduce(function sumPrice (prev, curr, ind, arr) {
-            return prev + curr.variant.price * curr.quantity;
-            }, 0) %> $
+          <td><%- cart.itemTotal %> $
         </tr>
         <tr>
           <td colspan="3" class="td-right">
@@ -65,17 +65,15 @@
             <h4>Estimated Order Total</h4>
           </td>
           <td>
-            <h4><%- cart.reduce(function sumPrice (prev, curr, ind, arr) {
-            return prev + curr.variant.price * curr.quantity;
-            }, 0) + 30 %> $</h4>
+            <h4><%- cart.itemTotal + 30 %> $</h4>
           </td>
         </tr>
       </tbody>
     </table>
   </div>
-  <!-- <button class="btn btn-next pull-right">>> Checkout with Paypal</button> -->
   <form name="input" action="pay" method="post">
-    <input type="image" src="https://www.paypal.com/en_US/i/btn/btn_xpressCheckout.gif" value="submit" class="pull-right btn-next">
-    </input>
+    <input type="image"
+           src="https://www.paypal.com/en_US/i/btn/btn_xpressCheckout.gif"
+           value="submit" class="pull-right btn-next">
   </form>
 </div>
