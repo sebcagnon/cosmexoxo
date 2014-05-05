@@ -67,6 +67,9 @@ $(".no-refresh").submit(function changeCart (e) {
 
 // Updates all the prices in the cart page when changing a quantity or product
 function updateCart(cart) {
+  if (cart.length == 0) {
+    location.reload();
+  }
   var totalPrice = 0;
   for (var i=0; i<cart.length; i++) {
     var product = cart[i];
