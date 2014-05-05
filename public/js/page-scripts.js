@@ -65,6 +65,7 @@ $(".no-refresh").submit(function changeCart (e) {
     );
 });
 
+// Updates all the prices in the cart page when changing a quantity or product
 function updateCart(cart) {
   var totalPrice = 0;
   for (var i=0; i<cart.length; i++) {
@@ -77,6 +78,15 @@ function updateCart(cart) {
     totalPrice += variant.price*product.quantity;
   }
   $("#itemTotal").text(totalPrice + ' $');
-  $("#orderTotal")
-    .html('<h4>'+(totalPrice+parseInt($("#shippingCost").val())) + ' $</h4>');
+  updateOrderPrice();
+}
+
+// update order price when shipping option is changed and on load
+$("#shippingCost").change( updateOrderPrice ).change();
+
+// does the #orderPrice update
+function updateOrderPrice () {
+  var total = parseInt($("#itemTotal").text()) +
+              parseInt($("#shippingCost").val());
+  $("#orderTotal").html('<h4>' + total + ' $</h4>');
 }
