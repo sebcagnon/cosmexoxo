@@ -32,6 +32,10 @@ body {
   border-bottom: 2px solid #000000;
 }
 
+.navbar .navbar-brand, .navbar .nav > li > a {
+  height: 53px;
+}
+
 .navbar .nav li a:hover,
 .navbar .navbar-brand:hover {
   color: #FFFFFF;
