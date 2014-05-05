@@ -22,7 +22,7 @@
                                 product.name) %>
       <h3><%- variant.name %></h3>
       <p>Price: <%= variant.price %>$</p>
-      <form action="/addToCart" class="form-horizontal addToCart"
+      <form action="/addToCart" class="form-horizontal no-refresh"
             method="post" role="form">
         <input type="hidden" name="product_id"
                value="<%= product.product_id %>">

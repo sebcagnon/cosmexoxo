@@ -13,7 +13,7 @@
   </div>
 </div>
 <div class="row">
-  <div class="table-responsive">
+  <div class="table-responsive" id="cartTable">
     <table class="table table-hover table-bordered">
       <thead>
         <tr>
@@ -27,7 +27,7 @@
       <tbody>
         <% for (var i=0; i<cart.length; i++) {
             var product = cart[i]; %>
-        <tr>
+        <tr id="<%= product.variant.variant_id %>">
           <td>
             <%- utils.link_to('/product/' + product.product_id,
                 utils.responsiveImage(
@@ -38,21 +38,36 @@
             <br>by <%- utils.link_to('/brands/' + product.brand_name,
                                      product.brand_name) %>
           </td>
-          <td><%= product.variant.price %> $</td>
-          <td><%= product.quantity %></td>
-          <td><%= product.variant.price * product.quantity %> $</td>
-          <td><button class="btn btn-danger btn-sm">Remove</button></td>
+          <td style="vertical-align:middle" id="#price">
+            <%= product.variant.price %> $
+          </td>
+          <td style="vertical-align:middle" id="#quantity">
+            <%= product.quantity %>
+          </td>
+          <td style="vertical-align:middle" id="#total">
+            <%= product.variant.price * product.quantity %> $
+          </td>
+          <td style="vertical-align:middle">
+            <form action="/removeFromCart" method="post" role="form"
+                  class="no-refresh">
+              <input type="hidden" name="product_id"
+                     value="<%= product.product_id %>">
+              <input type="hidden" name="variant_id"
+                     value="<%= product.variant.variant_id %>">
+              <input type="submit" value="Remove" class="btn btn-danger btn-sm">
+            </form>
+          </td>
         </tr>
         <% } %>
         <tr>
           <td colspan="3" class="td-right"><h4>Total Items Price</h4></td>
-          <td><%- cart.itemTotal %> $
+          <td style="vertical-align:middle"><%- cart.itemTotal %> $
         </tr>
         <tr>
           <td colspan="3" class="td-right">
             <h4>Estimated Shipping (EMS)</h4>
           </td>
-          <td>
+          <td style="vertical-align:middle">
             <select name="shippingCost" id="shippingCost">
               <option value="30">US: 30$</option>
               <option value="40">Europe: 40$</option>

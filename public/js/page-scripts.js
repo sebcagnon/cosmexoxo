@@ -1,5 +1,6 @@
-$('ul.dropdown-menu [data-toggle=dropdown]').on('click mouseenter',
-                                                function openMenu (event) {
+// special dropdown menu that overrides default bootstrap behavior
+$('ul.dropdown-menu [data-toggle=dropdown]')
+  .on('click mouseenter', function openMenu (event) {
   // Avoid following the href location when clicking
   event.preventDefault();
   // Avoid having the menu to close when clicking
@@ -32,23 +33,38 @@ $('ul.dropdown-menu [data-toggle=dropdown]').on('click mouseenter',
   }
 });
 
-$(".addToCart").submit(function addToCart (e) {
+// allows to add and remove from cart without refreshing the current page
+$(".no-refresh").submit(function changeCart (e) {
     e.preventDefault(); // Prevents the page from refreshing
     var $this = $(this); // `this` refers to the current form element
     var btn = $this.children(":submit");
     btn.addClass("active disabled");
     btn.after('<img id="loadImg" src="/images/ajax-loader.gif" alt="loading">');
     $.post(
-        $this.attr("action"), // Gets the URL to sent the post to
+        $this.attr("action"), // Gets the URL to send the post to
         $this.serialize(), // Serializes form data in standard format
         function(data) {
           if (data.error)
             return console.log('request returned an error: ' + data.error);
-          $("#cartSize").text(data.cartSize);
-          btn.removeClass("btn-primary active disabled")
-            .addClass("btn-success").attr("value", "Added");
+          $(".cartSize").text(data.cartSize);
+          if (btn.hasClass("btn-primary")) {
+            btn.removeClass("btn-primary active disabled")
+              .addClass("btn-success").attr("value", "Added");
+          } else if (btn.hasClass("btn-danger")) {
+            btn.removeClass("btn-danger active, disabled")
+              .addClass("btn-warning").attr("value", "Removed");
+            var rowID = '#' + $this.children(':input[name=variant_id]').attr("value");
+            $(rowID).remove();
+          }
           $this.children("#loadImg").remove();
+          if ($("#cartTable").length) {
+            updateCart(data.cart);
+          }
         },
         "json" // The format the response should be in "json"
     );
 });
+
+function updateCart(cart) {
+
+}

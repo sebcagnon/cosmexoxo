@@ -232,12 +232,7 @@ app.post('/pay', function(request, response) {
 // handles products added to cart
 app.post('/addToCart', function (request, response) {
   //validation
-  request.checkBody('product_id').notEmpty().isInt();
-  request.checkBody('variant_id').notEmpty().isInt();
-  request.checkBody('quantity').notEmpty().isInt();
-  request.sanitize('product_id').toInt();
-  request.sanitize('variant_id').toInt();
-  request.sanitize('quantity').toInt();
+  validateRequest(request, withQuantity=true);
   // check for errors
   var errors = request.validationErrors();
   if (errors) {
@@ -260,10 +255,38 @@ app.post('/addToCart', function (request, response) {
     }
     dbProduct.variants = undefined;
     dbProduct.quantity = newProduct.quantity;
-    var data = { cartSize: request.session.cart.length + 1 };
-    request.session.cart.push(dbProduct);
+    var cart = request.session.cart;
+    cart.push(dbProduct);
+    var data = {
+      cartSize: request.session.cart.length + 1,
+      cart: cart
+    };
     response.send(JSON.stringify(data));
+    request.session.cart = cart;
   });
+});
+
+app.post("/removeFromCart", function (request, response) {
+  validateRequest(request);
+  var errors = request.validationErrors();
+  if (errors) {
+    console.log("Validation errors in addToCart: " + JSON.stringify(errors));
+    return response.send(JSON.stringify({error:'Could not validate input'}));
+  }
+  var vid = request.param('variant_id');
+  var cart = request.session.cart;
+  for (var i=0; i<cart.length; i++) {
+    if (cart[i].variant.variant_id == vid) {
+      cart.splice(i, 1);
+      break;
+    }
+  }
+  data = {
+    cartSize: cart.length,
+    cart: cart
+  };
+  response.send(JSON.stringify(data));
+  request.session.cart = cart;
 });
 
 app.get('/cart', function (request, response) {
@@ -307,4 +330,13 @@ function refreshNavbar (app) {
 //function to get the sum of the price of all items in the cart
 function sumPrice (prev, curr, ind, arr) {
   return prev + curr.variant.price * curr.quantity;
+}
+
+function validateRequest(request, withQuantity) {
+  request.checkBody('product_id').notEmpty().isInt();
+  request.checkBody('variant_id').notEmpty().isInt();
+  if (withQuantity) request.checkBody('quantity').notEmpty().isInt();
+  request.sanitize('product_id').toInt();
+  request.sanitize('variant_id').toInt();
+  if (withQuantity) request.sanitize('quantity').toInt();
 }

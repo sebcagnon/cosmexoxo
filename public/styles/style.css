@@ -169,6 +169,10 @@ td > a > .img-responsive {
   text-align: right;
 }
 
+.top-space {
+  vertical-align: middle;
+}
+
 .btn-next {
   margin-bottom: 10px;
 }
