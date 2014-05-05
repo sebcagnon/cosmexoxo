@@ -61,7 +61,9 @@
         <% } %>
         <tr>
           <td colspan="3" class="td-right"><h4>Total Items Price</h4></td>
-          <td style="vertical-align:middle"><%- cart.itemTotal %> $
+          <td style="vertical-align:middle" id="itemTotal">
+            <%- cart.itemTotal %> $
+          </td>
         </tr>
         <tr>
           <td colspan="3" class="td-right">
@@ -79,7 +81,7 @@
           <td colspan="3" class="td-right">
             <h4>Estimated Order Total</h4>
           </td>
-          <td>
+          <td id="orderTotal">
             <h4><%- cart.itemTotal + 30 %> $</h4>
           </td>
         </tr>

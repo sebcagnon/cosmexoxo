@@ -258,7 +258,7 @@ app.post('/addToCart', function (request, response) {
     var cart = request.session.cart;
     cart.push(dbProduct);
     var data = {
-      cartSize: request.session.cart.length + 1,
+      cartSize: cart.length,
       cart: cart
     };
     response.send(JSON.stringify(data));

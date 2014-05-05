@@ -66,5 +66,17 @@ $(".no-refresh").submit(function changeCart (e) {
 });
 
 function updateCart(cart) {
-
+  var totalPrice = 0;
+  for (var i=0; i<cart.length; i++) {
+    var product = cart[i];
+    var variant = product.variant;
+    var vid = '#' + variant.variant_id;
+    $(vid).find("#price").text(variant.price + ' $');
+    $(vid).find("#quantity").text(product.quantity);
+    $(vid).find("#price").text((variant.price*product.quantity) + ' $');
+    totalPrice += variant.price*product.quantity;
+  }
+  $("#itemTotal").text(totalPrice + ' $');
+  $("#orderTotal")
+    .html('<h4>'+(totalPrice+parseInt($("#shippingCost").val())) + ' $</h4>');
 }
