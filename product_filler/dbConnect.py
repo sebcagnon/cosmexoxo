@@ -43,7 +43,7 @@ class DBConnection(object):
     where = self._checkGetProductInfoParams(id, name)
     self.cur.execute(
       """
-      SELECT p.product_id, p.name, p.description, p.active,
+      SELECT p.product_id, p.name, p.description, p.active, p.featured,
       b.brand_id, b.name, c.company_id, c.name
       FROM product p
       INNER JOIN brand b ON p.brand_id = b.brand_id
@@ -51,7 +51,7 @@ class DBConnection(object):
       WHERE {clause};
       """.format(clause=where))
     header = ("product_id", "product_name", "product_description",
-              "product_active", "brand_id", "brand_name",
+              "product_active", "product_featured", "brand_id", "brand_name",
               "company_id", "company_name")
     info = self.cur.fetchone()
     if info:

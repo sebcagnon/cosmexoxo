@@ -64,6 +64,14 @@ class ProductWidget(BaseWidget):
                        variable=self.activeState)
     self.activeLabel.grid(row=1, column=0, sticky=tk.N+tk.W)
     self.activeCheck.grid(row=1, column=1, sticky=tk.N+tk.W)
+    # Featured
+    self.featureLabel = tk.Label(self.productFrame, text="Featured? ")
+    self.featureState = tk.IntVar()
+    self.featureState.set(0)
+    self.featureCheck = tk.Checkbutton(self.productFrame,
+                       variable=self.featureState)
+    self.featureLabel.grid(row=2, column=0, sticky=tk.N+tk.W)
+    self.featureCheck.grid(row=2, column=1, sticky=tk.N+tk.W)
     # Brand
     self.brandLabel = tk.Label(self.productFrame, text="Brand: ")
     self.brandChoices = self.getBrandChoices()
@@ -72,8 +80,8 @@ class ProductWidget(BaseWidget):
     self.brandTextVar.set('Choose brand...')
     self.brandMenu = tk.OptionMenu(self.productFrame, self.brandTextVar,
                        *brandNames)
-    self.brandLabel.grid(row=2, column=0, sticky=tk.N+tk.W)
-    self.brandMenu.grid(row=2, column=1, sticky=tk.W+tk.N)
+    self.brandLabel.grid(row=3, column=0, sticky=tk.N+tk.W)
+    self.brandMenu.grid(row=3, column=1, sticky=tk.W+tk.N)
     # Categories
     self.categoryLabel = tk.Label(self.productFrame, text="Categories: ")
     self.categoryButton = tk.Button(self.productFrame, text="Select...",
@@ -84,9 +92,9 @@ class ProductWidget(BaseWidget):
     self.categoryText.set('')
     self.categoryListLabel = tk.Label(self.productFrame,
                        textvariable=self.categoryText)
-    self.categoryLabel.grid(row=3, column=0, sticky=tk.N+tk.W)
-    self.categoryButton.grid(row=3, column=1, sticky=tk.N+tk.W)
-    self.categoryListLabel.grid(row=4, column=0, rowspan=7, columnspan=2,
+    self.categoryLabel.grid(row=4, column=0, sticky=tk.N+tk.W)
+    self.categoryButton.grid(row=4, column=1, sticky=tk.N+tk.W)
+    self.categoryListLabel.grid(row=5, column=0, rowspan=7, columnspan=2,
                        sticky=tk.W+tk.N)
     self.categoryListLabel.config(anchor=tk.N, justify=tk.LEFT)
     # Description
@@ -94,7 +102,7 @@ class ProductWidget(BaseWidget):
     self.descText  = tk.Text(self.productFrame, width=35, height=13)
     self.descLabel.grid(row=0, column=2, columnspan=7, sticky=tk.W)
     self.descLabel.config(justify=tk.LEFT)
-    self.descText.grid(row=1, column=2, rowspan=10, columnspan=7,
+    self.descText.grid(row=1, column=2, rowspan=11, columnspan=7,
                        sticky=tk.N+tk.S+tk.W)
     # Pictures
     self.picturesFrame = tk.Frame(self.mainFrame)
@@ -115,8 +123,8 @@ class ProductWidget(BaseWidget):
     self.addVariantButton = tk.Button(self.variantFrame, image=self.plusImage,
                        text="Add Variant ", compound="left",
                        command=self.addVariant)
-    self.variantTitle.grid(row=12, column=0, sticky=tk.N+tk.W)
-    self.addVariantButton.grid(row=13, column=0, columnspan=2, sticky=tk.N+tk.W)
+    self.variantTitle.grid(row=13, column=0, sticky=tk.N+tk.W)
+    self.addVariantButton.grid(row=14, column=0, columnspan=2, sticky=tk.N+tk.W)
     self.id = 0
     # Save
     if self.editionMode == 'new':
@@ -130,12 +138,12 @@ class ProductWidget(BaseWidget):
 
   def save(self):
     """Uploads the current product to the database"""
-    (name, active, desc, chosenBrandID, catIds) = self.getFormInfo()
+    (name, active, featured, desc, chosenBrandID, catIds) = self.getFormInfo()
     self.checkValidity(name, chosenBrandID, catIds)
     # Save to Database, only commit after last one
     # product
-    heads = ('name', 'description', 'active', 'brand_id')
-    vals = (name, desc, active, chosenBrandID)
+    heads = ('name', 'description', 'active', 'brand_id', 'featured')
+    vals = (name, desc, active, chosenBrandID, featured)
     res = self.db.simpleInsert('product', heads, vals,
                         commit=False, returning='product_id')
     self.checkDBResult(res)
@@ -203,13 +211,13 @@ class ProductWidget(BaseWidget):
 
   def updateProduct(self):
     """Updates a product that is already in the database"""
-    (name, active, desc, chosenBrandID, catIds) = self.getFormInfo()
+    (name, active, featured, desc, chosenBrandID, catIds) = self.getFormInfo()
     self.checkValidity(name, chosenBrandID, catIds)
     productId = self.currentProduct['product_id']
     # Update into Database, only commit after last one
     # product
-    heads = ('name', 'description', 'active', 'brand_id')
-    vals = (name, desc, active, chosenBrandID)
+    heads = ('name', 'description', 'active', 'brand_id', 'featured')
+    vals = (name, desc, active, chosenBrandID, featured)
     res = self.db.simpleUpdate('product', heads, vals, productId, commit=False)
     self.checkDBResult(res)
     # product_category
@@ -307,6 +315,7 @@ class ProductWidget(BaseWidget):
     """Retrieves all the information from the different entries and checkboxes"""
     name = self.nameTextVar.get().encode('utf-8').strip()
     active = self.activeState.get() == 1
+    featured = self.featureState.get() == 1
     desc = self.descText.get(1.0, tk.END).encode('utf-8').strip()
     chosenBrandID = -1
     brandText = self.brandTextVar.get().encode('utf-8')
@@ -315,7 +324,7 @@ class ProductWidget(BaseWidget):
         chosenBrandID = id
         break
     catIds = [id for _, id in self.chosenCategories]
-    return (name, active, desc, chosenBrandID, catIds)
+    return (name, active, featured, desc, chosenBrandID, catIds)
 
   def checkValidity(self, name, chosenBrandID, catIds):
     """Checks if all the inputs are filled/valid"""
@@ -478,6 +487,7 @@ class ProductWidget(BaseWidget):
     self.clearAllInfo()
     self.nameTextVar.set(productInfo['product_name'])
     self.activeState.set(productInfo['product_active'])
+    self.featureState.set(productInfo['product_featured'])
     for name, id in self.brandChoices:
       if id==productInfo['brand_id']:
         self.brandTextVar.set(name)
