@@ -261,7 +261,11 @@ app.post('/addToCart', function (request, response) {
       cartSize: cart.length,
       cart: cart
     };
-    response.send(JSON.stringify(data));
+    if (request.param('jsenabled')) {
+      response.send(JSON.stringify(data));
+    } else {
+      response.redirect(request.get('Referrer'));
+    }
     request.session.cart = cart;
   });
 });
@@ -285,7 +289,11 @@ app.post("/removeFromCart", function (request, response) {
     cartSize: cart.length,
     cart: cart
   };
-  response.send(JSON.stringify(data));
+  if (request.param('jsenabled')) {
+    response.send(JSON.stringify(data));
+  } else {
+    response.redirect(request.get('Referrer'));
+  }
   request.session.cart = cart;
 });
 
@@ -339,4 +347,5 @@ function validateRequest(request, withQuantity) {
   request.sanitize('product_id').toInt();
   request.sanitize('variant_id').toInt();
   if (withQuantity) request.sanitize('quantity').toInt();
+  request.sanitize('jsenabled').toBoolean();
 }

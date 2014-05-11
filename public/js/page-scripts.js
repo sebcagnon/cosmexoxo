@@ -41,8 +41,8 @@ $(".no-refresh").submit(function changeCart (e) {
     btn.addClass("active disabled");
     btn.after('<img id="loadImg" src="/images/ajax-loader.gif" alt="loading">');
     $.post(
-        $this.attr("action"), // Gets the URL to send the post to
-        $this.serialize(), // Serializes form data in standard format
+        $this.attr("action"), // post URL
+        $this.serialize() + '&jsenabled=1', // post args
         function(data) {
           if (data.error)
             return console.log('request returned an error: ' + data.error);
