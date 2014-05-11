@@ -101,6 +101,17 @@ function testGetProductsByCategory(err, result) {
   }
   console.log('getProductsByCategory result:');
   console.log(result);
+  db.getFeaturedProducts(testGetFeaturedProducts);
+}
+
+function testGetFeaturedProducts(err, result) {
+  if (err) {
+    console.log('Error in getFeaturedProducts: ' + err);
+    db.close();
+    return;
+  }
+  console.log('getFeaturedProducts result:');
+  console.log(result);
   onFinished();
 }
 

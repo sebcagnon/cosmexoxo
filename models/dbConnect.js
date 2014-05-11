@@ -68,6 +68,24 @@ var db = {
     });
   },
 
+  getFeaturedProducts : function (callback) {
+    pg.connect(config, function featuredProductsQuery(err, client, done) {
+      if (err) callback(err);
+      var str = 'SELECT p.product_id, p.name, p.description as desc\
+                 FROM product_info.product p\
+                 WHERE p.featured = true';
+      client.query(str, function onQueryFinished(err, result) {
+        if (err) {
+          callback(err);
+        } else {
+          console.log(result);
+          callback(null, _.map(result.rows, addKeys));
+        }
+        done();
+      });
+    });
+  },
+
   // Returns a list of all products from 1 brand as the pair {product_id, name}
   getProductsByBrand : function (brandName, callback) {
     pg.connect(config, function prodByBrandQuery(err, client, done) {
@@ -80,11 +98,7 @@ var db = {
         if (err) {
           callback(err);
         } else {
-          callback(null, _.map(result.rows, function addKeys (row) {
-            row.key = db.createKey([row.product_id, row.name]);
-            row.link = '/product/' + row.product_id;
-            return row;
-          }));
+          callback(null, _.map(result.rows, addKeys));
         }
         done();
       });
@@ -125,11 +139,7 @@ var db = {
         if (err) {
           callback(err);
         } else {
-          callback(null, _.map(result.rows, function addKeys (row) {
-            row.key = db.createKey([row.product_id, row.name]);
-            row.link = '/product/' + row.product_id;
-            return row;
-          }));
+          callback(null, _.map(result.rows, addKeys));
         }
         done();
       });
@@ -355,6 +365,12 @@ function createCategoryTree(categories) {
     }
   }
   return categoryTree;
+}
+
+function addKeys (row) {
+  row.key = db.createKey([row.product_id, row.name]);
+  row.link = '/product/' + row.product_id;
+  return row;
 }
 
 // helper functions
