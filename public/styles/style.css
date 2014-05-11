@@ -202,3 +202,7 @@ td > a > .img-responsive {
   background-color: #F5177B;
   color: #FFFFFF;
 }
+
+.order-btn {
+  margin-top: 5px;
+}

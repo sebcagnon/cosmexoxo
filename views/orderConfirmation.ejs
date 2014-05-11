@@ -18,7 +18,7 @@
     <link rel="shortcut icon" href="/images/favicon.ico?v=2">
   </head>
 
-  <body>
+  <body style="padding-top: 20px;">
     <div class="container">
       <div class="row">
         <%- utils.link_to('/', utils.responsiveImage("/images/header.png"),
@@ -26,67 +26,86 @@
         <h1>Confirm Your Order</h1>
       </div>
       <div class="row" id="orderSummary">
-        <h2>Your Order</h2>
-        <div class="col-xs-6">
-          <p>Name:</p>
+        <div class="row">
+          <div class="col-xs-4">
+            <p>Name:</p>
+          </div>
+          <div class="col-xs-8">
+            <p><%= order.FIRSTNAME %> <%= order.LASTNAME %></p>
+          </div>
         </div>
-        <div class="col-xs-6">
-          <p><%= order.FIRSTNAME + ' ' order.LASTNAME %></p>
+        <div class="row">
+          <div class="col-xs-4">
+            <p>Ship to Address:</p>
+          </div>
+          <div class="col-xs-8">
+            <p>
+              <%= order.PAYMENTREQUEST_0_SHIPTONAME%><br>
+              <%= order.PAYMENTREQUEST_0_SHIPTOSTREET %><br>
+              <%= order.PAYMENTREQUEST_0_SHIPTOCITY %><br>
+              <%= order.PAYMENTREQUEST_0_SHIPTOSTATE %><br>
+              <%= order.PAYMENTREQUEST_0_SHIPTOZIP %><br>
+              <%= order.PAYMENTREQUEST_0_SHIPTOCOUNTRYNAME %>
+              <%= order.PAYMENTREQUEST_0_SHIPTOCOUNTRYCODE %>
+            </p>
+          </div>
         </div>
-        <div class="col-xs-6">
-          <p>Ship to Address:</p>
+        <div class="row">
+          <%  var i=0, prefix='L_PAYMENTREQUEST_0_';
+              while (true) {
+                if (!order.hasOwnProperty(prefix+'NAME'+i)) break; %>
+          <div class="col-xs-4">
+            <p>Product <%= i %>:</p>
+          </div>
+          <div class="col-xs-8">
+            <p>
+            <%= order[prefix+'NAME'+i] %><br>
+            <%= order[prefix+'QTY'+i] %> * <%= order[prefix+'AMT'+i] %> $ =
+            <%- parseInt(order[prefix+'QTY'+i])*parseInt(order[prefix+'AMT'+i]) %>
+            $</p>
+          </div>
         </div>
-        <div class="col-xs-6">
-          <p>
-            <%= order.PAYMENTREQUEST_0_SHIPTONAME%><br>
-            <%= order.PAYMENTREQUEST_0_SHIPTOSTREET %><br>
-            <%= order.PAYMENTREQUEST_0_SHIPTOCITY %><br>
-            <%= order.PAYMENTREQUEST_0_SHIPTOSTATE %><br>
-            <%= order.PAYMENTREQUEST_0_SHIPTOZIP %><br>
-            <%= order.PAYMENTREQUEST_0_SHIPTOCOUNTRYNAME %>
-            <%= order.PAYMENTREQUEST_0_SHIPTOCOUNTRYCODE %>
-          </p>
+        <div class="row">
+          <%  i+=1
+              } %>
         </div>
-        <%  var i=0, prefix='L_PAYMENTREQUEST_0_';
-            while (true) {
-              if (!order.hasOwnProperty(prefix+'NAME'+i)) break; %>
-        <div class="col-xs-6">
-          <p>Product <%= i %>:</p>
+        <div class="row">
+          <div class="col-xs-4">
+            <p>Item Total:</p>
+          </div>
+          <div class="col-xs-8">
+            <p><%= order.PAYMENTREQUEST_0_ITEMAMT %> $</p>
+          </div>
         </div>
-        <div class="col-xs-6">
-          <p>
-          <%= order[prefix+'NAME'+i] %><br>
-          <%= order[prefix+'QTY'+i] %> * <%= order[prefix+'AMT'+i] %> $ =
-          <%- parseInt(order[prefix+'QTY'+i])*parseInt(order[prefix+'AMT'+i]) %>
-          </p>
+        <div class="row">
+          <div class="col-xs-4">
+            <p>Shipping Cost (final):</p>
+          </div>
+          <div class="col-xs-8">
+            <p>+ <%= order.PAYMENTREQUEST_0_SHIPPINGAMT %> $</p>
+          </div>
         </div>
-        <% } %>
-        <div class="col-xs-6">
-          <p>Item Total:</p>
-        </div>
-        <div class="col-xs-6">
-          <p><%= order.PAYMENTREQUEST_0_ITEMAMT %> $</p>
-        </div>
-        <div class="col-xs-6">
-          <p>Shipping Cost (final):</p>
-        </div>
-        <div class="col-xs-6">
-          <p>+ <%= order.PAYMENTREQUEST_0_SHIPPINGAMT %> $</p>
-        </div>
-        <div class="col-xs-6">
-          <p>Total Amount:</p>
-        </div>
-        <div class="col-xs-6">
-          <p>= <%= order.PAYMENTREQUEST_0_AMT %> $</p>
-        </div>
+        <div class="row">
+          <div class="col-xs-4">
+            <p>Total Amount:</p>
+          </div>
+          <div class="col-xs-8">
+            <p>= <%= order.PAYMENTREQUEST_0_AMT %> $</p>
+          </div>
       </div>
       <div class="row">
-        <form action="/confirmPayment" method="post">
-          <input type="submit" class="btn btn-primary" value="Confirm Order">
-        </form>
-        <form action="/cart">
-          <input type="submit" class="btn btn-warning" value="Back to Cart">
-        </form>
+        <div class="col-xs-6 col-sm-6 col-md-4">
+          <form action="/confirmPayment" method="post">
+            <input type="submit" class="btn btn-primary btn-lg order-btn"
+                   value="Confirm Order">
+          </form>
+        </div>
+        <div class="col-xs-6 col-sm-6 col-md-8">
+          <form action="/cart">
+            <input type="submit" class="btn btn-warning btn-lg order-btn"
+                   value="Back to Cart">
+          </form>
+        </div>
       </div>
     </div>
   </body>

@@ -162,10 +162,11 @@ app.get('/orderVerification', function(request, response) {
   var payerid = request.query.PayerID;
   var params = {token:token};
   var cart = request.session.cart;
+  console.log('here');
   paypalxo.ec.getExpressCheckoutDetails(params, function (err, details) {
     // TODO: get country and update Shipping charge
-    itemamt = cart.reduce(sumPrice, 0);
-    shippingamt = 35;
+    var itemamt = cart.reduce(sumPrice, 0);
+    var shippingamt = 35;
     params.paymentrequest_0_shippingamt = shippingamt.toString();
     details.PAYMENTREQUEST_0_SHIPPINGAMT = shippingamt.toString();
     params.paymentrequest_0_itemamt = itemamt.toString();
@@ -175,7 +176,9 @@ app.get('/orderVerification', function(request, response) {
     details.PAYMENTREQUEST_0_AMT = params.paymentrequest_0_amt;
     params.paymentrequest_0_currencycode= 'USD';
     params.paymentrequest_0_paymentaction= 'Sale';
+    console.log('there');
     request.session.orderParams = params;
+    console.log('here again');
     response.render('orderConfirmation', {cart: cart, order: details});
   });
 });
