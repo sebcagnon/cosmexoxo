@@ -162,7 +162,6 @@ app.get('/orderVerification', function(request, response) {
   var payerid = request.query.PayerID;
   var params = {token:token};
   var cart = request.session.cart;
-  console.log('here');
   paypalxo.ec.getExpressCheckoutDetails(params, function (err, details) {
     // TODO: get country and update Shipping charge
     var itemamt = cart.reduce(sumPrice, 0);
@@ -176,15 +175,13 @@ app.get('/orderVerification', function(request, response) {
     details.PAYMENTREQUEST_0_AMT = params.paymentrequest_0_amt;
     params.paymentrequest_0_currencycode= 'USD';
     params.paymentrequest_0_paymentaction= 'Sale';
-    console.log('there');
     request.session.orderParams = params;
-    console.log('here again');
     response.render('orderConfirmation', {cart: cart, order: details});
   });
 });
 
 app.post('/confirmPayment', function(request, response) {
-  var params = request.session.params;
+  var params = request.session.orderParams;
   paypalxo.ec.doExpressCheckoutPayment(params, function (err, answer) {
     console.log('ExpressCheckoutPayment:\n' + JSON.stringify(answer));
     if (err || answer.PAYMENTINFO_0_PAYMENTSTATUS != 'Completed') {
@@ -245,7 +242,7 @@ app.post('/pay', function(request, response) {
     }
     // TODO: USE SESSION!!
     app.locals.token = ans.TOKEN;
-    return response.redirect(paypalxo.ec.getLoginURL(ans.TOKEN, true));
+    return response.redirect(paypalxo.ec.getLoginURL(ans.TOKEN));
   });
 });
 
