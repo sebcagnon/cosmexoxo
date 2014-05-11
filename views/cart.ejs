@@ -1,5 +1,14 @@
 <% layout('layout') -%>
 <% if (cartSize > 0) { %>
+<div class="row" id="checkoutProcess">
+  <div class="btn-group">
+    <button class="btn btn-default disabled active">1. Order Summary</button>
+    <button class="btn btn-default disabled">
+      2. Personal Info (via Paypal)
+    </button>
+    <button class="btn btn-default disabled">3. Confirm Order</button>
+  </div>
+</div>
 <div class="row">
   <div class="col-sm-6 col-md-6">
     <h1>Your Shopping Cart</h1>
@@ -7,8 +16,9 @@
   <div class="col-sm-6 col-md-6">
     <form name="input" action="pay" method="post">
       <input type="image"
-             src="https://www.paypal.com/en_US/i/btn/btn_xpressCheckout.gif" value="submit"
-             class="pull-right btn-next">
+             src="https://www.paypal.com/en_US/i/btn/btn_xpressCheckout.gif"
+             value="submit"
+             class="pull-right btn-next btn-next-top">
       </input>
   </form>
   </div>
@@ -68,7 +78,7 @@
         </tr>
         <tr>
           <td colspan="3" class="td-right">
-            <h4>Estimated Shipping (EMS)</h4>
+            <h4>Estimated Shipping (EMS)*</h4>
           </td>
           <td style="vertical-align:middle">
             <select name="shippingCost" id="shippingCost">
@@ -80,7 +90,7 @@
         </tr>
         <tr>
           <td colspan="3" class="td-right">
-            <h4>Estimated Order Total</h4>
+            <h4>Estimated Order Total*</h4>
           </td>
           <td id="orderTotal">
             <h4><%- cart.itemTotal + 30 %> $</h4>
@@ -89,11 +99,22 @@
       </tbody>
     </table>
   </div>
-  <form name="input" action="pay" method="post">
-    <input type="image"
-           src="https://www.paypal.com/en_US/i/btn/btn_xpressCheckout.gif"
-           value="submit" class="pull-right btn-next">
-  </form>
+  <div class="col-sm-6 col-md-6">
+    <p class="small">
+      *The Shipping cost will be confirmed after you input
+      your address in Paypal checkout process
+    </p>
+    <p class="small">
+      All orders are delivered via EMS
+    </p>
+  </div>
+  <div class="col-sm-6 col-md-6">
+    <form name="input" action="pay" method="post">
+      <input type="image"
+             src="https://www.paypal.com/en_US/i/btn/btn_xpressCheckout.gif"
+             value="submit" class="pull-right btn-next">
+    </form>
+  </div>
 </div>
 <% } else { %>
 <h1>Your Shopping Cart Is Empty</h1>

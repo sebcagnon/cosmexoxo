@@ -157,52 +157,57 @@ app.get('/products', function(request, response) {
   });
 });
 
-// adds payment testing page
-app.get('/payment', function(request, response) {
-  response.render('payment-test', {state:'ask'});
-});
-
 app.get('/paymentSuccess', function(request, response) {
   var token = request.query.token;
   var payerid = request.query.PayerID;
   var params = {token:token};
-  paypalxo.ec.getExpressCheckoutDetails(params, function (err, details) {
-    console.log('CheckoutDetails: \n' + JSON.stringify(details));
-  });
   var cart = request.session.cart;
-  params.payerid = payerid;
-  params.paymentrequest_0_amt= cart.reduce(sumPrice, 0).toString();
-  params.paymentrequest_0_currencycode= 'USD';
-  params.paymentrequest_0_paymentaction= 'Sale';
-  request.session.cart = []; // re-init cart in session
-  response.locals.cartSize = 0;
-  paypalxo.ec.doExpressCheckoutPayment(params, function (err, answer) {
-    console.log('ExpressCheckoutPayment:\n' + JSON.stringify(answer));
-    if (err || answer.PAYMENTINFO_0_PAYMENTSTATUS != 'Completed') {
-      var params = {
-        state:'failed',
-        reason: JSON.stringify(err) || answer.PAYMENTINFO_0_PAYMENTSTATUS
-      };
-      response.render('payment-test', params);
-    } else {
-      request.session.cart = []; // re-init cart in session
-      response.locals.cartSize = 0;
-      response.render('payment-test', {state:'success'});
-    }
+  paypalxo.ec.getExpressCheckoutDetails(params, function (err, details) {
+    // TODO: get country and update Shipping charge
+    itemamt = cart.reduce(sumPrice, 0);
+    shippingamt = 35;
+    params.paymentrequest_0_shippingamt = shippingamt.toString();
+    params.paymentrequest_0_itemamt = itemamt.toString();
+    // prepare answer
+    params.payerid = payerid;
+    params.paymentrequest_0_amt = (itemamt + shippingamt).toString();
+    params.paymentrequest_0_currencycode= 'USD';
+    params.paymentrequest_0_paymentaction= 'Sale';
+    request.session.cart = []; // re-init cart in session
+    response.locals.cartSize = 0;
+    paypalxo.ec.doExpressCheckoutPayment(params, function (err, answer) {
+      console.log('ExpressCheckoutPayment:\n' + JSON.stringify(answer));
+      if (err || answer.PAYMENTINFO_0_PAYMENTSTATUS != 'Completed') {
+        var params = {
+          state:'failed',
+          reason: JSON.stringify(err) || answer.PAYMENTINFO_0_PAYMENTSTATUS
+        };
+        response.render('orderConfirmation', params);
+      } else {
+        request.session.cart = []; // re-init cart in session
+        response.locals.cartSize = 0;
+        response.render('orderConfirmation',
+                        {state:'success'});
+      }
+    });
   });
 });
 
 app.get('/paymentFailure', function(request, response) {
-  response.render('payment-test', {state:'failed', reason:'could not set EC'});
+  response.render('orderConfirmation',
+                  {state:'failed', reason:'could not set EC'});
 });
 
 // handle paypal button
 app.post('/pay', function(request, response) {
   var cart = request.session.cart;
   // Prepare the data
+  itemamt = cart.reduce(sumPrice, 0);
+  shippingamt = 30;
   var data = {
-    paymentrequest_0_amt: cart.reduce(sumPrice, 0).toString(),
-    paymentrequest_0_itmamt: cart.reduce(sumPrice, 0).toString(),
+    paymentrequest_0_itemamt: itemamt.toString(),
+    paymentrequest_0_shippingamt: shippingamt.toString(),
+    paymentrequest_0_amt: (itemamt + shippingamt).toString(),
     paymentrequest_0_currencycode: 'USD',
     returnurl: app.locals.URL + '/paymentSuccess',
     cancelurl: app.locals.URL + '/paymentFailure',
@@ -220,6 +225,7 @@ app.post('/pay', function(request, response) {
     data[prefix+'URL'+i] = item.link;
   }
   console.log('setExpressCheckout')
+  console.log(data);
   paypalxo.ec.setExpressCheckout(data, function setECCallback (err, ans) {
     if (err) {
       console.log(err);

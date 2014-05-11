@@ -182,8 +182,23 @@ td > a > .img-responsive {
 }
 
 @media ( min-width: 768px ) {
-  .btn-next {
+  .btn-next-top {
     margin-top: 25px;
-    margin-bottom: 0px
+    margin-bottom: 0px;
   }
+}
+
+#checkoutProcess {
+  text-align: center;
+}
+
+#checkoutProcess .disabled {
+  background-color: #FFFFFF;
+  color: #000;
+  opacity: 1;
+}
+
+#checkoutProcess .active {
+  background-color: #F5177B;
+  color: #FFFFFF;
 }
