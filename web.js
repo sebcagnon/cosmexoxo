@@ -75,8 +75,10 @@ if (paypalString) {
 
 // home page
 app.get('/', function(request, response) {
-  console.log(response.locals);
-  response.render('index');
+  db.getFeaturedProducts(function renderIndex (err, result) {
+    if (err) return response.render('index', {products: []});
+    response.render('index', {products: result});
+  })
 });
 
 // displays the products of the brand 'brandName'
