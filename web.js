@@ -157,7 +157,7 @@ app.get('/products', function(request, response) {
   });
 });
 
-app.get('/paymentSuccess', function(request, response) {
+app.get('/orderVerification', function(request, response) {
   var token = request.query.token;
   var payerid = request.query.PayerID;
   var params = {token:token};
@@ -167,35 +167,44 @@ app.get('/paymentSuccess', function(request, response) {
     itemamt = cart.reduce(sumPrice, 0);
     shippingamt = 35;
     params.paymentrequest_0_shippingamt = shippingamt.toString();
+    details.PAYMENTREQUEST_0_SHIPPINGAMT = shippingamt.toString();
     params.paymentrequest_0_itemamt = itemamt.toString();
     // prepare answer
     params.payerid = payerid;
     params.paymentrequest_0_amt = (itemamt + shippingamt).toString();
+    details.PAYMENTREQUEST_0_AMT = params.paymentrequest_0_amt;
     params.paymentrequest_0_currencycode= 'USD';
     params.paymentrequest_0_paymentaction= 'Sale';
-    request.session.cart = []; // re-init cart in session
-    response.locals.cartSize = 0;
-    paypalxo.ec.doExpressCheckoutPayment(params, function (err, answer) {
-      console.log('ExpressCheckoutPayment:\n' + JSON.stringify(answer));
-      if (err || answer.PAYMENTINFO_0_PAYMENTSTATUS != 'Completed') {
-        var params = {
-          state:'failed',
-          reason: JSON.stringify(err) || answer.PAYMENTINFO_0_PAYMENTSTATUS
-        };
-        response.render('orderConfirmation', params);
-      } else {
-        request.session.cart = []; // re-init cart in session
-        response.locals.cartSize = 0;
-        response.render('orderConfirmation',
-                        {state:'success'});
-      }
-    });
+    request.session.orderParams = params;
+    response.render('orderConfirmation', {cart: cart, order: details});
+  });
+});
+
+app.post('/confirmPayment', function(request, response) {
+  var params = request.session.params;
+  paypalxo.ec.doExpressCheckoutPayment(params, function (err, answer) {
+    console.log('ExpressCheckoutPayment:\n' + JSON.stringify(answer));
+    if (err || answer.PAYMENTINFO_0_PAYMENTSTATUS != 'Completed') {
+      var params = {
+        state:'failed',
+        reason: JSON.stringify(err) || answer.PAYMENTINFO_0_PAYMENTSTATUS
+      };
+      response.render('paymentError', params);
+    } else {
+      request.session.cart = []; // re-init cart in session
+      response.locals.cartSize = 0;
+      response.redirect('/thankYouPage');
+    }
   });
 });
 
 app.get('/paymentFailure', function(request, response) {
   response.render('orderConfirmation',
                   {state:'failed', reason:'could not set EC'});
+});
+
+app.get('/thankYouPage', function(request, response) {
+  response.render('thankYouPage');
 });
 
 // handle paypal button
@@ -209,7 +218,7 @@ app.post('/pay', function(request, response) {
     paymentrequest_0_shippingamt: shippingamt.toString(),
     paymentrequest_0_amt: (itemamt + shippingamt).toString(),
     paymentrequest_0_currencycode: 'USD',
-    returnurl: app.locals.URL + '/paymentSuccess',
+    returnurl: app.locals.URL + '/orderVerification',
     cancelurl: app.locals.URL + '/paymentFailure',
     paymentrequest_0_paymentaction: 'Sale',
     solutiontype: 'Sole',
