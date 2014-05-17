@@ -174,7 +174,8 @@ app.get('/orderVerification', function(request, response) {
     params.paymentrequest_0_currencycode= 'USD';
     params.paymentrequest_0_paymentaction= 'Sale';
     request.session.orderParams = params;
-    response.render('orderConfirmation', {cart: cart, order: details});
+    responseParams = {cart: cart, order: details};
+    response.render('orderConfirmation', responseParams);
   });
 });
 
@@ -213,7 +214,7 @@ app.post('/pay', function(request, response) {
   // Prepare the data
   itemamt = cart.reduce(sumPrice, 0);
   weight = cart.reduce(sumWeight, 0);
-  shippingamt = utils.getShippingCost('United States', weight);
+  shippingamt = parseInt(utils.getShippingCost('United States', weight));
   var data = {
     paymentrequest_0_itemamt: itemamt.toString(),
     paymentrequest_0_shippingamt: shippingamt.toString(),
