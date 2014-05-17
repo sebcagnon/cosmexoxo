@@ -59,10 +59,6 @@ app.use( function (request, response, next) {
   next();
 });
 
-// Creates navbar variables and refresh it every day
-refreshNavbar(app);
-setInterval(refreshNavbar, 24*60*60*1000, app);
-
 // configure paypalxo API
 var paypalString =  nconf.get('PAYPAL');
 if (paypalString) {
@@ -340,12 +336,18 @@ app.use(function(req, res, next){
   res.type('txt').send('Not found');
 });
 
-http.createServer(app).listen(app.get('port'), function () {
-  console.log("Listening on " + app.get('port'));
+// creates the navbar, sets-up navbar refresh rate and starts server
+
+refreshNavbar(app, function onNavbarReady () {
+  http.createServer(app).listen(app.get('port'), function onServerStarted() {
+    console.log("Listening on " + app.get('port'));
+  });
 });
+setInterval(refreshNavbar, 24*60*60*1000, app);
+
 
 //called every once in a while to refresh the navbar variables
-function refreshNavbar (app) {
+function refreshNavbar (app, callback) {
   async.parallel([
     db.getNavbarBrands,
     db.getAllCategories
@@ -355,6 +357,7 @@ function refreshNavbar (app) {
       app.locals.brands = result[0];
       app.locals.categories = result[1];
       console.log('Navbar refreshed');
+      if (callback) callback();
     });
 }
 
