@@ -1,0 +1,56 @@
+{
+  "zones":["1", "2.1", "2.2", "3"],
+  "1":{
+    "countries":[
+      "Brunei", "Bhutan", "China", "Hong Kong", "Indonesia", "India", "Japan",
+      "Cambodia", "South Korea", "Laos", "Sri Lanka", "Mongolia", "Maldives",
+      "Malaysia", "Nepal", "Philippines", "Singapore", "Thailand", "Taiwan",
+      "Vietnam"],
+    "price":{
+      "300":"900", "500":"1100", "600":"1240", "700":"1380", "800":"1520",
+      "900":"1660", "1000":"1800", "1250":"1800", "1500":"2400",
+      "1750":"2700", "2000":"3000"
+    }
+  },
+  "2.1":{
+    "countries":[
+      "United Arab Emirates", "Australia", "Bulgaria", "Canada", "Costa Rica",
+      "Cyprus", "Fiji", "Honduras", "Israel", "Jamaica", "Kuwait", "Mexico",
+      "New Caledonia", "New Zealand", "Oman", "Panama", "Papua New Guinea",
+      "Qatar", "Saudi Arabia", "Solomon Islands", "El Salvador", "Turkey",
+      "Trinidad and Tobago", "United States"],
+    "price":{
+      "300":"1200", "500":"1500", "600":"1680", "700":"1860", "800":"2040",
+      "900":"2220", "1000":"2400", "1250":"2800", "1500":"3200",
+      "1750":"3600", "2000":"4000"
+    }
+  },
+  "2.2":{
+    "countries":[
+      "Austria", "Azerbaijan Republic", "Barbados", "Belgium", "Bahrain",
+      "Switzerland", "Czech Republic", "Germany", "Denmark", "Estonia",
+      "Spain", "Finland", "France", "United Kingdom", "Greece", "Croatia",
+      "Hungary", "Ireland", "Iceland", "Italy", "Liechtenstein", "Lithuania",
+      "Luxembourg", "Latvia", "Malta", "Netherlands", "Norway", "Poland",
+      "Portugal", "Romania", "Russia", "Sweden", "Slovenia", "Slovakia",
+      "Ukraine"],
+    "price":{
+      "300":"1500", "500":"1800", "600":"2000", "700":"2200", "800":"2400",
+      "900":"2600", "1000":"2800", "1250":"3250", "1500":"3700",
+      "1750":"4150", "2000":"4600"
+    }
+  },
+  "3":{
+    "countries":[
+      "Argentina", "Brazil", "Botswana", "Chile", "Colombia", "Djibouti",
+      "Algeria", "Ecuador", "Egypt", "Ethiopia", "Gabon Republic", "Kenya",
+      "Morocco", "Madagascar", "Mauritius", "Niger", "Peru", "Rwanda",
+      "Sierra Leone", "Senegal", "Togo", "Tunisia", "Tanzania", "Uganda",
+      "Uruguay", "Venezuela", "South Africa"],
+    "price":{
+      "300":"1700", "500":"2100", "600":"2440", "700":"2780", "800":"3120",
+      "900":"3460", "1000":"3800", "1250":"4600", "1500":"5400",
+      "1750":"6200", "2000":"7000"
+    }
+  }
+}

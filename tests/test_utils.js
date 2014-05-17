@@ -25,5 +25,12 @@ console.log(utils.link_to('/brand/L\'Oréal', 'L\'Oréal', 'class="special"'));
 console.log('responsive image:');
 console.log(utils.responsiveImage('http://www.example.com/myimage.jpg',
                           "example image"));
+console.log('shipping cost calculator:');
+console.log('expected: 13; got: ' + utils.getShippingCost('Nepal', '550'));
+console.log('expected: 32; got: ' + utils.getShippingCost('Oman', 1400));
+console.log('expected: 15; got: ' + utils.getShippingCost('Austria', '100'));
+console.log('expected: undefined; got: ' + utils.getShippingCost('b', '100'));
+console.log('list of available countries:');
+console.log(utils.getAvailableCountries());
 
 db.getAllCategories(testDisplayCategoryTree);
