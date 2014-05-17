@@ -78,7 +78,6 @@ var db = {
         if (err) {
           callback(err);
         } else {
-          console.log(result);
           callback(null, _.map(result.rows, addKeys));
         }
         done();
