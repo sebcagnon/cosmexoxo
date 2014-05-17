@@ -55,7 +55,6 @@ var utils = {
           if (parseInt(w) < currentRange && parseInt(w) >= parseInt(weight)) {
             currentRange = w;
             price = shippingFees[zone].price[w];
-            console.log(price);
           }
         }
         return Math.ceil(parseInt(price)*parseFloat(yenToDollars)).toString();
