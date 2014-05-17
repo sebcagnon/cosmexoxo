@@ -38,7 +38,7 @@
       <tbody>
         <% for (var i=0; i<cart.length; i++) {
             var product = cart[i]; %>
-        <tr id="<%= product.variant.variant_id %>">
+        <tr id="<%= product.variant.variant_id %>" class="variant-row">
           <td>
             <%- utils.link_to('/product/' + product.product_id,
                 utils.responsiveImage(

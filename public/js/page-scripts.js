@@ -49,16 +49,19 @@ $(".no-refresh").submit(function changeCart (e) {
           $(".cartSize").text(data.cartSize);
           if (btn.hasClass("btn-primary")) { // case add to cart
             btn.removeClass("btn-primary active disabled")
-              .addClass("btn-success").attr("value", "Added");
+              .addClass("btn-success");
           } else if (btn.hasClass("btn-danger")) { // case remove
-            btn.removeClass("btn-danger active, disabled")
-              .addClass("btn-warning").attr("value", "Removed");
+            btn.removeClass("btn-danger active disabled")
+              .addClass("btn-warning");
           } else {
             btn.removeClass("active disabled")
           }
           if (data.removeId) {
             var rowID = '#' + data.removeId;
             $(rowID).remove();
+          }
+          if (data.btnMessage) {
+            btn.attr("value", data.btnMessage);
           }
           $this.children("#loadImg").remove();
           if ($("#cartTable").length) {
@@ -71,7 +74,7 @@ $(".no-refresh").submit(function changeCart (e) {
 
 // Updates all the prices in the cart page when changing a quantity or product
 function updateCart(cart) {
-  if (cart.length == 0) {
+  if (cart.length == 0 || cart.length != $('.variant-row').length) {
     location.reload();
   }
   var totalPrice = 0;

@@ -262,6 +262,27 @@ app.post('/addToCart', function (request, response) {
     variant_id: request.param('variant_id'),
     quantity: request.param('quantity')
   };
+  // check if already there
+  var cart = request.session.cart;
+  for (var i=0; i<cart.length; i++) {
+    if (cart[i].variant.variant_id == newProduct.variant_id) {
+      cart[i].quantity = newProduct.quantity;
+      break;
+    }
+  }
+  if (i<cart.length) {
+    var data = {
+      cartSize: cart.length,
+      cart: cart,
+      btnMessage: 'Updated'
+    };
+    if (request.param('jsenabled')) {
+      response.send(JSON.stringify(data));
+    } else {
+      response.redirect(request.get('Referrer'));
+    }
+    return request.session.cart = cart;
+  }
   // get full data from db
   var dbProduct = db.getProduct(newProduct.product_id,
                                 function addProductToCart (err, dbProduct) {
@@ -273,11 +294,11 @@ app.post('/addToCart', function (request, response) {
     }
     dbProduct.variants = undefined;
     dbProduct.quantity = newProduct.quantity;
-    var cart = request.session.cart;
     cart.push(dbProduct);
     var data = {
       cartSize: cart.length,
-      cart: cart
+      cart: cart,
+      btnMessage: 'Added'
     };
     if (request.param('jsenabled')) {
       response.send(JSON.stringify(data));
@@ -306,7 +327,8 @@ app.post("/removeFromCart", function (request, response) {
   data = {
     cartSize: cart.length,
     cart: cart,
-    removeId: vid
+    removeId: vid,
+    btnMessage: 'Removed'
   };
   if (request.param('jsenabled')) {
     response.send(JSON.stringify(data));
