@@ -21,24 +21,40 @@
   <body style="padding-top: 20px;">
     <div class="container">
       <div class="row">
+        <div class="col-md-8 col-md-offset-2">
         <%- utils.link_to('/', utils.responsiveImage("/images/header.png"),
                           "CosmeXO logo", "CosmeXO: Back to home page") %>
-        <h1>Confirm Your Order</h1>
+        </div>
       </div>
-      <div class="row" id="orderSummary">
+      <div class="row" id="checkoutProcess" style="margin-top:30px;">
+        <div class="btn-group">
+          <button class="btn btn-default disabled">1. Order Summary</button>
+          <button class="btn btn-default disabled">
+            2. Personal Info (via Paypal)
+          </button>
+          <button class="btn btn-default disabled active">
+            3. Confirm Order
+          </button>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-md-8 col-md-offset-2">
+          <h1>Please Confirm Your Order</h1>
+        </div>
+      </div>
         <div class="row">
-          <div class="col-xs-4">
+          <div class="col-xs-4 col-md-offset-2">
             <p>Name:</p>
           </div>
-          <div class="col-xs-8">
+          <div class="col-xs-8 col-md-6">
             <p><%= order.FIRSTNAME %> <%= order.LASTNAME %></p>
           </div>
         </div>
         <div class="row">
-          <div class="col-xs-4">
+          <div class="col-xs-4 col-md-offset-2">
             <p>Ship to Address:</p>
           </div>
-          <div class="col-xs-8">
+          <div class="col-xs-8 col-md-6">
             <p>
               <%= order.PAYMENTREQUEST_0_SHIPTONAME%><br>
               <%= order.PAYMENTREQUEST_0_SHIPTOSTREET %><br>
@@ -46,7 +62,7 @@
               <%= order.PAYMENTREQUEST_0_SHIPTOSTATE %><br>
               <%= order.PAYMENTREQUEST_0_SHIPTOZIP %><br>
               <%= order.PAYMENTREQUEST_0_SHIPTOCOUNTRYNAME %>
-              <%= order.PAYMENTREQUEST_0_SHIPTOCOUNTRYCODE %>
+              (<%= order.PAYMENTREQUEST_0_SHIPTOCOUNTRYCODE %>)
             </p>
           </div>
         </div>
@@ -54,10 +70,10 @@
           <%  var i=0, prefix='L_PAYMENTREQUEST_0_';
               while (true) {
                 if (!order.hasOwnProperty(prefix+'NAME'+i)) break; %>
-          <div class="col-xs-4">
+          <div class="col-xs-4 col-md-offset-2">
             <p>Product <%= i %>:</p>
           </div>
-          <div class="col-xs-8">
+          <div class="col-xs-8 col-md-6">
             <p>
             <%= order[prefix+'NAME'+i] %><br>
             <%= order[prefix+'QTY'+i] %> * <%= order[prefix+'AMT'+i] %> $ =
@@ -70,37 +86,37 @@
               } %>
         </div>
         <div class="row">
-          <div class="col-xs-4">
+          <div class="col-xs-4 col-md-offset-2">
             <p>Item Total:</p>
           </div>
-          <div class="col-xs-8">
+          <div class="col-xs-8 col-md-6">
             <p><%= order.PAYMENTREQUEST_0_ITEMAMT %> $</p>
           </div>
         </div>
         <div class="row">
-          <div class="col-xs-4">
+          <div class="col-xs-4 col-md-offset-2">
             <p>Shipping Cost (final):</p>
           </div>
-          <div class="col-xs-8">
+          <div class="col-xs-8 col-md-6">
             <p>+ <%= order.PAYMENTREQUEST_0_SHIPPINGAMT %> $</p>
           </div>
         </div>
         <div class="row">
-          <div class="col-xs-4">
+          <div class="col-xs-4 col-md-offset-2">
             <p>Total Amount:</p>
           </div>
-          <div class="col-xs-8">
+          <div class="col-xs-8 col-md-6">
             <p>= <%= order.PAYMENTREQUEST_0_AMT %> $</p>
           </div>
       </div>
       <div class="row">
-        <div class="col-xs-6 col-sm-6 col-md-4">
+        <div class="col-xs-6 col-sm-6 col-md-4 col-md-offset-2">
           <form action="/confirmPayment" method="post">
             <input type="submit" class="btn btn-primary btn-lg order-btn"
                    value="Confirm Order">
           </form>
         </div>
-        <div class="col-xs-6 col-sm-6 col-md-8">
+        <div class="col-xs-6 col-sm-6 col-md-6">
           <form action="/cart">
             <input type="submit" class="btn btn-warning btn-lg order-btn"
                    value="Back to Cart">

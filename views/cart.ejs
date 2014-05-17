@@ -82,10 +82,15 @@
           </td>
           <td style="vertical-align:middle">
             <select name="shippingCost" id="shippingCost">
-              <option value="30">US: 30$</option>
-              <option value="40">Europe: 40$</option>
-              <option value="35">Asia: 35$</option>
+            <% var regions = { 'North America, Oceania: Middle East':'Oman',
+                               'East Asia':'China', 'Europe':'France',
+                               'South America, Africa':'Brazil'};
+               for (place in regions) {
+                var price = utils.getShippingCost(regions[place], cart.weightTotal); %>
+              <option value="<%= price %>"><%= place %>: <%= price %>$</option>
+            <% } %>
             </select>
+            <p></p>
           </td>
         </tr>
         <tr>
@@ -93,7 +98,10 @@
             <h4>Estimated Order Total*</h4>
           </td>
           <td id="orderTotal">
-            <h4><%- cart.itemTotal + 30 %> $</h4>
+            <h4>
+              <%- cart.itemTotal +
+                  utils.getShippingCost('Oman', cart.weight) %> $
+            </h4>
           </td>
         </tr>
       </tbody>

@@ -161,11 +161,13 @@ app.get('/orderVerification', function(request, response) {
   var token = request.query.token;
   var payerid = request.query.PayerID;
   var params = {token:token};
-  var cart = request.session.cart;
+  var cart = request.session.order;
   paypalxo.ec.getExpressCheckoutDetails(params, function (err, details) {
-    // TODO: get country and update Shipping charge
-    var itemamt = cart.reduce(sumPrice, 0);
-    var shippingamt = 35;
+    var itemamt = parseInt(details.PAYMENTREQUEST_0_ITEMAMT);
+    var country = details.PAYMENTREQUEST_0_SHIPTOCOUNTRYNAME;
+    var weight = cart.reduce(sumWeight, 0);
+    var shippingamt = parseInt(utils.getShippingCost(country, weight));
+    console.log(country + ' ' + weight);
     params.paymentrequest_0_shippingamt = shippingamt.toString();
     details.PAYMENTREQUEST_0_SHIPPINGAMT = shippingamt.toString();
     params.paymentrequest_0_itemamt = itemamt.toString();
@@ -210,9 +212,12 @@ app.get('/thankYouPage', function(request, response) {
 // handle paypal button
 app.post('/pay', function(request, response) {
   var cart = request.session.cart;
+  // save order in a different variable, in case the cart changes in between
+  request.session.order = cart;
   // Prepare the data
   itemamt = cart.reduce(sumPrice, 0);
-  shippingamt = 30;
+  weight = cart.reduce(sumWeight, 0);
+  shippingamt = utils.getShippingCost('United States', weight);
   var data = {
     paymentrequest_0_itemamt: itemamt.toString(),
     paymentrequest_0_shippingamt: shippingamt.toString(),
@@ -317,6 +322,7 @@ app.post("/removeFromCart", function (request, response) {
 app.get('/cart', function (request, response) {
   var cart = request.session.cart;
   cart.itemTotal = cart.reduce(sumPrice, 0);
+  cart.weightTotal = cart.reduce(sumWeight, 0);
   response.render('cart', {cart:cart});
 });
 
@@ -355,6 +361,11 @@ function refreshNavbar (app) {
 //function to get the sum of the price of all items in the cart
 function sumPrice (prev, curr, ind, arr) {
   return prev + curr.variant.price * curr.quantity;
+}
+
+//function to get the sum of the weight of all items in the cart
+function sumWeight (prev, curr, ind, arr) {
+  return prev + curr.variant.weight * curr.quantity;
 }
 
 function validateRequest(request, withQuantity) {
