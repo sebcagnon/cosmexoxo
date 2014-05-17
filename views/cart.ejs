@@ -52,8 +52,34 @@
           <td style="vertical-align:middle" id="#price">
             <%= product.variant.price %> $
           </td>
-          <td style="vertical-align:middle" id="#quantity">
-            <%= product.quantity %>
+          <td style="vertical-align:middle">
+            <ul class="list-inline">
+              <li>
+                <form action="/changeQuantity" method="post" role="form"
+                      class="no-refresh">
+                  <input type="hidden" name="product_id"
+                         value="<%= product.product_id %>">
+                  <input type="hidden" name="variant_id"
+                         value="<%= product.variant.variant_id %>">
+                  <input type="hidden" name="quantity" value="-1">
+                  <input type="submit" value="" class="plus-minus minus-button">
+                </form>
+              </li>
+              <li class="plus-minus-li">
+                <p id="quantity"><%= product.quantity %></p>
+              </li>
+              <li class="plus-minus-li">
+                <form action="/changeQuantity" method="post" role="form"
+                      class="no-refresh">
+                  <input type="hidden" name="product_id"
+                         value="<%= product.product_id %>">
+                  <input type="hidden" name="variant_id"
+                         value="<%= product.variant.variant_id %>">
+                  <input type="hidden" name="quantity" value="1">
+                  <input type="submit" value="" class="plus-minus plus-button">
+                </form>
+              </li>
+            </ul>
           </td>
           <td style="vertical-align:middle" id="#total">
             <%= product.variant.price * product.quantity %> $

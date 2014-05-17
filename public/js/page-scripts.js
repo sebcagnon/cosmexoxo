@@ -47,13 +47,17 @@ $(".no-refresh").submit(function changeCart (e) {
           if (data.error)
             return console.log('request returned an error: ' + data.error);
           $(".cartSize").text(data.cartSize);
-          if (btn.hasClass("btn-primary")) {
+          if (btn.hasClass("btn-primary")) { // case add to cart
             btn.removeClass("btn-primary active disabled")
               .addClass("btn-success").attr("value", "Added");
-          } else if (btn.hasClass("btn-danger")) {
+          } else if (btn.hasClass("btn-danger")) { // case remove
             btn.removeClass("btn-danger active, disabled")
               .addClass("btn-warning").attr("value", "Removed");
-            var rowID = '#' + $this.children(':input[name=variant_id]').attr("value");
+          } else {
+            btn.removeClass("active disabled")
+          }
+          if (data.removeId) {
+            var rowID = '#' + data.removeId;
             $(rowID).remove();
           }
           $this.children("#loadImg").remove();

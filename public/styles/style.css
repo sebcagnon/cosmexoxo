@@ -206,3 +206,23 @@ td > a > .img-responsive {
 .order-btn {
   margin-top: 5px;
 }
+
+.plus-minus-li {
+  display: inline;
+  list-style-type: none;
+}
+
+.plus-minus {
+  cursor: pointer;
+  width: 22px;
+  height: 22px;
+  border: none;
+}
+
+.minus-button {
+  background: url(/images/minus.png) no-repeat;
+}
+
+.plus-button {
+  background: url(/images/plus.png) no-repeat;
+}

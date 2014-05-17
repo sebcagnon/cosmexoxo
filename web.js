@@ -163,7 +163,6 @@ app.get('/orderVerification', function(request, response) {
     var country = details.PAYMENTREQUEST_0_SHIPTOCOUNTRYNAME;
     var weight = cart.reduce(sumWeight, 0);
     var shippingamt = parseInt(utils.getShippingCost(country, weight));
-    console.log(country + ' ' + weight);
     params.paymentrequest_0_shippingamt = shippingamt.toString();
     details.PAYMENTREQUEST_0_SHIPPINGAMT = shippingamt.toString();
     params.paymentrequest_0_itemamt = itemamt.toString();
@@ -306,8 +305,41 @@ app.post("/removeFromCart", function (request, response) {
   }
   data = {
     cartSize: cart.length,
-    cart: cart
+    cart: cart,
+    removeId: vid
   };
+  if (request.param('jsenabled')) {
+    response.send(JSON.stringify(data));
+  } else {
+    response.redirect(request.get('Referrer'));
+  }
+  request.session.cart = cart;
+});
+
+app.post('/changeQuantity', function (request, response) {
+  validateRequest(request, withQuantity=true);
+  var errors = request.validationErrors();
+  if (errors) {
+    console.log("Validation errors in changeQuantity: " +
+                JSON.stringify(errors));
+    return response.send(JSON.stringify({error:'Could not validate input'}));
+  }
+  var vid = request.param('variant_id');
+  var cart = request.session.cart;
+  var change = request.param('quantity');
+  var data = {}
+  for (var i=0; i<cart.length; i++) {
+    if (cart[i].variant.variant_id == vid) {
+      cart[i].quantity += change;
+      if (cart[i].quantity == 0) {
+        cart.splice(i, 1);
+        data.removeId = vid;
+      }
+      break;
+    }
+  }
+  data.cartSize = cart.length;
+  data.cart = cart;
   if (request.param('jsenabled')) {
     response.send(JSON.stringify(data));
   } else {
