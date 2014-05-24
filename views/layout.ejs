@@ -100,13 +100,13 @@
 
     <div class="container">
       <!-- header -->
-      <div class="row">
-        <div class="col-md-6">
+      <div class="row" id="website-header">
+        <div class="col-sm-6">
           <%- utils.link_to('/', utils.responsiveImage("/images/header.png"),
                                     "CosmeXO logo",
                                     "CosmeXO: Back to home page") %>
         </div>
-        <div class="contact-search col-md-4">
+        <div class="contact-search col-sm-4 col-xs-8">
           <div class="col-md-12">
             <a href="#">
               <button class="btn btn-large btn-link">
@@ -123,14 +123,14 @@
             </div>
           </div>
         </div>
-        <div class="col-md-2" style="text-align:center">
-          <a href="/cart">
-            <img src="/images/shopping_basket_fushia.png">
-            <p class="cartSize"><%= cartSize %> item(s)</p>
-          </a>
-          <a href="/cart">
-            <button class="btn btn-large btn-link">Checkout</button>
-          </a>
+        <div class="col-sm-2 col-xs-4" >
+          <%- utils.link_to('/cart',
+                    utils.responsiveImage(
+                      "/images/shopping_basket_fushia.png")
+                      + '<span class="badge cartSize">' + cartSize + '</span>'
+                      + '<span id="checkout">Checkout</span>',
+                    "Shopping cart image",
+                    "Go to shopping cart") %>
         </div>
       </div>
 

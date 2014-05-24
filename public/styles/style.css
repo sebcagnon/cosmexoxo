@@ -19,9 +19,22 @@ body {
   margin: 60px 0;
 }
 
-.contact-search {
-  padding-top: 15px;
+/* website header */
+#website-header .img-responsive+.badge {
+  position: relative;
+  top: -35px;
+  left: 30px;
 }
+
+#website-header .badge {
+  background-color: #EEE;
+  color: #000;
+}
+
+#checkout {
+  margin-left: -8px;
+}
+
 
 /* navbar colors */
 .navbar .navbar-brand, .navbar .nav li a{
@@ -29,7 +42,7 @@ body {
   font-weight: bold;
   border-left: 1px solid rgba(255,255,255,.75);
   border-right: 1px solid rgba(255,255,255,.9);
-  border-bottom: 2px solid #000000;
+  border-bottom: 2px solid #222222;
 }
 
 .navbar .navbar-brand, .navbar .nav > li > a {
