@@ -159,6 +159,7 @@ app.get('/orderVerification', function(request, response) {
   var params = {token:token};
   var cart = request.session.order;
   paypalxo.ec.getExpressCheckoutDetails(params, function (err, details) {
+    console.log('CheckoutDetails: ' + JSON.stringify(details));
     var itemamt = parseInt(details.PAYMENTREQUEST_0_ITEMAMT);
     var country = details.PAYMENTREQUEST_0_SHIPTOCOUNTRYNAME;
     var weight = cart.reduce(sumWeight, 0);
@@ -166,6 +167,8 @@ app.get('/orderVerification', function(request, response) {
     params.paymentrequest_0_shippingamt = shippingamt.toString();
     details.PAYMENTREQUEST_0_SHIPPINGAMT = shippingamt.toString();
     params.paymentrequest_0_itemamt = itemamt.toString();
+    if (!details.PAYMENTREQUEST_0_SHIPTOSTREET2)
+      details.PAYMENTREQUEST_0_SHIPTOSTREET2 = null;
     // prepare answer
     params.payerid = payerid;
     params.paymentrequest_0_amt = (itemamt + shippingamt).toString();
@@ -210,6 +213,8 @@ app.post('/pay', function(request, response) {
   var cart = request.session.cart;
   // save order in a different variable, in case the cart changes in between
   request.session.order = cart;
+  // var orderId = db.createOrder(cart);
+  // var invNum = createInvoiceNumber(orderId);
   // Prepare the data
   itemamt = cart.reduce(sumPrice, 0);
   weight = cart.reduce(sumWeight, 0);
@@ -224,7 +229,8 @@ app.post('/pay', function(request, response) {
     paymentrequest_0_paymentaction: 'Sale',
     solutiontype: 'Sole',
     landingpage: 'Billing',
-    buyeremailoptinenable: 1
+    buyeremailoptinenable: 1,
+    brandname: 'CosmeXO.com' // , invnum: invNum
   };
   var prefix = 'L_PAYMENTREQUEST_0_';
   for (var i=0; i<cart.length; i++) {
@@ -434,4 +440,9 @@ function validateRequest(request, withQuantity) {
   request.sanitize('variant_id').toInt();
   if (withQuantity) request.sanitize('quantity').toInt();
   request.sanitize('jsenabled').toBoolean();
+}
+
+function createInvoiceNumber(orderId) {
+  var d = new Date();
+  return 'INV' + d.getFullYear() + 0 + (d.getMonth() + 1) + orderId;
 }

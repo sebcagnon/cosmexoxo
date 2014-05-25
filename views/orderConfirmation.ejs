@@ -58,6 +58,9 @@
             <p>
               <%= order.PAYMENTREQUEST_0_SHIPTONAME%><br>
               <%= order.PAYMENTREQUEST_0_SHIPTOSTREET %><br>
+              <% if (order.PAYMENTREQUEST_0_SHIPTOSTREET2) { %>
+              <%= order.PAYMENTREQUEST_0_SHIPTOSTREET2%><br>
+              <% } %>
               <%= order.PAYMENTREQUEST_0_SHIPTOCITY %><br>
               <%= order.PAYMENTREQUEST_0_SHIPTOSTATE %><br>
               <%= order.PAYMENTREQUEST_0_SHIPTOZIP %><br>
