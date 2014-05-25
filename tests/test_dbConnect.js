@@ -121,13 +121,24 @@ function testGetFeaturedProducts(err, result) {
   db.createOrder(cart, testCreateOrder);
 }
 
-function testCreateOrder(err, invoiceNumber) {
+function testCreateOrder(err, ids) {
   if (err) {
     console.log('Error in createOrder: ' + err);
     db.close();
     return;
   }
-  console.log('createOrder returned following id: ' + invoiceNumber);
+  console.log('createOrder returned following ids: ' + ids);
+  db.updateOrder({invoice_number:ids[1], token:'EC-ABCD1234'},
+                 ['order_id', ids[0]],
+                 testUpdateOrder);
+}
+
+function testUpdateOrder(err) {
+  if (err) {
+    console.log('Error in updateOrder: ' + err);
+    return db.close();
+  }
+  console.log('updateOrder succeeded! (no result)');
   onFinished();
 }
 

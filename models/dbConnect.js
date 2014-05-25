@@ -158,13 +158,42 @@ var db = {
     return;
   },
 
+  // creates a new row in order and add its variants into order_variant
   createOrder : function (cart, callback) {
     createNewOrder(cart, function onOrderCreated (err, orderId) {
       if (err) return callback(err);
       var invoiceNumber = createInvoiceNumber(orderId);
       createOrderVariant(cart, orderId, function onOrderReady (err) {
         if (err) return callback(err);
-        callback(null, invoiceNumber);
+        callback(null, [orderId, invoiceNumber]);
+      });
+    });
+  },
+
+  // updates the "order" table for the fields using whereParams for WHERE clause
+  updateOrder : function (fields, whereParams, callback) {
+    pg.connect(config, function updateOrderQuery (err, client, done) {
+      if (err) return callback(err);
+      var setItems = [];
+      var params = [];
+      var i = 1;
+      for(var item in fields) {
+        setItems.push(item.toString() + '= $' + i);
+        i += 1;
+        params.push(fields[item]);
+      }
+      var str = 'UPDATE product_info."order" SET _ITEMS_\
+                 WHERE ' + whereParams[0] + ' = $' + i;
+      str = replaceAll('_ITEMS_', setItems.join(', '), str);
+      params.push(whereParams[1]);
+      console.log(str);
+      client.query(str, params, function onOrderUpdated (err) {
+        if (err) {
+          callback(err)
+        } else {
+          callback();
+        }
+        done();
       });
     });
   },
@@ -423,7 +452,6 @@ function createOrderVariant (cart, order_id, callback) {
       line += ')';
       str += line;
     }
-    console.log(str);
     client.query(str, function onInsertedOrderVariant (err) {
       callback(err);
       done();
@@ -443,8 +471,6 @@ function createInvoiceNumber(orderId) {
 function replaceAll(find, replace, str) {
   return str.replace(new RegExp(find, 'g'), replace);
 }
-
-
 
 
 module.exports = db;
