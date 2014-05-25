@@ -139,6 +139,26 @@ function testUpdateOrder(err) {
     return db.close();
   }
   console.log('updateOrder succeeded! (no result)');
+  db.createAddress(
+    {
+      name: 'Seb Cag',
+      street: '1-1-1 Aoyama',
+      street2: 'Paypal Building 101',
+      city: 'Bunkyo',
+      zip: '113-0031',
+      country_code: 'JP',
+      country: 'Japan',
+      state: 'Tokyo'
+    },
+    testCreateAddress);
+}
+
+function testCreateAddress(err, address_id) {
+  if (err) {
+    console.log('Error in createAddress: ' + err);
+    return db.close();
+  }
+  console.log('createAddress returned address_id: ' + address_id);
   onFinished();
 }
 

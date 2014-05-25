@@ -68,6 +68,7 @@ var db = {
     });
   },
 
+  // Returns a list of all products that are featured for home page
   getFeaturedProducts : function (callback) {
     pg.connect(config, function featuredProductsQuery(err, client, done) {
       if (err) callback(err);
@@ -124,6 +125,7 @@ var db = {
     categoriesRequest(callback);
   },
 
+  // returns a list of products belonging to category: categoryName
   getProductsByCategory : function (categoryName, callback) {
     pg.connect(config, function prodByCatQuery(err, client, done) {
       if (err) return callback(err);
@@ -186,12 +188,40 @@ var db = {
                  WHERE ' + whereParams[0] + ' = $' + i;
       str = replaceAll('_ITEMS_', setItems.join(', '), str);
       params.push(whereParams[1]);
-      console.log(str);
       client.query(str, params, function onOrderUpdated (err) {
         if (err) {
           callback(err)
         } else {
           callback();
+        }
+        done();
+      });
+    });
+  },
+
+  // creates address and returns its address_id
+  createAddress : function (fields, callback) {
+    pg.connect(config, function insertAddressQuery (err, client, done) {
+      if (err) return callback(err);
+      var setItems = [], dollars = [], params = [], i = 1;
+      for (var item in fields) {
+        setItems.push(item.toString());
+        dollars.push('$' + i);
+        i += 1;
+        params.push(fields[item]);
+      }
+      var str = 'INSERT INTO product_info.address (_HEADERS_)\
+                 VALUES (_VALUES_) RETURNING address_id';
+      str = replaceAll('_HEADERS_', setItems.join(', '), str);
+      str = replaceAll('_VALUES_', dollars.join(', '), str);
+      console.log(str);
+      client.query(str, params, function onAddressInserted (err, result) {
+        if (err) {
+          callback(err);
+        } else if (result.rows.length == 0) {
+          callback('no value returned when inserting address');
+        } else {
+          callback(null, result.rows[0].address_id);
         }
         done();
       });
