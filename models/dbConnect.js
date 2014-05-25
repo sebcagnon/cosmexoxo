@@ -158,6 +158,17 @@ var db = {
     return;
   },
 
+  createOrder : function (cart, callback) {
+    createNewOrder(cart, function onOrderCreated (err, orderId) {
+      if (err) return callback(err);
+      var invoiceNumber = createInvoiceNumber(orderId);
+      createOrderVariant(cart, orderId, function onOrderReady (err) {
+        if (err) return callback(err);
+        callback(null, invoiceNumber);
+      });
+    });
+  },
+
   // Closes remaining connections to the database
   // after queries have all returned
   // to allow for programs to finish nicely.
@@ -366,14 +377,67 @@ function createCategoryTree(categories) {
   return categoryTree;
 }
 
+// adds S3 key and link URL the product objects
 function addKeys (row) {
   row.key = db.createKey([row.product_id, row.name]);
   row.link = '/product/' + row.product_id;
   return row;
 }
 
-// helper functions
+// creates a new row in order table
+function createNewOrder (cart, callback) {
+  pg.connect(config, function onConnected(err, client, done) {
+    if (err) return callback(err);
+    var str = 'INSERT INTO product_info."order"\
+                (total_amount, shipping_amount, item_amount)\
+                VALUES ($1, $2, $3)\
+                RETURNING order_id';
+    client.query(
+      str,
+      [cart.shippingamt+cart.itemamt, cart.shippingamt, cart.itemamt],
+      function onOrderInserted (err, result) {
+        if (err) {
+          callback(err);
+        } else if (result.rows.length == 0) {
+          callback('no order_id was returned when creating the order');
+        } else {
+          callback(null, result.rows[0].order_id);
+        }
+        done();
+    });
+  });
+}
 
+function createOrderVariant (cart, order_id, callback) {
+  pg.connect(config, function onConnected(err, client, done) {
+    if (err) return callback(err);
+    var str = 'INSERT INTO product_info.order_variant\
+                (order_id, variant_id, quantity, unit_price)\
+               VALUES '
+    for (var i=0; i<cart.length; i++) {
+      var item = cart[i];
+      var line = '(';
+      if (i>0) line = ', ' + line;
+      line += [order_id, item.variant.variant_id,
+               item.quantity, item.variant.price].join(", ");
+      line += ')';
+      str += line;
+    }
+    console.log(str);
+    client.query(str, function onInsertedOrderVariant (err) {
+      callback(err);
+      done();
+    });
+  });
+}
+
+// creates an invoice number from an order_id
+function createInvoiceNumber(orderId) {
+  var d = new Date();
+  return 'INV' + d.getFullYear() + 0 + (d.getMonth() + 1) + orderId;
+}
+
+// helper functions
 
 // Replaces all occurences of 'find' by 'replace' in 'str'
 function replaceAll(find, replace, str) {

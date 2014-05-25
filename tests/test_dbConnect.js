@@ -112,6 +112,22 @@ function testGetFeaturedProducts(err, result) {
   }
   console.log('getFeaturedProducts result:');
   console.log(result);
+  var cart = [
+    {quantity: 2, variant:{variant_id:47, price:15}},
+    {quantity: 1, variant:{variant_id:38, price:10}}
+  ];
+  cart.itemamt = 40;
+  cart.shippingamt = 15;
+  db.createOrder(cart, testCreateOrder);
+}
+
+function testCreateOrder(err, invoiceNumber) {
+  if (err) {
+    console.log('Error in createOrder: ' + err);
+    db.close();
+    return;
+  }
+  console.log('createOrder returned following id: ' + invoiceNumber);
   onFinished();
 }
 
