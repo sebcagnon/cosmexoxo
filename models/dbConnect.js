@@ -167,7 +167,7 @@ var db = {
       var invoiceNumber = createInvoiceNumber(orderId);
       createOrderVariant(cart, orderId, function onOrderReady (err) {
         if (err) return callback(err);
-        callback(null, [orderId, invoiceNumber]);
+        callback(null, orderId, invoiceNumber);
       });
     });
   },
@@ -214,7 +214,6 @@ var db = {
                  VALUES (_VALUES_) RETURNING address_id';
       str = replaceAll('_HEADERS_', setItems.join(', '), str);
       str = replaceAll('_VALUES_', dollars.join(', '), str);
-      console.log(str);
       client.query(str, params, function onAddressInserted (err, result) {
         if (err) {
           callback(err);
@@ -228,6 +227,32 @@ var db = {
     });
   },
 
+  // retrieves the total weight of the variants in the order
+  getOrderWeight : function (invoiceNumber, callback) {
+    pg.connect(config, function getWeightQuery (err, client, done) {
+      if (err) return callback(err);
+      var str = 'SELECT v.weight, ov.quantity\
+                 FROM product_info.order o\
+                 INNER JOIN product_info.order_variant ov\
+                  ON o.order_id = ov.order_id\
+                 INNER JOIN product_info.variant v\
+                  ON ov.variant_id = v.variant_id\
+                 WHERE o.invoice_number = $1';
+      client.query(str, [invoiceNumber], function onVariantsList (err, result) {
+        if (err || !result.rows.length) {
+          callback(err || 'no variants found');
+        } else {
+          var getWeight = function (prev, curr, ind, arr) {
+            return prev + curr.weight * curr.quantity;
+          };
+          var orderWeight = result.rows.reduce(getWeight, 0);
+          callback(null, orderWeight);
+        }
+        done();
+      });
+    });
+  },
+
   // Closes remaining connections to the database
   // after queries have all returned
   // to allow for programs to finish nicely.
@@ -235,7 +260,7 @@ var db = {
     pg.end();
   },
 
-  // Creates an key for AWS S3 from products/variants name and id
+  // Creates a key for AWS S3 from products/variants name and id
   createKey : function (keyParts) {
     var key = keyParts.join('_');
     return replaceAll(' ', '-', key)

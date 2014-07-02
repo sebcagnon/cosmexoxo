@@ -121,15 +121,16 @@ function testGetFeaturedProducts(err, result) {
   db.createOrder(cart, testCreateOrder);
 }
 
-function testCreateOrder(err, ids) {
+function testCreateOrder(err, orderId, invoiceNumber) {
   if (err) {
     console.log('Error in createOrder: ' + err);
     db.close();
     return;
   }
-  console.log('createOrder returned following ids: ' + ids);
-  db.updateOrder({invoice_number:ids[1], token:'EC-ABCD1234'},
-                 ['order_id', ids[0]],
+  console.log('createOrder returned following ids: ' + orderId + ', '
+              + invoiceNumber);
+  db.updateOrder({invoice_number:invoiceNumber, token:'EC-ABCD1234'},
+                 ['order_id', orderId],
                  testUpdateOrder);
 }
 
@@ -159,7 +160,16 @@ function testCreateAddress(err, address_id) {
     return db.close();
   }
   console.log('createAddress returned address_id: ' + address_id);
-  onFinished();
+  db.getOrderWeight("INV20140512", testGetOrderWeight);
+}
+
+function testGetOrderWeight(err, totalWeight) {
+  if (err) {
+    console.log('Errorr in getOrderWeight: ' + err);
+    return db.close();
+  }
+  console.log('getOrderWeight returned: ' + totalWeight);
+  onFinished()
 }
 
 function onFinished() {
