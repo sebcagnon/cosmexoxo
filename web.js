@@ -157,34 +157,82 @@ app.get('/orderVerification', function(request, response) {
   var token = request.query.token;
   var payerid = request.query.PayerID;
   var params = {token:token};
-  var cart = request.session.order;
   paypalxo.ec.getExpressCheckoutDetails(params, function (err, details) {
-    console.log('CheckoutDetails: ' + JSON.stringify(details));
+    //console.log('CheckoutDetails: ' + JSON.stringify(details));
+    // handle missing ITEMAMT!!
+    if (details.PAYMENTREQUEST_0_ITEMAMT == undefined) {
+      details.PAYMENTREQUEST_0_ITEMAMT =
+          (parseInt(details.PAYMENTREQUEST_0_AMT) -
+           parseInt(details.PAYMENTREQUEST_0_SHIPPINGAMT)).toString();
+    }
     var itemamt = parseInt(details.PAYMENTREQUEST_0_ITEMAMT);
     var country = details.PAYMENTREQUEST_0_SHIPTOCOUNTRYNAME;
-    var weight = cart.reduce(sumWeight, 0);
-    var shippingamt = parseInt(utils.getShippingCost(country, weight));
-    params.paymentrequest_0_shippingamt = shippingamt.toString();
-    details.PAYMENTREQUEST_0_SHIPPINGAMT = shippingamt.toString();
-    params.paymentrequest_0_itemamt = itemamt.toString();
-    if (!details.PAYMENTREQUEST_0_SHIPTOSTREET2)
-      details.PAYMENTREQUEST_0_SHIPTOSTREET2 = null;
-    // prepare answer
-    params.payerid = payerid;
-    params.paymentrequest_0_amt = (itemamt + shippingamt).toString();
-    details.PAYMENTREQUEST_0_AMT = params.paymentrequest_0_amt;
-    params.paymentrequest_0_currencycode= 'USD';
-    params.paymentrequest_0_paymentaction= 'Sale';
-    request.session.orderParams = params;
-    responseParams = {cart: cart, order: details};
-    response.render('orderConfirmation', responseParams);
+    var invoiceNumber = details.PAYMENTREQUEST_0_INVNUM
+    db.getOrderWeight(invoiceNumber, function onWeight(err, weight) {
+      if (err) {
+        console.log(err);
+        return response.redirect('/paymentFailure');
+      }
+      address = {
+        name: details.PAYMENTREQUEST_0_SHIPTONAME,
+        street: details.PAYMENTREQUEST_0_SHIPTOSTREET,
+        street2: details.PAYMENTREQUEST_0_SHIPTOSTREET2,
+        city: details.PAYMENTREQUEST_0_SHIPTOCITY,
+        zip: details.PAYMENTREQUEST_0_SHIPTOZIP,
+        country_code: details.PAYMENTREQUEST_0_SHIPTOCOUNTRYCODE,
+        country: details.PAYMENTREQUEST_0_SHIPTOCOUNTRY,
+        state: details.PAYMENTREQUEST_0_SHIPTOSTATE
+      };
+      db.createAddress(address, function onAddressCreated (err, addressID) {
+        if (err) {
+          console.log(err);
+          return response.redirect('/paymentFailure');
+        }
+        // update Order in DB
+        var shippingamt = parseInt(utils.getShippingCost(country, weight));
+        params.paymentrequest_0_shippingamt = shippingamt.toString();
+        details.PAYMENTREQUEST_0_SHIPPINGAMT = shippingamt.toString();
+        params.paymentrequest_0_itemamt = itemamt.toString();
+        params.payerid = payerid;
+        params.paymentrequest_0_amt = (itemamt + shippingamt).toString();
+        if (!details.PAYMENTREQUEST_0_SHIPTOSTREET2)
+          details.PAYMENTREQUEST_0_SHIPTOSTREET2 = null;
+        fields = {
+          email: details.EMAIL,
+          payerid: details.PAYERID,
+          firstname: details.FIRSTNAME,
+          lastname: details.LASTNAME,
+          currencycode: details.CURRENCYCODE,
+          total_amount: itemamt + shippingamt,
+          shipping_amount: shippingamt,
+          shipping_address_id: addressID,
+          checkoutstatus: 'WaitingForConfirmation'
+        };
+        where = ['invoice_number', invoiceNumber];
+        db.updateOrder(fields, where, function onOrderUpdated (err) {
+          if (err) {
+            console.log(err);
+            return response.redirect('/paymentFailure');
+          }
+          // prepare answer
+          details.PAYMENTREQUEST_0_AMT = params.paymentrequest_0_amt;
+          params.paymentrequest_0_currencycode= 'USD';
+          params.paymentrequest_0_paymentaction= 'Sale';
+          var responseParams = {order: details};
+          response.render('orderConfirmation', responseParams);
+          request.session.orderParams = params;
+        });
+      });
+    });
   });
 });
 
 app.post('/confirmPayment', function(request, response) {
   var params = request.session.orderParams;
+  console.log('before doECPayment');
   paypalxo.ec.doExpressCheckoutPayment(params, function (err, answer) {
-    console.log('ExpressCheckoutPayment:\n' + JSON.stringify(answer));
+    //console.log('ExpressCheckoutPayment:\n' + JSON.stringify(answer));
+    console.log('done doECPayment');
     if (err || answer.PAYMENTINFO_0_PAYMENTSTATUS != 'Completed') {
       var params = {
         state:'failed',
@@ -200,8 +248,11 @@ app.post('/confirmPayment', function(request, response) {
 });
 
 app.get('/paymentFailure', function(request, response) {
-  response.render('orderConfirmation',
-                  {state:'failed', reason:'could not set EC'});
+  var params = {
+    state:'failed',
+    reason: 'could not process payment'
+  };
+  response.render('paymentError', params);
 });
 
 app.get('/thankYouPage', function(request, response) {
@@ -211,45 +262,62 @@ app.get('/thankYouPage', function(request, response) {
 // handle paypal button
 app.post('/pay', function(request, response) {
   var cart = request.session.cart;
-  // save order in a different variable, in case the cart changes in between
-  request.session.order = cart;
-  // var orderId = db.createOrder(cart);
-  // var invNum = createInvoiceNumber(orderId);
-  // Prepare the data
   itemamt = cart.reduce(sumPrice, 0);
   weight = cart.reduce(sumWeight, 0);
   shippingamt = parseInt(utils.getShippingCost('United States', weight));
-  var data = {
-    paymentrequest_0_itemamt: itemamt.toString(),
-    paymentrequest_0_shippingamt: shippingamt.toString(),
-    paymentrequest_0_amt: (itemamt + shippingamt).toString(),
-    paymentrequest_0_currencycode: 'USD',
-    returnurl: app.locals.URL + '/orderVerification',
-    cancelurl: app.locals.URL + '/paymentFailure',
-    paymentrequest_0_paymentaction: 'Sale',
-    solutiontype: 'Sole',
-    landingpage: 'Billing',
-    buyeremailoptinenable: 1,
-    brandname: 'CosmeXO.com' // , invnum: invNum
-  };
-  var prefix = 'L_PAYMENTREQUEST_0_';
-  for (var i=0; i<cart.length; i++) {
-    var item = cart[i];
-    data[prefix+'NAME'+i] = item.variant.name + ' of ' + item.name;
-    data[prefix+'AMT'+i] = item.variant.price;
-    data[prefix+'QTY'+i] = item.quantity;
-    data[prefix+'URL'+i] = item.link;
-  }
-  console.log('setExpressCheckout')
-  console.log(data);
-  paypalxo.ec.setExpressCheckout(data, function setECCallback (err, ans) {
+  cart.itemamt = itemamt;
+  cart.shippingamt = shippingamt;
+  // creating new Order in DB
+  db.createOrder(cart, function onOrderCreated(err, orderId, invoiceNumber) {
+    // Prepare the data
     if (err) {
       console.log(err);
-      return response.redirect('/paymentFailure');
+      response.redirect('/paymentFailure');
     }
-    // TODO: USE SESSION!!
-    app.locals.token = ans.TOKEN;
-    return response.redirect(paypalxo.ec.getLoginURL(ans.TOKEN));
+    var data = {
+      paymentrequest_0_itemamt: itemamt.toString(),
+      paymentrequest_0_shippingamt: shippingamt.toString(),
+      paymentrequest_0_amt: (itemamt + shippingamt).toString(),
+      paymentrequest_0_currencycode: 'USD',
+      paymentrequest_0_invnum: invoiceNumber,
+      returnurl: app.locals.URL + '/orderVerification',
+      cancelurl: app.locals.URL + '/paymentFailure',
+      paymentrequest_0_paymentaction: 'Sale',
+      solutiontype: 'Sole',
+      landingpage: 'Billing',
+      buyeremailoptinenable: 1,
+      brandname: 'CosmeXO.com' // , invnum: invNum
+    };
+    var prefix = 'L_PAYMENTREQUEST_0_';
+    for (var i=0; i<cart.length; i++) {
+      var item = cart[i];
+      data[prefix+'NAME'+i] = item.variant.name + ' of ' + item.name;
+      data[prefix+'AMT'+i] = item.variant.price;
+      data[prefix+'QTY'+i] = item.quantity;
+      data[prefix+'URL'+i] = item.link;
+    }
+    //console.log('setExpressCheckout')
+    //console.log(data);
+    paypalxo.ec.setExpressCheckout(data, function setECCallback (err, ans) {
+      if (err) {
+        console.log(err);
+        return response.redirect('/paymentFailure');
+      }
+      // updating Order with invnum and token
+      var updateFields = {
+        invoice_number: invoiceNumber,
+        token: ans.TOKEN,
+        checkoutstatus: 'Set'
+      };
+      var where = ['order_id', orderId];
+      db.updateOrder(updateFields, where, function onOrderUpdated (err) {
+        if (err) {
+          console.log(err);
+          return response.redirect('/paymentFailure');
+        }
+        return response.redirect(paypalxo.ec.getLoginURL(ans.TOKEN));
+      });
+    });
   });
 });
 
@@ -440,9 +508,4 @@ function validateRequest(request, withQuantity) {
   request.sanitize('variant_id').toInt();
   if (withQuantity) request.sanitize('quantity').toInt();
   request.sanitize('jsenabled').toBoolean();
-}
-
-function createInvoiceNumber(orderId) {
-  var d = new Date();
-  return 'INV' + d.getFullYear() + 0 + (d.getMonth() + 1) + orderId;
 }
