@@ -62,7 +62,9 @@
               <%= order.PAYMENTREQUEST_0_SHIPTOSTREET2%><br>
               <% } %>
               <%= order.PAYMENTREQUEST_0_SHIPTOCITY %><br>
+              <% if (order.PAYMENTREQUEST_0_SHIPTOSTATE) { %>
               <%= order.PAYMENTREQUEST_0_SHIPTOSTATE %><br>
+              <% } %>
               <%= order.PAYMENTREQUEST_0_SHIPTOZIP %><br>
               <%= order.PAYMENTREQUEST_0_SHIPTOCOUNTRYNAME %>
               (<%= order.PAYMENTREQUEST_0_SHIPTOCOUNTRYCODE %>)

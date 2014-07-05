@@ -42,7 +42,7 @@ var order = {
     state: '',
     zip: '75001',
     country: 'France',
-    countrycode: 'FRA'
+    country_code: 'FRA'
   },
   variants: [
     {
@@ -58,8 +58,10 @@ var order = {
       price: 29
     }
   ],
-  shipping: 20,
-  totalPrice: 79
+  shipping_amount: 20,
+  item_amount: 59,
+  total_amount: 79,
+  checkoutstatus: 'Completed'
 };
 
 mailing.sendNewOrder(order, testSendNewOrder);

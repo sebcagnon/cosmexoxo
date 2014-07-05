@@ -172,7 +172,7 @@ var db = {
     });
   },
 
-  // updates the "order" table for the fields using whereParams for WHERE clause
+  // updates the "order" table for the fields using whereParams in WHERE clause
   updateOrder : function (fields, whereParams, callback) {
     pg.connect(config, function updateOrderQuery (err, client, done) {
       if (err) return callback(err);
@@ -238,7 +238,7 @@ var db = {
                  INNER JOIN product_info.variant v\
                   ON ov.variant_id = v.variant_id\
                  WHERE o.invoice_number = $1';
-      client.query(str, [invoiceNumber], function onVariantsList (err, result) {
+      client.query(str, [invoiceNumber], function onVariantsList(err, result) {
         if (err || !result.rows.length) {
           callback(err || 'no variants found');
         } else {
@@ -249,6 +249,61 @@ var db = {
           callback(null, orderWeight);
         }
         done();
+      });
+    });
+  },
+
+  // retrieves all the info the customer needs about his order
+  getOrderInfo: function (invoiceNumber, callback) {
+    pg.connect(config, function orderInfoQuery (err, client, done) {
+      if (err) return callback(err);
+      var str =
+"SELECT o.invoice_number, o.firstname, o.lastname, o.email, o.total_amount, \
+  o.item_amount, o.shipping_amount, o.checkoutstatus, \
+  a.name as shipname, a.street, a.street2, a.city, a.zip, a.country_code, \
+  a.country, a.state, \
+  v.name, p.name as productName, ov.quantity, ov.unit_price \
+FROM product_info.order o \
+LEFT JOIN product_info.address a ON a.address_id = o.shipping_address_id \
+LEFT JOIN product_info.order_variant ov ON o.order_id = ov.order_id \
+LEFT JOIN product_info.variant v ON ov.variant_id = v.variant_id \
+LEFT JOIN product_info.product p ON p.product_id = v.product_id \
+WHERE o.invoice_number = $1;"
+      client.query(str, [invoiceNumber], function onOrderInfo (err, result) {
+        if (err) {
+          done();
+          return callback(err);
+        }
+        var row0 = result.rows[0];
+        order = {};
+
+        // /!\ depends of for (... in ...) keeping the order
+        var i = 0;
+        for (var prop in row0) {
+          // copy order basics
+          if (i<8) {
+            order[prop] = row0[prop];
+          } else if (i==8) {
+            order.address = {name:row0[prop]};
+          } else if (i<16) {
+            order.address[prop] = row0[prop];
+          }
+          i++;
+        }
+        order.variants = [];
+        for (var i=0; i<result.rows.length; i++) {
+          var v = result.rows[i];
+          order.variants.push(
+            {
+              name: v.name,
+              productName: v.productname,
+              quantity: v.quantity,
+              price: v.unit_price
+            }
+          );
+        }
+        done();
+        callback(null, order);
       });
     });
   },

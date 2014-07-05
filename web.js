@@ -7,7 +7,8 @@ var express = require('express')
   , nconf = require('nconf')
   , exValidator = require('express-validator')
   , utils = require('./models/utils')
-  , db = require('./models/dbConnect'); // product info requests
+  , db = require('./models/dbConnect') // product info requests
+  , mailing = require('./models/mailing'); // sending emails
 
 nconf.env().file('./.env');
 
@@ -180,7 +181,7 @@ app.get('/orderVerification', function(request, response) {
         city: details.PAYMENTREQUEST_0_SHIPTOCITY,
         zip: details.PAYMENTREQUEST_0_SHIPTOZIP,
         country_code: details.PAYMENTREQUEST_0_SHIPTOCOUNTRYCODE,
-        country: details.PAYMENTREQUEST_0_SHIPTOCOUNTRY,
+        country: details.PAYMENTREQUEST_0_SHIPTOCOUNTRYNAME,
         state: details.PAYMENTREQUEST_0_SHIPTOSTATE
       };
       db.createAddress(address, function onAddressCreated (err, addressID) {
@@ -221,6 +222,7 @@ app.get('/orderVerification', function(request, response) {
           var responseParams = {order: details};
           response.render('orderConfirmation', responseParams);
           request.session.orderParams = params;
+          request.session.invoiceNumber = invoiceNumber;
         });
       });
     });
@@ -229,10 +231,8 @@ app.get('/orderVerification', function(request, response) {
 
 app.post('/confirmPayment', function(request, response) {
   var params = request.session.orderParams;
-  console.log('before doECPayment');
   paypalxo.ec.doExpressCheckoutPayment(params, function (err, answer) {
     //console.log('ExpressCheckoutPayment:\n' + JSON.stringify(answer));
-    console.log('done doECPayment');
     if (err || answer.PAYMENTINFO_0_PAYMENTSTATUS != 'Completed') {
       var params = {
         state:'failed',
@@ -240,9 +240,20 @@ app.post('/confirmPayment', function(request, response) {
       };
       response.render('paymentError', params);
     } else {
-      request.session.cart = []; // re-init cart in session
       response.locals.cartSize = 0;
+      request.session.cart = []; // re-init cart in session
       response.redirect('/thankYouPage');
+      var invoiceNumber = request.session.invoiceNumber;
+      db.getOrderInfo(invoiceNumber, function sendMails(err, orderInfo) {
+        mailing.sendOrderConfirmation(orderInfo, function check(err) {
+          if (err)
+            console.log('error while sending confirmation email: ' + err);
+        });
+        mailing.sendNewOrder(orderInfo, function check2(err) {
+          if (err)
+            console.log('error while sending notification email: ' + err);
+        });
+      });
     }
   });
 });

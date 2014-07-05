@@ -63,9 +63,13 @@ function createOrderConfirmationHTML(order) {
   html += '<h1>Order Summary</h1>';
   html += 'Address:<br>';
   html += order.address.name + '<br>';
-  html += order.address.street + ' ' + order.address.street2 + ' ' +
-          order.address.city + ' ' + order.address.state + ' ' +
-          order.address.zip + ' ' + order.address.country + '.<br>';
+  var address = order.address;
+  var addressArray = [address.street, address.street2, address.city,
+                      address.state, address.zip, address.country]
+  for (var i=0; i<addressArray.length; i++) {
+    if (addressArray[i]) html += addressArray[i] + ' ';
+  }
+  html += '<br>';
   html += 'Purchased items:<br>';
   for (var i=0; i<order.variants.length; i++) {
     var variant = order.variants[i];
@@ -73,8 +77,8 @@ function createOrderConfirmationHTML(order) {
             variant.quantity + ' * ' + variant.price + '$ = ' +
             (variant.quantity * variant.price) + '$<br>';
   }
-  html += 'Shipping cost: ' + order.shipping + '$<br>';
-  html += '<b>Total paid: ' + order.totalPrice + '$</b><br><br>';
+  html += 'Shipping cost: ' + order.shipping_amount + '$<br>';
+  html += '<b>Total paid: ' + order.total_amount + '$</b><br><br>';
   html += 'Best regards,<br>The CosmeXO team';
   return html;
 }

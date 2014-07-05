@@ -165,10 +165,20 @@ function testCreateAddress(err, address_id) {
 
 function testGetOrderWeight(err, totalWeight) {
   if (err) {
-    console.log('Errorr in getOrderWeight: ' + err);
+    console.log('Error in getOrderWeight: ' + err);
     return db.close();
   }
   console.log('getOrderWeight returned: ' + totalWeight);
+  db.getOrderInfo('INV20140719', testGetOrderInfo);
+}
+
+function testGetOrderInfo(err, orderInfo) {
+  if (err) {
+    console.log('Error in getOrderInfo: ' + err);
+    return db.close();
+  }
+  console.log('getOrderInfo returned:');
+  console.log(orderInfo);
   onFinished()
 }
 
