@@ -512,6 +512,13 @@ app.post('/contactUs', function (request, response) {
   }
 });
 
+app.get('/search', function (request, response) {
+  var params = {
+    cse_cx:nconf.get('GOOGLE_CSE_CX')
+  };
+  response.render('searchResults', params);
+})
+
 // Handling pages not handled by app.get
 app.use(function(req, res, next){
   res.status(404);

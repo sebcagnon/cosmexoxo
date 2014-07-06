@@ -239,3 +239,12 @@ td > a > .img-responsive {
 .plus-button {
   background: url(/images/plus.png) no-repeat;
 }
+
+/* Search Box */
+.gsc-selected-option, .gsc-selected-option-container {
+  height:auto !important;
+  min-width:75px !important;
+  /*padding:10 28px !important;*/
+  margin-top:1px;
+  text-align:left !important;
+}

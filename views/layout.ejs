@@ -108,17 +108,21 @@
         </div>
         <div class="contact-search col-sm-4 col-xs-8">
           <div class="col-md-12">
-            <a href="#">
+            <a href="/contactUs">
               <button class="btn btn-large btn-link">
                 <i class="icon-envelope"></i> Contact Us
               </button>
             </a>
           </div>
           <div class="col-md-12 input-append">
-              <input type="text" class="col-md-8">
-              <button class="btn btn-primary btn-xs" type="button">
-                <i class="icon-search icon-white"></i> Search
-              </button>
+            <form id="cse-search-box" action="/search">
+              <div style="margin:0px 0px 5px 0px;">
+                  <input type="text" class="col-md-8" name="q" size="15">
+                  <button class="btn btn-primary btn-xs" type="submit">
+                    <i class="icon-search icon-white"></i> Search
+                  </button>
+              </div>
+            </form>
           </div>
         </div>
         <div class="col-sm-2 col-xs-4" >
@@ -130,7 +134,6 @@
                     "Shopping cart image",
                     "Go to shopping cart") %>
         </div>
-      </div>
 
 <%- body %>
 
