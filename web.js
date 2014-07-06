@@ -233,7 +233,7 @@ app.get('/orderVerification', function(request, response) {
   });
 });
 
-app.post('/confirmPayment', function(request, response) {
+app.post('/thankYou', function(request, response) {
   var params = request.session.orderParams;
   paypalxo.ec.doExpressCheckoutPayment(params, function (err, answer) {
     //console.log('ExpressCheckoutPayment:\n' + JSON.stringify(answer));
@@ -244,11 +244,15 @@ app.post('/confirmPayment', function(request, response) {
       };
       response.render('paymentError', params);
     } else {
+      var invoiceNumber = request.session.invoiceNumber;
       response.locals.cartSize = 0;
       request.session.cart = []; // re-init cart in session
-      response.redirect('/thankYouPage');
-      var invoiceNumber = request.session.invoiceNumber;
       db.getOrderInfo(invoiceNumber, function sendMails(err, orderInfo) {
+        var resParams = {
+          invoiceNumber: invoiceNumber,
+          email: orderInfo.email
+        };
+        response.render('/thankYouPage', resParams);
         mailing.sendOrderConfirmation(orderInfo, function check(err) {
           if (err)
             console.log('error while sending confirmation email: ' + err);
@@ -262,16 +266,13 @@ app.post('/confirmPayment', function(request, response) {
   });
 });
 
+// displayed in case a problem was encountered during payment
 app.get('/paymentFailure', function(request, response) {
   var params = {
     state:'failed',
     reason: 'could not process payment'
   };
   response.render('paymentError', params);
-});
-
-app.get('/thankYouPage', function(request, response) {
-  response.render('thankYouPage');
 });
 
 // handle paypal button
