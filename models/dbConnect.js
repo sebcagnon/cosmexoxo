@@ -308,6 +308,20 @@ WHERE o.invoice_number = $1;"
     });
   },
 
+  // retrieves the list of all orders with status Completed
+  getOrdersToShip: function (callback) {
+    pg.connect(config, function getOrdersQuery (err, client, done) {
+      var str =
+        "SELECT invoice_number, creation_date, total_amount, checkoutstatus\
+          FROM product_info.order\
+          WHERE checkoutstatus = 'Completed';"
+      client.query(str, function onOrdersList (err, result) {
+        done();
+        callback(err, result.rows);
+      });
+    });
+  },
+
   // Closes remaining connections to the database
   // after queries have all returned
   // to allow for programs to finish nicely.

@@ -179,7 +179,17 @@ function testGetOrderInfo(err, orderInfo) {
   }
   console.log('getOrderInfo returned:');
   console.log(orderInfo);
-  onFinished()
+  db.getOrdersToShip(testGetOrdersToShip);
+}
+
+function testGetOrdersToShip(err, result) {
+  if (err) {
+    console.log('Error in getOrdersToShip: ' + err);
+    return db.close();
+  }
+  console.log('getOrdersToShip returned: ');
+  console.log(result);
+  onFinished();
 }
 
 function onFinished() {
@@ -187,7 +197,8 @@ function onFinished() {
   db.close();
 }
 
-db.getProduct(24, testGetProduct1);
+db.getOrdersToShip(testGetOrdersToShip);
+// db.getProduct(24, testGetProduct1);
 
 
 // helper functions
