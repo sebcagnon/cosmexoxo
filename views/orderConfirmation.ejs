@@ -116,18 +116,20 @@
       </div>
       <div class="row">
         <div class="col-xs-6 col-sm-6 col-md-4 col-md-offset-2">
-          <form action="/confirmPayment" method="post">
-            <input type="submit" class="btn btn-primary btn-lg order-btn"
+          <form action="/confirmPayment" method="post" class="confirmForm">
+            <input type="submit" class="btn btn-primary btn-lg order-btn confirm-btn"
                    value="Confirm Order">
           </form>
         </div>
         <div class="col-xs-6 col-sm-6 col-md-6">
           <form action="/cart">
-            <input type="submit" class="btn btn-warning btn-lg order-btn"
+            <input type="submit" class="btn btn-warning btn-lg order-btn confirm-btn"
                    value="Back to Cart">
           </form>
         </div>
       </div>
     </div>
+    <script type="text/javascript" src="/js/jquery-1.10.2.min.js"></script>
+    <script type="text/javascript" src="/js/page-scripts.js"></script>
   </body>
 </html>

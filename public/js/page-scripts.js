@@ -100,3 +100,10 @@ function updateOrderPrice () {
               parseInt($("#shippingCost").val());
   $("#orderTotal").html('<h4>' + total + ' $</h4>');
 }
+
+// disable order confirmation once it's clicked
+$(".confirmForm").submit(function disableOrderButton (e) {
+  $('.confirm-btn').attr('disabled', 'disabled');
+  var btn = $(this).children(":submit");
+  btn.attr('value', 'Processing...');
+});
