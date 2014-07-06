@@ -248,3 +248,9 @@ td > a > .img-responsive {
   margin-top:1px;
   text-align:left !important;
 }
+
+/* orders */
+hr.order-delimiter {
+  height: 1px;
+  background-color: #999;
+}

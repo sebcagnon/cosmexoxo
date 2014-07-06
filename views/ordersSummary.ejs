@@ -1,0 +1,42 @@
+<% layout('layout') -%>
+<h1>Orders Summary</h1>
+
+<p>See the list of unshipped orders below:</p>
+
+<% if (alert!=null) { %>
+<div class="row">
+  <div class='col-md-12'>
+    <div class="alert alert-danger">
+      <%= alert %>
+    </div>
+  </div>
+</div>
+<% } else { %>
+<div class="row">
+  <% for (var i=0; i<orders.length; i++) { %>
+  <form action="/orderShipped" class="form-horizontal no-refresh"
+        method="post" role="form">
+    <div class="col-md-3">
+      <%= orders[i].creation_date.toDateString() %>:
+      &nbsp;<%= orders[i].total_amount %>$
+      <a href="/orders/<%= orders[i].invoice_number %>" target="blank">
+        &nbsp;See order
+      </a>
+    </div>
+    <div class="col-md-9">
+      <input type="hidden" name="invoice_number"
+             value="<%= orders[i].invoice_number %>">
+      <input type="submit" value="Set as Shipped" class="btn btn-primary">
+    </div>
+    <div class="row">
+      <div class="col-md-4 col-md-offset-1">
+        <hr class="order-delimiter">
+      </div>
+    </div>
+  </form>
+  <% } %>
+</div>
+<div class="row">
+  <a href="/shoppingList" target="blank"><h2>See the full shopping list</h2></a>
+</div>
+<% } %>

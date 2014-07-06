@@ -252,7 +252,13 @@ app.post('/thankYou', function(request, response) {
           invoiceNumber: invoiceNumber,
           email: orderInfo.email
         };
-        response.render('/thankYouPage', resParams);
+        response.render('thankYouPage', resParams);
+        db.updateOrder({checkoutstatus:'Completed'},
+          ['invoice_number', invoiceNumber],
+          function check (err) {
+            if (err)
+              return console.log('error when updating status in DB!');
+        });
         mailing.sendOrderConfirmation(orderInfo, function check(err) {
           if (err)
             console.log('error while sending confirmation email: ' + err);
@@ -517,7 +523,22 @@ app.get('/search', function (request, response) {
     cse_cx:nconf.get('GOOGLE_CSE_CX')
   };
   response.render('searchResults', params);
-})
+});
+
+if (nconf.get('OWNER_PRIVILEDGE')==1) {
+  app.get('/orders', function (request, response) {
+    db.getOrdersToShip(function renderOrders(err, result) {
+      var params = {alert:null};
+      if (err) {
+        params.alert = 'Could not retrieve orders from database.';
+      } else {
+        params.orders = result;
+      }
+      response.render('ordersSummary', params);
+    });
+  });
+}
+
 
 // Handling pages not handled by app.get
 app.use(function(req, res, next){
