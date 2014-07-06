@@ -161,6 +161,10 @@ app.get('/orderVerification', function(request, response) {
   paypalxo.ec.getExpressCheckoutDetails(params, function (err, details) {
     //console.log('CheckoutDetails: ' + JSON.stringify(details));
     // handle missing ITEMAMT!!
+    if (err) {
+      console.log(err);
+      return response.redirect('/paymentFailure');
+    }
     if (details.PAYMENTREQUEST_0_ITEMAMT == undefined) {
       details.PAYMENTREQUEST_0_ITEMAMT =
           (parseInt(details.PAYMENTREQUEST_0_AMT) -
