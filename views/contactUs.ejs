@@ -1,0 +1,72 @@
+<% layout('layout') -%>
+<h1>Contact Us</h1>
+
+<p>Have any questions? Are you looking for a specific product? You want to comment on our website? Or just tell us what you think about the products you bought with us? Use the form below to contact us, and we will reply soon.</p>
+
+<% if (alert!='noalert') { %>
+<div class="row">
+  <div class="col-md-10" id="result">
+  <% if (alert=='success') { %>
+    <div class="alert alert-success">
+      <strong>
+        <span class="glyphicon glyphicon-send"></span>
+        Success! Your message was sent successfully.
+      </strong>
+    </div>
+  <% } %>
+  <% if (alert=='failure') { %>
+    <div class="alert alert-danger">
+      <span class="glyphicon glyphicon-alert"></span>
+      <% if (errors.length==1 && param=='') { %>
+      <strong><%= errors[0].msg %></strong>
+      <% } else {
+        for (var i=0; i<errors<length; i++) { %>
+        <%= errors[0].param %>: <%= errors[0].msg %>
+      <% }} %>
+    </div>
+  <% } %>
+  </div>
+</div>
+<% } %>
+
+<div class="row">
+  <form role="form" action="contactUs" method="post" >
+    <div class="col-lg-6 col-md-10">
+      <div class="form-group">
+        <label for="InputName">Your Name</label>
+        <div class="input-group">
+          <input type="text" class="form-control" name="InputName"
+                 id="InputName" placeholder="Enter Name" required>
+          <span class="input-group-addon">Required</span>
+        </div>
+      </div>
+      <div class="form-group">
+        <label for="InputEmail">Your Email</label>
+        <div class="input-group">
+          <input type="email" class="form-control" id="InputEmail"
+                 name="InputEmail" placeholder="Enter Email" required >
+          <span class="input-group-addon">Required</span>
+        </div>
+      </div>
+      <div class="form-group">
+        <label for="InvoiceNumber">
+          Your Invoice Number<br>(insert it if your query is related to an order)
+        </label>
+        <div class="input-group">
+          <input type="text" class="form-control" id="InputEmail"
+                 name="InvoiceNumber" placeholder="Invoice Number" >
+          <span class="input-group-addon">Optional</span>
+        </div>
+      </div>
+      <div class="form-group">
+        <label for="InputMessage">Message</label>
+        <div class="input-group">
+          <textarea name="InputMessage" id="InputMessage" class="form-control"
+                    rows="5" required></textarea>
+          <span class="input-group-addon">Required</span>
+        </div>
+      </div>
+      <input type="submit" name="submit" id="submit" value="Submit" class="btn btn-info pull-right">
+    </div>
+  </form>
+</div>

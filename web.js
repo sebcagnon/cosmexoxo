@@ -467,6 +467,51 @@ app.get('/cart', function (request, response) {
   response.render('cart', {cart:cart});
 });
 
+app.get('/contactUs', function (request, response) {
+  var params = {};
+  if (request.query.status == 'success') {
+    params.alert = 'success';
+  } else if (request.query.status == 'failure'){
+    params.alert = 'failure';
+    params.errors = [{param:'', msg:'error unknown'}];
+  } else {
+    params.alert = 'noalert'
+  }
+  response.render('contactUs', params);
+});
+
+app.post('/contactUs', function (request, response) {
+  validateContactUs(request);
+  var errors = request.validationErrors();
+  params = {};
+  if (errors) {
+    params.alert = 'failure';
+    params.errors = errors;
+    response.render('contactUs', params);
+  } else {
+    form = {
+      name: request.param('InputName'),
+      email: request.param('InputEmail'),
+      invoiceNumber: request.param('InvoiceNumber'),
+      message: request.param('InputMessage')
+    }
+    mailing.sendContactUs(form, function onContactUsMailsSent (err) {
+      if (err) {
+        params.alert = 'failure';
+        params.errors = [{
+          param:'',
+          msg:'Could not send email to CosmeXO team'
+        }];
+      } else {
+        params.alert = 'success';
+      }
+      response.render('contactUs', params);
+    });
+    params.alert = 'success';
+    response.render('contactUs', params);
+  }
+});
+
 // Handling pages not handled by app.get
 app.use(function(req, res, next){
   res.status(404);
@@ -524,4 +569,11 @@ function validateRequest(request, withQuantity) {
   request.sanitize('variant_id').toInt();
   if (withQuantity) request.sanitize('quantity').toInt();
   request.sanitize('jsenabled').toBoolean();
+}
+
+function validateContactUs(request) {
+  request.checkBody('InputName').notEmpty().isAlphanumeric();
+  request.checkBody('InputEmail').notEmpty().isEmail();
+  request.checkBody('InvoiceNumber').isAlphanumeric();
+  request.checkBody('InputMessage').notEmpty();
 }
