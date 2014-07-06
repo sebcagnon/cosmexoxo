@@ -25,6 +25,16 @@ function testSendOrderConfirmation(err) {
     onFinished();
   } else {
     console.log('sendOrderConfirmation success!');
+    mailing.sendContactUs(form, testSendContactUs);
+  }
+}
+
+function testSendContactUs(err) {
+  if (err) {
+    console.log('Error in sendContactUs: ' + err);
+    onFinished();
+  } else {
+    console.log('sendContactUs success');
     onFinished();
   }
 }
@@ -62,6 +72,13 @@ var order = {
   item_amount: 59,
   total_amount: 79,
   checkoutstatus: 'Completed'
+};
+
+var form = {
+  name: 'Test User',
+  email: ownerEmail,
+  invoiceNumber: 'ABC123456001',
+  message: 'hello, this is my message. Hope you like.'
 };
 
 mailing.sendNewOrder(order, testSendNewOrder);

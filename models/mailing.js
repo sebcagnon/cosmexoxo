@@ -31,7 +31,7 @@ var mailing = {
 
   // sends an order confirmation email to the customer
   sendOrderConfirmation: function (orderInfo, callback) {
-    html = createOrderConfirmationHTML(orderInfo);
+    var html = createOrderConfirmationHTML(orderInfo);
     var orderNumber = ''
     if (orderInfo.invoice_number != undefined)
       orderNumber = orderInfo.invoice_number + ' ';
@@ -42,6 +42,34 @@ var mailing = {
       html: html
     }
     smtpTransport.sendMail(mailOptions, callback);
+  },
+
+  // sends emails in case someone used Contact Us form
+  sendContactUs: function (form, callback) {
+    var html = createContactUsHTML(form);
+    var ownerMail = 'Hello CosmeXO team,<br><br>';
+    ownerMail += 'You have received a mail through the websites '
+    ownerMail += 'Contact Form<br><br>';
+    ownerMail += html;
+    var mailOptions = {
+      from: from,
+      to: owner,
+      subject: 'CosmeXO Contact Form: ' + form.name + ' has a question',
+      html: ownerMail
+    };
+    smtpTransport.sendMail(mailOptions, function sendConfirmationMail (err) {
+      if (err) return callback(err);
+      mailOptions.to = form.email;
+      mailOptions.subject = 'Thank you for contacting us, ' + form.name;
+      var clientMail = 'Thank you for contacting us, ' + form.name + '<br><br>';
+      clientMail += 'We will answer you within a few days.<br><br>';
+      clientMail += 'Here is a copy of your message:<br>';
+      clientMail += html;
+      mailOptions.html = clientMail;
+      smtpTransport.sendMail(mailOptions, function finishedSending (err) {
+        callback(null); // this mail is not critical, so we don't check err
+      });
+    });
   },
 
   // closes the smtpTransport
@@ -79,6 +107,15 @@ function createOrderConfirmationHTML(order) {
   }
   html += 'Shipping cost: ' + order.shipping_amount + '$<br>';
   html += '<b>Total paid: ' + order.total_amount + '$</b><br><br>';
+  html += 'Best regards,<br>The CosmeXO team';
+  return html;
+}
+
+function createContactUsHTML(form) {
+  var html = 'Name: ' + form.name + '<br>';
+  html += 'Email: ' + form.email + '<br>';
+  html += 'InvoiceNumber: ' + form.invoiceNumber + '<br>';
+  html += 'Message:<br>' + form.message + '<br><br>';
   html += 'Best regards,<br>The CosmeXO team';
   return html;
 }
