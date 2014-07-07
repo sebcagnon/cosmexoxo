@@ -16,12 +16,12 @@
   <% } %>
   <% if (alert=='failure') { %>
     <div class="alert alert-danger">
-      <span class="glyphicon glyphicon-alert"></span>
-      <% if (errors.length==1 && param=='') { %>
+      <% if (errors.length==1 && errors.param=='') { %>
       <strong><%= errors[0].msg %></strong>
       <% } else {
-        for (var i=0; i<errors<length; i++) { %>
-        <%= errors[0].param %>: <%= errors[0].msg %>
+        for (var i=0; i<errors.length; i++) { %>
+        <%= errors[i].param %>: <%= errors[i].msg %>
+        <% if (i!=errors.length-1) { %><br><% } %>
       <% }} %>
     </div>
   <% } %>

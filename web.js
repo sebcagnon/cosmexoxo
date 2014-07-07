@@ -602,7 +602,7 @@ function validateRequest(request, withQuantity) {
 
 function validateContactUs(request) {
   request.checkBody('InputName').notEmpty().isAlphanumeric();
-  request.checkBody('InputEmail').notEmpty().isEmail();
+  request.checkBody('InputEmail').notEmpty();
   request.checkBody('InvoiceNumber').isAlphanumeric();
   request.checkBody('InputMessage').notEmpty();
 }
