@@ -493,6 +493,7 @@ app.post('/contactUs', function (request, response) {
   if (errors) {
     params.alert = 'failure';
     params.errors = errors;
+    console.log(errors);
     response.render('contactUs', params);
   } else {
     form = {
