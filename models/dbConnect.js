@@ -314,7 +314,8 @@ WHERE o.invoice_number = $1;"
       var str =
         "SELECT invoice_number, creation_date, total_amount, checkoutstatus\
           FROM product_info.order\
-          WHERE checkoutstatus = 'Completed';"
+          WHERE checkoutstatus = 'Completed'\
+          ORDER BY creation_date;"
       client.query(str, function onOrdersList (err, result) {
         done();
         callback(err, result.rows);
