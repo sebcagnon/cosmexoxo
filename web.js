@@ -493,7 +493,6 @@ app.post('/contactUs', function (request, response) {
   if (errors) {
     params.alert = 'failure';
     params.errors = errors;
-    console.log(errors);
     response.render('contactUs', params);
   } else {
     form = {
@@ -601,8 +600,8 @@ function validateRequest(request, withQuantity) {
 }
 
 function validateContactUs(request) {
-  request.checkBody('InputName').notEmpty().isAlphanumeric();
-  request.checkBody('InputEmail').notEmpty();
+  request.checkBody('InputName').notEmpty();
+  request.checkBody('InputEmail').notEmpty().isEmail();
   request.checkBody('InvoiceNumber').isAlphanumeric();
   request.checkBody('InputMessage').notEmpty();
 }
