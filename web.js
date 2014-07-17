@@ -473,6 +473,10 @@ app.get('/cart', function (request, response) {
   response.render('cart', {cart:cart});
 });
 
+app.get('/aboutUs', function (request, response) {
+  response.render('aboutUs');
+});
+
 app.get('/contactUs', function (request, response) {
   var params = {};
   if (request.query.status == 'success') {
