@@ -1,13 +1,6 @@
 body {
   padding-top: 60px;
-  padding-bottom: 20px;
   font-family: 'Didact Gothic', sans-serif;
-}
-
-@media (min-width: 980px) {
-  body {
-    padding-bottom: 40px;
-  }
 }
 
 /* Custom container */
@@ -253,4 +246,13 @@ td > a > .img-responsive {
 hr.order-delimiter {
   height: 1px;
   background-color: #999;
+}
+
+/* footer */
+.footer {
+  text-align: center;
+  border-top: 2px solid DimGray;
+  background-color: MintCream;
+  margin-top: 10px;
+  padding: 10px 0px;
 }

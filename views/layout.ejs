@@ -134,10 +134,16 @@
                     "Shopping cart image",
                     "Go to shopping cart") %>
         </div>
+      </div>
 
 <%- body %>
-
     </div> <!-- end container -->
+    <div class="footer">
+      <p>
+        <%- utils.link_to('/aboutUs', 'About Us') %> -
+        <%- utils.link_to('/contactUs', 'Contact Us') %>
+      </p>
+    </div>
     <script type="text/javascript" src="/js/jquery-1.10.2.min.js"></script>
     <script type="text/javascript" src="/bootstrap/js/bootstrap.min.js"></script>
     <script type="text/javascript" src="/js/priceDisplays.js"></script>
