@@ -187,7 +187,7 @@ app.get('/orderVerification', function(request, response) {
         zip: details.PAYMENTREQUEST_0_SHIPTOZIP,
         country_code: details.PAYMENTREQUEST_0_SHIPTOCOUNTRYCODE,
         country: details.PAYMENTREQUEST_0_SHIPTOCOUNTRYNAME,
-        state: details.PAYMENTREQUEST_0_SHIPTOSTATE
+        state: details.PAYMENTREQUEST_0_SHIPTOSTATE,
       };
       db.createAddress(address, function onAddressCreated (err, addressID) {
         if (err) {
@@ -218,6 +218,9 @@ app.get('/orderVerification', function(request, response) {
           shipping_address_id: addressID,
           checkoutstatus: 'WaitingForConfirmation'
         };
+        if (details.PAYMENTREQUEST_0_SHIPTOPHONENUM) {
+          fields.phone_number= parseInt(details.PAYMENTREQUEST_0_SHIPTOPHONENUM);
+        }
         where = ['invoice_number', invoiceNumber];
         db.updateOrder(fields, where, function onOrderUpdated (err) {
           if (err) {
