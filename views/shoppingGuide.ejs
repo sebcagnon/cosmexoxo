@@ -1,0 +1,43 @@
+<% layout('layout') -%>
+<h1>Shopping Guide</h1>
+
+<p>After you select the items you like, you can click "Shopping Bag" in the top navigation bar, or "Check Out" to proceed to payment.</p>
+
+<%- utils.responsiveImage("/images/shoppingGuide/checkoutButton.png", "showing checkout buttons placement", "Checkout Buttons placement") %>
+
+<p>Your payment will be processed by 3 steps indicated above your shopping cart list.</p>
+
+<ol class="shopping-guide">
+  <li>
+    <h3>Order Summary</h3>
+    <p>Please select your shipping zone. The shipping cost at this step is an estimated value. The exact shipping cost will be confirmed after you input shipping address in step 2.</p>
+
+    <p>You can easily change the quantity of each product by click the plus or minus button.
+    Click the “Check out with PayPal” button to proceed to the 2nd step</p>
+
+    <%- utils.responsiveImage("/images/shoppingGuide/cartView.png", "View of the shopping cart with Paypal button", "Shopping Cart view") %>
+  </li>
+  <li>
+    <h3>Paypal page</h3>
+
+    <p>You will enter PayPal Page. We choose PayPal to ensure the security of your online payment and protect your privacy as well.
+    Please be sure to provide your correct address and telephone number for PayPal to process your payment. Faulty information may cause the failure/error in your payment and delay in placing your order.</p>
+
+    <%- utils.responsiveImage("/images/shoppingGuide/paypal1.png", "illustration of Paypal payment process", "Paypal payment process 1") %>
+
+    <p>If you order for your family or friend or the shipping address is different from your billing address on PayPal, you should roll down the PayPal Page to find shipping address. Please unselect “same as billing address”. Then input the address you want us to deliver the order. The exact shipping cost will be calculated  according to the shipping address.</p>
+
+    <%- utils.responsiveImage("/images/shoppingGuide/paypal2.png", "showing where to unselect 'same as billing address'", "Paypal payment process 2") %>
+  </li>
+  <li>
+    <h3>Confirm Order</h3>
+
+    <%- utils.responsiveImage("/images/shoppingGuide/confirmOrder.jpg", "Showing confirm order page", "Confirm order page") %>
+
+    <p>After click confirm order, there will be a confirmation email sent to your PayPal registered email address. You can contact us using the <%- utils.link_to("/contactUs", "contact form on this page") %>. For any topic related to your order, please include your invoice number.</p>
+
+    <p>We wish you have a pleasant shopping experience with us. Thank you.</p>
+
+    <%- utils.responsiveImage("/images/shoppingGuide/thankYouPage.jpg", "View of thank you page", "Thank you page view") %>
+  </li>
+</ol>

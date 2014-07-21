@@ -477,6 +477,18 @@ app.get('/aboutUs', function (request, response) {
   response.render('aboutUs');
 });
 
+app.get('/termsAndConditions', function (request, response) {
+  response.render('termsConditions');
+});
+
+app.get('/shoppingGuide', function (request, response) {
+  response.render('shoppingGuide');
+});
+
+app.get('/shippingInfo', function (request, response) {
+  response.render('shippingInfo');
+});
+
 app.get('/contactUs', function (request, response) {
   var params = {};
   if (request.query.status == 'success') {
