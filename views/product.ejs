@@ -7,7 +7,7 @@
   <div class="col-md-8" id="productDesc">
     <h1><%= product.brand_name %> <%= product.name %></h1>
     <h3>by <%= product.company_name %></h3>
-    <p><%= product.desc %></p>
+    <p><%- product.desc %></p>
   </div>
 <% for (var i=0; i<product.variants.length; i++) {
     var variant = product.variants[i]; %>
