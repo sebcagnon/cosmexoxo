@@ -93,7 +93,8 @@ function createOrderConfirmationHTML(order) {
   html += order.address.name + '<br>';
   var address = order.address;
   var addressArray = [address.street, address.street2, address.city,
-                      address.state, address.zip, address.country]
+                      address.state, address.zip, address.country,
+                      order.phone_number]
   for (var i=0; i<addressArray.length; i++) {
     if (addressArray[i]) html += addressArray[i] + ' ';
   }

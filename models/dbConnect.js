@@ -259,7 +259,7 @@ var db = {
       if (err) return callback(err);
       var str =
 "SELECT o.invoice_number, o.firstname, o.lastname, o.email, o.total_amount, \
-  o.item_amount, o.shipping_amount, o.checkoutstatus, \
+  o.item_amount, o.shipping_amount, o.checkoutstatus, o.phone_number \
   a.name as shipname, a.street, a.street2, a.city, a.zip, a.country_code, \
   a.country, a.state, \
   v.name, p.name as productName, ov.quantity, ov.unit_price \
@@ -281,11 +281,11 @@ WHERE o.invoice_number = $1;"
         var i = 0;
         for (var prop in row0) {
           // copy order basics
-          if (i<8) {
+          if (i<9) {
             order[prop] = row0[prop];
-          } else if (i==8) {
+          } else if (i==9) {
             order.address = {name:row0[prop]};
-          } else if (i<16) {
+          } else if (i<17) {
             order.address[prop] = row0[prop];
           }
           i++;
