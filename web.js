@@ -224,9 +224,9 @@ app.get('/orderVerification', function(request, response) {
           params.paymentrequest_0_currencycode= 'USD';
           params.paymentrequest_0_paymentaction= 'Sale';
           var responseParams = {order: details};
-          response.render('orderConfirmation', responseParams);
           request.session.orderParams = params;
           request.session.invoiceNumber = invoiceNumber;
+          response.render('orderConfirmation', responseParams);
         });
       });
     });
