@@ -165,10 +165,11 @@ app.get('/orderVerification', function(request, response) {
       console.log(err);
       return response.redirect('/paymentFailure');
     }
+    var shippingamt = parseInt(details.PAYMENTREQUEST_0_SHIPPINGAMT);
     if (details.PAYMENTREQUEST_0_ITEMAMT == undefined) {
       details.PAYMENTREQUEST_0_ITEMAMT =
           (parseInt(details.PAYMENTREQUEST_0_AMT) -
-           parseInt(details.PAYMENTREQUEST_0_SHIPPINGAMT)).toString();
+           shippingamt).toString();
     }
     var itemamt = parseInt(details.PAYMENTREQUEST_0_ITEMAMT);
     var country = details.PAYMENTREQUEST_0_SHIPTOCOUNTRYNAME;
@@ -194,7 +195,11 @@ app.get('/orderVerification', function(request, response) {
           return response.redirect('/paymentFailure');
         }
         // update Order in DB
-        var shippingamt = parseInt(utils.getShippingCost(country, weight));
+        // to be updated when I fix #61
+        var shippingamt = parseInt(details.PAYMENTREQUEST_0_SHIPPINGAMT);
+        if (shippingamt != 5) {
+          var shippingamt = parseInt(utils.getShippingCost(country, weight));
+        }
         params.paymentrequest_0_shippingamt = shippingamt.toString();
         details.PAYMENTREQUEST_0_SHIPPINGAMT = shippingamt.toString();
         params.paymentrequest_0_itemamt = itemamt.toString();
@@ -283,14 +288,36 @@ app.get('/paymentFailure', function(request, response) {
 
 // handle paypal button
 app.post('/pay', function(request, response) {
+  validatePaypalButton(request);
+  errors = request.validationErrors(true);
+  if (request.validationErrors()) {
+    if (errors.shippingOption) {
+      return response.redirect('/cart?error=option');
+    } else if (request.param('shippingOption') == 'EMS' ) {
+      if (errors.shippingCost) {
+        return response.redirect('/cart?error=shipping');
+      } else if (errors.phoneNumber) {
+        return response.redirect('/cart?error=phone');
+      }
+    }
+  }
+  var shipping = {type:request.param('shippingOption')};
   var cart = request.session.cart;
   itemamt = cart.reduce(sumPrice, 0);
   weight = cart.reduce(sumWeight, 0);
-  shippingamt = parseInt(utils.getShippingCost('United States', weight));
+  if (shipping.type == 'EMS') {
+    var region = request.param('shippingCost');
+    var shippingamt = parseInt(utils.getShippingCost(region, weight));
+    shipping.phone = request.param('phoneNumber');
+  } else {
+    shippingamt = 5;
+  }
   cart.itemamt = itemamt;
   cart.shippingamt = shippingamt;
   // creating new Order in DB
-  db.createOrder(cart, function onOrderCreated(err, orderId, invoiceNumber) {
+  db.createOrder(cart,
+                 shipping,
+                 function onOrderCreated(err, orderId, invoiceNumber) {
     // Prepare the data
     if (err) {
       console.log(err);
@@ -470,7 +497,18 @@ app.get('/cart', function (request, response) {
   var cart = request.session.cart;
   cart.itemTotal = cart.reduce(sumPrice, 0);
   cart.weightTotal = cart.reduce(sumWeight, 0);
-  response.render('cart', {cart:cart});
+  var error = '';
+  if (request.query.error) {
+    var errorType = request.query.error;
+    if (errorType=='option' || errorType=='shipping') {
+      error = 'There was an unknown error when submitting your cart';
+    } else if (errorType=='phone') {
+      error = 'The phone number is required for shipping with EMS. Please ';
+      error += 'make sure you input your phone number with only numbers (no ';
+      error += 'spaces or special characters allowed).';
+    }
+  }
+  response.render('cart', {cart:cart, error:error});
 });
 
 app.get('/aboutUs', function (request, response) {
@@ -613,6 +651,12 @@ function validateRequest(request, withQuantity) {
   request.sanitize('variant_id').toInt();
   if (withQuantity) request.sanitize('quantity').toInt();
   request.sanitize('jsenabled').toBoolean();
+}
+
+function validatePaypalButton(request) {
+  request.checkBody('shippingOption').notEmpty().isIn(['ePacket', 'EMS']);
+  request.checkBody('phoneNumber').isNumeric();
+  request.checkBody('shippingCost').notEmpty().isAlpha();
 }
 
 function validateContactUs(request) {

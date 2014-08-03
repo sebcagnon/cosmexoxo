@@ -161,8 +161,8 @@ var db = {
   },
 
   // creates a new row in order and add its variants into order_variant
-  createOrder : function (cart, callback) {
-    createNewOrder(cart, function onOrderCreated (err, orderId) {
+  createOrder : function (cart, shipping, callback) {
+    createNewOrder(cart, shipping, function onOrderCreated (err, orderId) {
       if (err) return callback(err);
       var invoiceNumber = createInvoiceNumber(orderId);
       createOrderVariant(cart, orderId, function onOrderReady (err) {
@@ -539,16 +539,27 @@ function addKeys (row) {
 }
 
 // creates a new row in order table
-function createNewOrder (cart, callback) {
+function createNewOrder (cart, shipping, callback) {
   pg.connect(config, function onConnected(err, client, done) {
     if (err) return callback(err);
-    var str = 'INSERT INTO product_info."order"\
-                (total_amount, shipping_amount, item_amount)\
-                VALUES ($1, $2, $3)\
+    var params = [cart.shippingamt+cart.itemamt, cart.shippingamt,
+                  cart.itemamt, shipping.type]
+    if (shipping.type == 'EMS') {
+      var str = 'INSERT INTO product_info."order"\
+                (total_amount, shipping_amount, item_amount, shipping_type,\
+                 phone_number)\
+                VALUES ($1, $2, $3, $4, $5)\
                 RETURNING order_id';
+      params.push(shipping.phone);
+    } else {
+      var str = 'INSERT INTO product_info."order"\
+                (total_amount, shipping_amount, item_amount, shipping_type)\
+                VALUES ($1, $2, $3, $4)\
+                RETURNING order_id';
+    }
     client.query(
       str,
-      [cart.shippingamt+cart.itemamt, cart.shippingamt, cart.itemamt],
+      params,
       function onOrderInserted (err, result) {
         if (err) {
           callback(err);

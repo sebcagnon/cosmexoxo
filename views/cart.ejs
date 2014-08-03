@@ -9,6 +9,9 @@
     <button class="btn btn-default disabled">3. Confirm Order</button>
   </div>
 </div>
+<% if (error!='') { %>
+<div class='alert alert-danger'><%= error %></div>
+<% } %>
 <div class="row">
   <div class="col-sm-6 col-md-6">
     <h1>Your Shopping Cart</h1>
@@ -118,11 +121,13 @@
                                  'South America, Africa':'Brazil'};
                  for (place in regions) {
                   var price = utils.getShippingCost(regions[place], cart.weightTotal); %>
-                <option value="<%= price %>"><%= place %>: <%= price %>$</option>
+                <option value="<%= regions[place] %>">
+                  <%= place %>: <%= price %>$
+                </option>
               <% } %>
               </select>
               <p>
-                The shipping price will be confirmed according to the region of
+                The shipping price will be confirmed according to
                 the shipping address you will input in Paypal Checkout.
               </p>
             </div>
@@ -147,6 +152,6 @@
 
 <script type="text/javascript">
   window.onpageshow = function () {
-    $(".onlyOnce").removeAttr('disabled');
+    $(".onlyOnce").removeAttr('disabled').css('cursor', 'pointer');
   }
 </script>
