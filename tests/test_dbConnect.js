@@ -118,7 +118,8 @@ function testGetFeaturedProducts(err, result) {
   ];
   cart.itemamt = 40;
   cart.shippingamt = 15;
-  db.createOrder(cart, testCreateOrder);
+  var ship = {type: 'EMS', phone: '54321'};
+  db.createOrder(cart, ship, testCreateOrder);
 }
 
 function testCreateOrder(err, orderId, invoiceNumber) {
@@ -197,8 +198,7 @@ function onFinished() {
   db.close();
 }
 
-db.getOrdersToShip(testGetOrdersToShip);
-// db.getProduct(24, testGetProduct1);
+db.getProduct(24, testGetProduct1);
 
 
 // helper functions
