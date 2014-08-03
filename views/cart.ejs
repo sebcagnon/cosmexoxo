@@ -13,15 +13,6 @@
   <div class="col-sm-6 col-md-6">
     <h1>Your Shopping Cart</h1>
   </div>
-  <div class="col-sm-6 col-md-6">
-    <form name="input" action="pay" method="post">
-      <input type="image"
-             src="https://www.paypal.com/en_US/i/btn/btn_xpressCheckout.gif"
-             value="submit"
-             class="pull-right btn-next btn-next-top">
-      </input>
-  </form>
-  </div>
 </div>
 <div class="row">
   <div class="table-responsive" id="cartTable">
@@ -98,56 +89,55 @@
         <% } %>
         <tr>
           <td colspan="3" class="td-right"><h4>Total Items Price</h4></td>
-          <td style="vertical-align:middle" id="itemTotal">
+          <td colspan="2" style="vertical-align:middle" id="itemTotal">
             <%- cart.itemTotal %> $
           </td>
         </tr>
+        <form action="/pay" method="post" class="confirmForm">
         <tr>
-          <td colspan="3" class="td-right">
-            <h4>Estimated Shipping (EMS)*</h4>
-          </td>
-          <td style="vertical-align:middle">
-            <select name="shippingCost" id="shippingCost">
-            <% var regions = { 'North America, Oceania: Middle East':'Oman',
-                               'East Asia':'China', 'Europe':'France',
-                               'South America, Africa':'Brazil'};
-               for (place in regions) {
-                var price = utils.getShippingCost(regions[place], cart.weightTotal); %>
-              <option value="<%= price %>"><%= place %>: <%= price %>$</option>
-            <% } %>
-            </select>
-            <p></p>
+          <td colspan="5">
+            <h4>Shipping Option</h4>
+            <input type="radio" name="shippingOption" id="shippingOption"
+                   value="ePacket" checked>
+            <strong>Normal Shipping with ePacket</strong>: 5 $<br><br>
+            <input type="radio" name="shippingOption" id="shippingOption"
+                   value="EMS">
+            <strong>Expedited Shipping EMS</strong>: price depends on region<br>
+            <div id="infoEMS">
+              Phone Number:
+              <input type="tel" name="phoneNumber" id="phoneNumber"
+                     placeholder="no spaces or '-' allowed"><br>
+              <p>
+                Your phone number is required by EMS. Please only use number,
+                spaces and hyphens "-" are not allowed.
+              </p>
+              Shipping cost:
+              <select name="shippingCost" id="shippingCost">
+              <% var regions = { 'North America, Oceania, Middle East':'Oman',
+                                 'East Asia':'China', 'Europe':'France',
+                                 'South America, Africa':'Brazil'};
+                 for (place in regions) {
+                  var price = utils.getShippingCost(regions[place], cart.weightTotal); %>
+                <option value="<%= price %>"><%= place %>: <%= price %>$</option>
+              <% } %>
+              </select>
+              <p>
+                The shipping price will be confirmed according to the region of
+                the shipping address you will input in Paypal Checkout.
+              </p>
+            </div>
           </td>
         </tr>
         <tr>
-          <td colspan="3" class="td-right">
-            <h4>Estimated Order Total*</h4>
-          </td>
-          <td id="orderTotal">
-            <h4>
-              <%- cart.itemTotal +
-                  utils.getShippingCost('Oman', cart.weight) %> $
-            </h4>
+          <td colspan="5">
+            <input type="image"
+             src="https://www.paypal.com/en_US/i/btn/btn_xpressCheckout.gif"
+             value="submit" class="btn-next onlyOnce">
           </td>
         </tr>
+        </form>
       </tbody>
     </table>
-  </div>
-  <div class="col-sm-6 col-md-6">
-    <p class="small">
-      *The Shipping cost will be confirmed after you input
-      your address in Paypal checkout process
-    </p>
-    <p class="small">
-      All orders are delivered via EMS
-    </p>
-  </div>
-  <div class="col-sm-6 col-md-6">
-    <form name="input" action="pay" method="post">
-      <input type="image"
-             src="https://www.paypal.com/en_US/i/btn/btn_xpressCheckout.gif"
-             value="submit" class="pull-right btn-next">
-    </form>
   </div>
 </div>
 <% } else { %>

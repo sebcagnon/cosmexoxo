@@ -179,12 +179,18 @@ td > a > .img-responsive {
   text-align: right;
 }
 
+.td-middle {
+  text-align: middle;
+}
+
 .top-space {
   vertical-align: middle;
 }
 
 .btn-next {
-  margin-bottom: 10px;
+  margin: 0 auto;
+  display: block;
+  cursor: pointer;
 }
 
 @media ( min-width: 768px ) {
@@ -192,6 +198,10 @@ td > a > .img-responsive {
     margin-top: 25px;
     margin-bottom: 0px;
   }
+}
+
+#infoEMS {
+  padding-left: 5em;
 }
 
 #checkoutProcess {

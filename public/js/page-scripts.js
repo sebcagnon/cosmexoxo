@@ -103,7 +103,7 @@ function updateOrderPrice () {
 
 // disable order confirmation once it's clicked
 $(".confirmForm").submit(function disableOrderButton (e) {
-  $('.confirm-btn').attr('disabled', 'disabled');
+  $('.onlyOnce').attr('disabled', 'disabled').css('cursor', 'wait');
   var btn = $(this).children(":submit");
   btn.attr('value', 'Processing...');
 });
