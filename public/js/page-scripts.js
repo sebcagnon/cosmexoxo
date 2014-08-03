@@ -84,7 +84,7 @@ function updateCart(cart) {
     var vid = '#' + variant.variant_id;
     $(vid).find("#price").text(variant.price + ' $');
     $(vid).find("#quantity").text(product.quantity);
-    $(vid).find("#price").text((variant.price*product.quantity) + ' $');
+    $(vid).find("#total").text((variant.price*product.quantity) + ' $');
     totalPrice += variant.price*product.quantity;
   }
   $("#itemTotal").text(totalPrice + ' $');
