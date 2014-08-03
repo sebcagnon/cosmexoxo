@@ -144,3 +144,9 @@
 <h1>Your Shopping Cart Is Empty</h1>
 <%- utils.link_to('/cart', 'Click here to refresh page') %>
 <% } %>
+
+<script type="text/javascript">
+  window.onpageshow = function () {
+    $(".onlyOnce").removeAttr('disabled');
+  }
+</script>
