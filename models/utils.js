@@ -51,16 +51,24 @@ var utils = {
       if (shippingFees[zone].countries.indexOf(country) != -1) {
         var currentRange = 10000;
         var price = 0;
+        var maxPrice = 0;
         for (w in shippingFees[zone].price) {
           if (parseInt(w) < currentRange && parseInt(w) >= parseInt(weight)) {
             currentRange = w;
             price = shippingFees[zone].price[w];
           }
+          if (parseInt(shippingFees[zone].price[w]) >= parseInt(maxPrice)) {
+            maxPrice = shippingFees[zone].price[w];
+          }
+        }
+        // if order is too heavy
+        if (price == 0) {
+          price = maxPrice;
         }
         return Math.ceil(parseInt(price)*parseFloat(yenToDollars)).toString();
       }
     }
-    return; // could not find coutry, return undefined
+    return; // could not find country, return undefined
   },
 
   // returns the list of available countries
