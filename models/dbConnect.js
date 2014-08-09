@@ -259,15 +259,16 @@ var db = {
       if (err) return callback(err);
       var str =
 "SELECT o.invoice_number, o.firstname, o.lastname, o.email, o.total_amount, \
-  o.item_amount, o.shipping_amount, o.checkoutstatus, o.phone_number \
-  a.name as shipname, a.street, a.street2, a.city, a.zip, a.country_code, \
-  a.country, a.state, \
-  v.name, p.name as productName, ov.quantity, ov.unit_price \
+  o.item_amount, o.shipping_amount, o.checkoutstatus, o.phone_number, \
+  o.shipping_type, a.name as shipname, a.street, a.street2, a.city, a.zip, \
+  a.country_code, a.country, a.state, v.name, p.name as productName, \
+  ov.quantity, ov.unit_price, b.name as brandName \
 FROM product_info.order o \
 LEFT JOIN product_info.address a ON a.address_id = o.shipping_address_id \
 LEFT JOIN product_info.order_variant ov ON o.order_id = ov.order_id \
 LEFT JOIN product_info.variant v ON ov.variant_id = v.variant_id \
 LEFT JOIN product_info.product p ON p.product_id = v.product_id \
+LEFT JOIN product_info.brand b ON b.brand_id = p.brand_id \
 WHERE o.invoice_number = $1;"
       client.query(str, [invoiceNumber], function onOrderInfo (err, result) {
         if (err) {
@@ -281,11 +282,11 @@ WHERE o.invoice_number = $1;"
         var i = 0;
         for (var prop in row0) {
           // copy order basics
-          if (i<9) {
+          if (i<10) {
             order[prop] = row0[prop];
-          } else if (i==9) {
+          } else if (i==10) {
             order.address = {name:row0[prop]};
-          } else if (i<17) {
+          } else if (i<18) {
             order.address[prop] = row0[prop];
           }
           i++;
@@ -297,6 +298,7 @@ WHERE o.invoice_number = $1;"
             {
               name: v.name,
               productName: v.productname,
+              brandName: v.brandname,
               quantity: v.quantity,
               price: v.unit_price
             }

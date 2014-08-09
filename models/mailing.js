@@ -93,18 +93,21 @@ function createOrderConfirmationHTML(order) {
   html += order.address.name + '<br>';
   var address = order.address;
   var addressArray = [address.street, address.street2, address.city,
-                      address.state, address.zip, address.country,
-                      order.phone_number]
+                      address.state, address.zip, address.country]
   for (var i=0; i<addressArray.length; i++) {
     if (addressArray[i]) html += addressArray[i] + ' ';
+  }
+  html += '<br>Shipping service: ' + order.shipping_type;
+  if (order.phone_number) {
+    html += '<br>Phone Number: ' + order.phone_number;
   }
   html += '<br>';
   html += 'Purchased items:<br>';
   for (var i=0; i<order.variants.length; i++) {
-    var variant = order.variants[i];
-    html += variant.name + ' of ' + variant.productName + ': ' +
-            variant.quantity + ' * ' + variant.price + '$ = ' +
-            (variant.quantity * variant.price) + '$<br>';
+    var v = order.variants[i];
+    html += v.name + ' of ' + v.productName + ' by ' + v.brandName + ': ';
+    html += v.quantity + ' * ' + v.price + '$ = ';
+    html += (v.quantity * v.price) + '$<br>';
   }
   html += 'Shipping cost: ' + order.shipping_amount + '$<br>';
   html += '<b>Total paid: ' + order.total_amount + '$</b><br><br>';

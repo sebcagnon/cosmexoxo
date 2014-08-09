@@ -218,9 +218,6 @@ app.get('/orderVerification', function(request, response) {
           shipping_address_id: addressID,
           checkoutstatus: 'WaitingForConfirmation'
         };
-        if (details.PAYMENTREQUEST_0_SHIPTOPHONENUM) {
-          fields.phone_number= parseInt(details.PAYMENTREQUEST_0_SHIPTOPHONENUM);
-        }
         where = ['invoice_number', invoiceNumber];
         db.updateOrder(fields, where, function onOrderUpdated (err) {
           if (err) {

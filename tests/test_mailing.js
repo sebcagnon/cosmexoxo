@@ -44,6 +44,8 @@ var order = {
   lastname: 'User',
   email: ownerEmail,
   invoice_number: 'ABC123456001',
+  phone_number: '0123456789',
+  shipping_type: 'EMS',
   address: {
     name: 'Test User',
     street: '3 rue de la prairie',
@@ -58,12 +60,14 @@ var order = {
     {
       name: 'Color Red',
       productName: 'Lipstick',
+      brandName: 'Dior',
       quantity: 2,
       price: 15
     },
     {
       name: 'RST 17',
       productName: 'Meye Shadow',
+      brandName: 'Elixir',
       quantity: 1,
       price: 29
     }
@@ -82,3 +86,5 @@ var form = {
 };
 
 mailing.sendNewOrder(order, testSendNewOrder);
+
+var order_invnums = ["INV20140867", "INV20140868"];
