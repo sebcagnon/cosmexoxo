@@ -658,14 +658,19 @@ class ProductSelection(tk.Toplevel):
                        cancelImage=None):
     tk.Toplevel.__init__(self)
     self.onSelect = onSelect
+    self.searchFrame = tk.Frame(self)
+    self.searchVar = tk.StringVar()
+    vcmd = (self.register(self.search), '%P')
+    self.searchEntry = tk.Entry(self.searchFrame, textvariable=self.searchVar,
+                                width=35, validate='all',
+                                validatecommand=vcmd)
+    self.searchEntry.grid(sticky=tk.W+tk.E)
+    self.searchFrame.grid(sticky=tk.W+tk.E)
     self.selection = tk.IntVar()
     self.selection.set(-1)
     self.productListFrame = VerticalScrolledFrame(self)
-    for p in productList:
-      t = ', '.join(p[1:])
-      button = tk.Radiobutton(self.productListFrame.interior, text=t,
-                       variable=self.selection, value=p[0], indicatoron=0)
-      button.grid(sticky=tk.N+tk.W)
+    self.productList = productList
+    self.displayProducts()
     self.productListFrame.grid()
     self.buttonFrame = tk.Frame(self)
     self.buttonFrame.grid()
@@ -685,6 +690,27 @@ class ProductSelection(tk.Toplevel):
       self.onSelect(self.selection.get())
       self.grab_release()
       self.destroy()
+
+  def displayProducts(self, searchString=''):
+    """Displays only products that contain searchString in their label"""
+    for child in self.productListFrame.interior.winfo_children():
+      child.destroy()
+    for p in self.productList:
+      t = ', '.join(p[1:])
+      if searchString.lower() in t.lower():
+        button = tk.Radiobutton(self.productListFrame.interior, text=t,
+                         variable=self.selection, value=p[0], indicatoron=0)
+        button.grid(sticky=tk.N+tk.W)
+
+  def search(self, newText):
+    """Callback for the search Entry box: changes the visibility of product"""
+    for p in self.productList:
+      t = ', '.join(p[1:])
+      if newText.lower() in t.lower():
+        self.displayProducts(newText)
+        return True
+    else:
+      return False
 
 
 class ProductWidgetError(BaseException):
