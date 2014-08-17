@@ -266,3 +266,69 @@ hr.order-delimiter {
   margin-top: 10px;
   padding: 10px 0px;
 }
+
+/* Button designs */
+/* Using http://www.cssbuttongenerator.com/ */
+
+.btn-skin {
+  text-indent:0px;
+  display:inline-block;
+  font-weight:bold;
+  font-style:normal;
+  padding: 5px 20px;
+  text-decoration:none;
+  text-align:center;
+  border: 0px;
+  -webkit-border-top-left-radius:37px;
+  -moz-border-radius-topleft:37px;
+  border-top-left-radius:37px;
+  -webkit-border-top-right-radius:37px;
+  -moz-border-radius-topright:37px;
+  border-top-right-radius:37px;
+  -webkit-border-bottom-right-radius:37px;
+  -moz-border-radius-bottomright:37px;
+  border-bottom-right-radius:37px;
+  -webkit-border-bottom-left-radius:37px;
+  -moz-border-radius-bottomleft:37px;
+  border-bottom-left-radius:37px;
+}
+
+.btn-info, .btn-info.disabled.active {
+  background-color:#2290bf;
+  text-shadow:1px 1px 0px #287ace;
+  color:#ffffff;
+}
+
+.btn-info:hover {
+  background-color:#26a3d4;
+}
+
+.btn-info:active, .btn-info:focus {
+  position:relative;
+  top:1px;
+  background-color: #26a3d4;
+}
+
+.btn-action, .btn-action.disabled.active {
+  background-color: #F5177B;
+  text-shadow:0px 0px 0px #cccccc;
+  color: #FFFFFF;
+  font-weight: normal;
+}
+
+.btn-action:hover, .btn-action:active, .btn-action:focus {
+  background-color: #ff0077;
+  color: #FFFFFF;
+}
+
+.btn-remove, .btn-remove.disabled.active {
+  background-color: #f24848;
+  text-shadow:0px 0px 0px #cccccc;
+  color: #FFFFFF;
+  font-weight: normal;
+}
+
+.btn-remove:hover, .btn-remove:active, .btn-remove:focus{
+  background-color: #f73e3e;
+  color: #FFFFFF;
+}

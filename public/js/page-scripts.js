@@ -47,10 +47,7 @@ $(".no-refresh").submit(function changeCart (e) {
           if (data.error)
             return console.log('request returned an error: ' + data.error);
           $(".cartSize").text(data.cartSize);
-          if (btn.hasClass("btn-primary")) { // case add to cart
-            btn.removeClass("btn-primary active disabled")
-              .addClass("btn-success");
-          } else if (btn.hasClass("btn-danger")) { // case remove
+          if (btn.hasClass("btn-danger")) { // case remove
             btn.removeClass("btn-danger active disabled")
               .addClass("btn-warning");
           } else {
