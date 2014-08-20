@@ -72,8 +72,10 @@ var db = {
   getFeaturedProducts : function (callback) {
     pg.connect(config, function featuredProductsQuery(err, client, done) {
       if (err) callback(err);
-      var str = 'SELECT p.product_id, p.name, p.description as desc\
+      var str = 'SELECT p.product_id, p.name, p.description as desc,\
+                 b.name as brandname\
                  FROM product_info.product p\
+                 LEFT JOIN product_info.brand b ON p.brand_id = b.brand_id\
                  WHERE p.featured = true';
       client.query(str, function onQueryFinished(err, result) {
         if (err) {
@@ -129,12 +131,15 @@ var db = {
   getProductsByCategory : function (categoryName, callback) {
     pg.connect(config, function prodByCatQuery(err, client, done) {
       if (err) return callback(err);
-      var str = 'SELECT p.product_id, p.name, p.description as desc\
+      var str = 'SELECT p.product_id, p.name, p.description as desc,\
+                 b.name as brandname\
                  FROM product_info.product p\
                  INNER JOIN product_info.product_category pc\
                   ON p.product_id = pc.product_id\
                  INNER JOIN product_info.category c\
                   ON pc.category_id = c.category_id\
+                 INNER JOIN product_info.brand b\
+                  ON p.brand_id = b.brand_id\
                  WHERE c.name = $1';
       client.query(str, [categoryName], function onQueryFinished(err, result) {
         if (err) {

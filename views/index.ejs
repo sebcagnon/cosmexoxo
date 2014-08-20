@@ -14,11 +14,16 @@
   <div class="row">
   <% } %>
     <div class="col-xs-6 col-sm-6 col-md-3">
-      <div class="thumbnail">
+      <div class="thumbnail product-thumbnail">
         <a href="<%= product.link %>">
           <%- utils.responsiveImage(S3URL +'/'+ product.key, product.name) %>
         </a>
-        <h3><%- product.name %></h3>
+        <h4>
+          <%- utils.link_to('/brands/' + product.brandname,
+                        product.brandname.toUpperCase(),
+                        'title="See all ' + product.brandname + ' products"') %>
+        </h4>
+        <h4><%- product.name %></h4>
         <p><%- product.desc.slice(0, 40)%>...</p>
         <p>
           <a class="btn btn-skin btn-info" href="<%= product.link %>">
