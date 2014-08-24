@@ -80,6 +80,12 @@ var utils = {
     }
     retList.sort();
     return retList;
+  },
+
+  // useful to sort categories by name
+  sortByNameKey : function (a, b) {
+    var x = a.name; var y = b.name;
+    return ((x < y) ? -1 : ((x > y) ? 1 : 0));
   }
 }; // end of exported functions
 
