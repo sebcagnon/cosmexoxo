@@ -86,6 +86,12 @@ var utils = {
   sortByNameKey : function (a, b) {
     var x = a.name; var y = b.name;
     return ((x < y) ? -1 : ((x > y) ? 1 : 0));
+  },
+
+  // useful to sort categories by ID
+  sortByIDKey : function (a, b) {
+    var x = a.id; var y = b.id;
+    return ((x < y) ? -1 : ((x > y) ? 1 : 0));
   }
 }; // end of exported functions
 
