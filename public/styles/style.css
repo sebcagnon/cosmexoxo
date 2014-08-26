@@ -248,6 +248,7 @@ td > a > .img-responsive {
 
 .order-btn {
   margin-top: 5px;
+  width: 150px;
 }
 
 .plus-minus-li {
@@ -340,7 +341,6 @@ hr.order-delimiter {
   background-color: #F5177B;
   text-shadow:0px 0px 0px #cccccc;
   color: #FFFFFF;
-  font-weight: normal;
 }
 
 .btn-action:hover, .btn-action:active, .btn-action:focus {
@@ -353,6 +353,7 @@ hr.order-delimiter {
   text-shadow:0px 0px 0px #cccccc;
   color: #FFFFFF;
   font-weight: normal;
+  padding: 5px 10px;
 }
 
 .btn-remove:hover, .btn-remove:active, .btn-remove:focus{
