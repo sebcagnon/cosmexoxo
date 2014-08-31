@@ -6,12 +6,13 @@
     <%- utils.displayCategoryTree(categories, 2, 0) %>
 <% } else { %>
   <h1>Featured Products</h1>
+  <div class="col-md-9">
   <div class="row">
   <% for (var i=0; i<products.length; i++) {
     var product = products[i]; %>
   <% if (i!= 0 && i%4==0) { %>
-  </div>
-  <div class="row">
+    </div>
+    <div class="row">
   <% } %>
     <div class="col-xs-6 col-sm-6 col-md-3">
       <div class="thumbnail product-thumbnail">
@@ -33,6 +34,10 @@
       </div>
     </div>
   <% } %>
+  </div>
+  </div>
+  <div class="col-md-3">
+    <%- utils.responsiveImage("/images/newsboard.png", "newsboard") %>
   </div>
 <% } %>
 
