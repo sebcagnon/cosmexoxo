@@ -45,7 +45,7 @@ var order = {
   email: ownerEmail,
   invoice_number: 'ABC123456001',
   phone_number: '0123456789',
-  shipping_type: 'EMS',
+  shipping_type: 'ePacket',
   address: {
     name: 'Test User',
     street: '3 rue de la prairie',

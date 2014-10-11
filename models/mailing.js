@@ -97,7 +97,7 @@ function createOrderConfirmationHTML(order) {
   for (var i=0; i<addressArray.length; i++) {
     if (addressArray[i]) html += addressArray[i] + ' ';
   }
-  html += '<br>Shipping service: ' + order.shipping_type;
+  html += '<br>Shipping service: ' + shippingTypeToText(order.shipping_type);
   if (order.phone_number) {
     html += '<br>Phone Number: ' + order.phone_number;
   }
@@ -122,6 +122,14 @@ function createContactUsHTML(form) {
   html += 'Message:<br>' + form.message + '<br><br>';
   html += 'Best regards,<br>The CosmeXO team';
   return html;
+}
+
+function shippingTypeToText(shippingType) {
+  if (shippingType == 'ePacket') {
+    return 'Registered International';
+  } else {
+    return shippingType;
+  }
 }
 
 module.exports = mailing;
